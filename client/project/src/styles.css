@@ -8,11 +8,7 @@ html {
 
 body {
   font-family: var(--font-family);
-  background-image: linear-gradient(
-    to bottom right,
-    black,
-    rgba(0, 0, 0, 0.836)
-  );
+  background-image: linear-gradient(to bottom right, black, rgb(77, 26, 90));
   height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

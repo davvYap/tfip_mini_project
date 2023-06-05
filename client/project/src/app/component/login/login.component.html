@@ -20,7 +20,14 @@
           [toggleMask]="true"
         ></p-password>
 
-        <button class="mt-3 ms-3" type="submit" pButton>Login</button>
+        <button
+          class="mt-3 ms-3"
+          type="submit"
+          pButton
+          [disabled]="form.invalid"
+        >
+          Login
+        </button>
       </form>
     </div>
   </div>

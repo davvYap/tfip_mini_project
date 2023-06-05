@@ -1,4 +1,9 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  AfterContentInit,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MessageService, PrimeNGConfig } from 'primeng/api';
 import { Router } from '@angular/router';
@@ -26,13 +31,15 @@ export class LoginComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    if (!this.getSvc.isLogin && this.getSvc.isLoginRecently)
-      this.showLogoutMessage();
+    setTimeout(() => {
+      if (!this.getSvc.isLogin && this.getSvc.isLoginRecently)
+        this.showLogoutMessage();
+    });
   }
 
   createForm(): FormGroup {
     return this.fb.group({
-      username: this.fb.control('', [Validators.required, Validators.email]),
+      username: this.fb.control('', [Validators.required]),
       password: this.fb.control('', [Validators.required]),
     });
   }
