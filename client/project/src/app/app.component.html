@@ -1,0 +1,20 @@
+<p-menubar [model]="items">
+  <ng-template pTemplate="start">
+    <img
+      src="https://primefaces.org/cdn/primeng/images/primeng.svg"
+      height="40"
+      class="mr-2"
+    />
+  </ng-template>
+  <ng-template #menuItemTempalte let-item>
+    <a *ngIf="!item.routerLink" [href]="item.url" [target]="item.target">
+      <i class="{{ item.icon }}"></i>
+      <span>{{ item.label }}</span>
+    </a>
+  </ng-template>
+  <ng-template pTemplate="end">
+    <input type="text" pInputText placeholder="Search" class="w-full" />
+  </ng-template>
+</p-menubar>
+
+<router-outlet></router-outlet>
