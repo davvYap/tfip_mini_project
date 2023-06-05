@@ -2,15 +2,23 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PrimeNgModule } from './prime-ng.module';
 import { LoginComponent } from './component/login/login.component';
 import { DashboardComponent } from './component/dashboard/dashboard.component';
+import { LogoutComponent } from './component/logout/logout.component';
+import { MessageService } from 'primeng/api';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, DashboardComponent],
+  declarations: [
+    AppComponent,
+    LoginComponent,
+    DashboardComponent,
+    LogoutComponent,
+  ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -18,8 +26,9 @@ import { DashboardComponent } from './component/dashboard/dashboard.component';
     PrimeNgModule,
     ReactiveFormsModule,
     FormsModule,
+    HttpClientModule,
   ],
-  providers: [],
+  providers: [MessageService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

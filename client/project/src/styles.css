@@ -2,6 +2,10 @@
 @import "~bootstrap/dist/css/bootstrap.css";
 @import "primeicons/primeicons.css";
 
+html {
+  font-size: 14px;
+}
+
 body {
   font-family: var(--font-family);
   background-image: linear-gradient(
@@ -10,4 +14,13 @@ body {
     rgba(0, 0, 0, 0.836)
   );
   height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.card {
+  background: var(--surface-card);
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
 }

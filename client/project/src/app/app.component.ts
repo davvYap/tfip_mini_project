@@ -142,7 +142,10 @@ export class AppComponent implements OnInit {
       {
         label: 'Quit',
         icon: 'pi pi-fw pi-power-off',
+        routerLink: '/login',
       },
     ];
   }
+
+  handleButtonClick() {}
 }
