@@ -8,6 +8,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MessageService, PrimeNGConfig } from 'primeng/api';
 import { Router } from '@angular/router';
 import { GetService } from 'src/app/service/get.service';
+import { ThemeService } from 'src/app/service/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -21,12 +22,14 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private router: Router,
     private getSvc: GetService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private themeSvc: ThemeService
   ) {}
 
   ngOnInit(): void {
     this.primengConfig.ripple = true;
     this.getSvc.isLogin = false;
+
     this.form = this.createForm();
   }
 
@@ -52,6 +55,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
       .then((res) => {
         this.getSvc.isLogin = res.isLogin;
         this.getSvc.isLoginRecently = res.isLogin;
+        this.getSvc.userId = res.userId;
         this.router.navigate(['/dashboard']);
       })
       .catch((err) => {

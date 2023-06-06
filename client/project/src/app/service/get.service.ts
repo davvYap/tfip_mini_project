@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { LoginStatus } from '../models';
+import { LoginStatus, Stock, UserTheme } from '../models';
 import { Observable, lastValueFrom } from 'rxjs';
 
 @Injectable({
@@ -8,8 +8,8 @@ import { Observable, lastValueFrom } from 'rxjs';
 })
 export class GetService {
   isLogin!: boolean;
-
   isLoginRecently: boolean = false;
+  userId!: string;
 
   constructor(private http: HttpClient) {}
 
@@ -40,5 +40,44 @@ export class GetService {
         withCredentials: true,
       })
     );
+  }
+
+  getUserTheme(userId: string): Promise<UserTheme> {
+    let qp = new HttpParams().set('userId', userId);
+    return lastValueFrom(
+      this.http.get<UserTheme>('http://localhost:8080/api/theme', {
+        params: qp,
+      })
+    );
+  }
+
+  getStocks(): Stock[] {
+    return [
+      {
+        symbol: 'AAPL',
+        name: 'APPLE',
+        price: 182,
+      },
+      {
+        symbol: 'MSFT',
+        name: 'MICROSOFT',
+        price: 290,
+      },
+      {
+        symbol: 'AMZN',
+        name: 'AMAZON',
+        price: 232,
+      },
+      {
+        symbol: 'TSM',
+        name: 'TAIWAN SEMICONDUCTOR MANUFACTURING CO., LTD.',
+        price: 98,
+      },
+      {
+        symbol: 'META',
+        name: 'META ',
+        price: 298,
+      },
+    ];
   }
 }

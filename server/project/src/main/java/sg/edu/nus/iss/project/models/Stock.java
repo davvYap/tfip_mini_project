@@ -11,34 +11,13 @@ import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 
-public class UserStock {
-    private int userId;
-    private String username;
+public class Stock {
     private String stockName;
     private double quantity;
     private double strikePrice;
     private String symbol;
     private LocalDateTime purchasedDate;
     private double fees;
-
-    public UserStock() {
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public String getStockName() {
         return stockName;
@@ -72,14 +51,6 @@ public class UserStock {
         this.symbol = symbol;
     }
 
-    public double getFees() {
-        return fees;
-    }
-
-    public void setFees(double fees) {
-        this.fees = fees;
-    }
-
     public LocalDateTime getPurchasedDate() {
         return purchasedDate;
     }
@@ -88,10 +59,17 @@ public class UserStock {
         this.purchasedDate = purchasedDate;
     }
 
+    public double getFees() {
+        return fees;
+    }
+
+    public void setFees(double fees) {
+        this.fees = fees;
+    }
+
     public Document toDocument() {
         Document doc = new Document();
-        doc.append("userId", userId);
-        doc.append("username", username);
+
         doc.append("stockName", stockName);
         doc.append("quantity", quantity);
         doc.append("strikePrice", strikePrice);
@@ -102,24 +80,22 @@ public class UserStock {
 
     }
 
-    public static UserStock convertFromJsonString(String js) throws IOException {
-        UserStock us = null;
+    public static Stock convertFromJsonObject(String js) throws IOException {
+        Stock s = null;
         if (js != null) {
-            us = new UserStock();
+            s = new Stock();
             try (InputStream is = new ByteArrayInputStream(js.getBytes())) {
                 JsonReader jr = Json.createReader(is);
                 JsonObject jsObj = jr.readObject();
-                us.setUserId(jsObj.getInt("userId"));
-                us.setUsername(jsObj.getString("username"));
-                us.setStockName(jsObj.getString("stockName"));
-                us.setStrikePrice(Double.parseDouble(jsObj.getString("strikePrice")));
-                us.setSymbol(jsObj.getString("symbol"));
-                us.setQuantity(Double.parseDouble(jsObj.getString("quantity")));
-                us.setPurchasedDate(LocalDateTime.parse(jsObj.getString("purchasedDate")));
-                us.setFees(Double.parseDouble(jsObj.getString("fees")));
+                s.setStockName(jsObj.getString("stockName"));
+                s.setStrikePrice(Double.parseDouble(jsObj.getString("strikePrice")));
+                s.setSymbol(jsObj.getString("symbol"));
+                s.setQuantity(Double.parseDouble(jsObj.getString("quantity")));
+                s.setPurchasedDate(LocalDateTime.parse(jsObj.getString("purchasedDate")));
+                s.setFees(Double.parseDouble(jsObj.getString("fees")));
             }
         }
-        return us;
+        return s;
     }
 
 }

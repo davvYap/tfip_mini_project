@@ -7,6 +7,9 @@ import { MessagesModule } from 'primeng/messages';
 import { ToastModule } from 'primeng/toast';
 import { FieldsetModule } from 'primeng/fieldset';
 import { ChartModule } from 'primeng/chart';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { CheckboxModule } from 'primeng/checkbox';
+import { RadioButtonModule } from 'primeng/radiobutton';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -17,6 +20,9 @@ const primeModules: any[] = [
   ToastModule,
   FieldsetModule,
   ChartModule,
+  AutoCompleteModule,
+  CheckboxModule,
+  RadioButtonModule,
 ];
 
 @NgModule({

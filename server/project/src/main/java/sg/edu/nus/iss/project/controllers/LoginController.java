@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.json.Json;
 import jakarta.servlet.http.HttpSession;
+import sg.edu.nus.iss.project.models.User;
 import sg.edu.nus.iss.project.services.LoginService;
 
 @Controller
@@ -21,65 +22,82 @@ import sg.edu.nus.iss.project.services.LoginService;
 @RequestMapping(path = "/api")
 public class LoginController {
 
-    @Autowired
-    private LoginService loginSvc;
+	@Autowired
+	private LoginService loginSvc;
 
-    @GetMapping(path = "/login")
-    @ResponseBody
-    public ResponseEntity<String> verifyLogin(@RequestParam String username, @RequestParam String password,
-            HttpSession session) {
+	@GetMapping(path = "/login")
+	@ResponseBody
+	public ResponseEntity<String> verifyLogin(@RequestParam String username, @RequestParam String password,
+			HttpSession session) {
 
-        Boolean isLogin = loginSvc.verifyLogin(username, password);
-        session.setAttribute("isLogin", isLogin);
-        // testSessionId(session);
-        if (!isLogin) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("isLogin", isLogin).build().toString());
-        }
-        System.out.println("Login...");
-        return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Json.createObjectBuilder().add("isLogin", isLogin).build().toString());
-    }
+		String userId = loginSvc.verifyLogin(username, password);
+		if (userId == null) {
+			session.setAttribute("isLogin", false);
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder()
+							.add("isLogin", false)
+							.add("userId", "guest000")
+							.build().toString());
+		}
+		User user = new User(userId, username);
+		session.setAttribute("isLogin", true);
+		session.setAttribute("user", user);
+		// testSessionId(session);
+		System.out.println("Login...");
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(Json.createObjectBuilder()
+						.add("isLogin", true)
+						.add("userId", userId)
+						.build().toString());
+	}
 
-    // CHECK IF USER IS LOGIN
-    @GetMapping(path = "/isLogin")
-    @ResponseBody
-    public ResponseEntity<String> isLogin(HttpSession session) {
+	// CHECK IF USER IS LOGIN
+	@GetMapping(path = "/isLogin")
+	@ResponseBody
+	public ResponseEntity<String> isLogin(HttpSession session) {
 
-        // testSessionId(session);
-        System.out.println("Check login...");
-        Boolean isLogin = (Boolean) session.getAttribute("isLogin");
-        System.out.println("username from /api/isLogin >>> " + isLogin);
-        if (isLogin == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("isLogin", false).build().toString());
-        }
+		// testSessionId(session);
+		System.out.println("Check login...");
+		Boolean isLogin = (Boolean) session.getAttribute("isLogin");
+		User user = (User) session.getAttribute("user");
+		System.out.println("username from /api/isLogin >>> " + isLogin);
+		if (isLogin == null || user == null) {
+			return ResponseEntity.status(HttpStatus.OK)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder()
+							.add("isLogin", false)
+							.add("userId", "guest000")
+							.build().toString());
+		}
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Json.createObjectBuilder().add("isLogin", isLogin).build().toString());
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(Json.createObjectBuilder()
+						.add("isLogin", isLogin)
+						.add("userId", user.getUserId())
+						.build().toString());
 
-    }
+	}
 
-    @GetMapping(path = "/logout")
-    @ResponseBody
-    public ResponseEntity<String> logout(HttpSession session) {
+	@GetMapping(path = "/logout")
+	@ResponseBody
+	public ResponseEntity<String> logout(HttpSession session) {
 
-        System.out.println("Logout...");
-        // testSessionId(session);
+		System.out.println("Logout...");
+		// testSessionId(session);
 
-        session.invalidate();
-        return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Json.createObjectBuilder().add("isLogin", false).build().toString());
-    }
+		session.invalidate();
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(Json.createObjectBuilder().add("isLogin", false).build().toString());
+	}
 
-    private void testSessionId(HttpSession session) {
-        System.out.println("session id >>> " + session.getId());
-        System.out.println("creation time >>> " + session.getCreationTime());
-        System.out.println("session max inactive interval >>> " + session.getMaxInactiveInterval());
-    }
+	// EXTRA
+	private void testSessionId(HttpSession session) {
+		System.out.println("session id >>> " + session.getId());
+		System.out.println("creation time >>> " + session.getCreationTime());
+		System.out.println("session max inactive interval >>> " + session.getMaxInactiveInterval());
+	}
 }

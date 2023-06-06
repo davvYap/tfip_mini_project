@@ -21,6 +21,7 @@ export class AppComponent implements OnInit {
     private primengConfig: PrimeNGConfig,
     private themeSvc: ThemeService,
     private getSvc: GetService,
+    private postSvc: PostService,
     private router: Router,
     private routerPerSvc: RoutePersistenceService
   ) {}
@@ -35,6 +36,7 @@ export class AppComponent implements OnInit {
       tooltip: 1100, // tooltip
     };
 
+    //IMPORTANT To prevent refresh page routes to login page
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.routerPerSvc.saveCurrentRoute(event.url);
@@ -51,8 +53,9 @@ export class AppComponent implements OnInit {
             icon: 'pi pi-fw pi-plus',
             items: [
               {
-                label: 'Bookmark',
-                icon: 'pi pi-fw pi-bookmark',
+                label: 'Investment',
+                icon: 'pi pi-fw pi-bitcoin',
+                routerLink: '/investment',
               },
               {
                 label: 'Video',
@@ -80,17 +83,17 @@ export class AppComponent implements OnInit {
           {
             label: 'Mira',
             icon: 'pi pi-fw pi-align-left',
-            command: () => this.changeMiraTheme(0),
+            command: () => this.changeTheme(0),
           },
           {
             label: 'MDC Dark',
             icon: 'pi pi-fw pi-align-right',
-            command: () => this.changeMiraTheme(1),
+            command: () => this.changeTheme(1),
           },
           {
             label: 'Viva Dark',
             icon: 'pi pi-fw pi-align-center',
-            command: () => this.changeMiraTheme(2),
+            command: () => this.changeTheme(2),
           },
           {
             label: 'Justify',
@@ -177,9 +180,11 @@ export class AppComponent implements OnInit {
     ];
   }
 
-  changeMiraTheme(i: number) {
+  changeTheme(i: number) {
     let theme = this.themes[i];
     this.themeSvc.switchTheme(theme);
+    let userId = this.getSvc.userId;
+    this.postSvc.updateUserTheme(userId, theme);
   }
 
   logout() {
@@ -193,6 +198,7 @@ export class AppComponent implements OnInit {
       .checkLoginStatus()
       .then((res: LoginStatus) => {
         console.log('user login >>> ', res.isLogin);
+        console.log('userId >>> ', res.userId);
       })
       .catch((err) => {
         console.log('user login >>> ', err.isLogin);

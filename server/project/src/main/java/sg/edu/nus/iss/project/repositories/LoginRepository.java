@@ -13,14 +13,14 @@ public class LoginRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public boolean verifyLogin(String username, String password) {
+    public String verifyLogin(String username, String password) {
         SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_VERIFY_LOGIN, username, password);
 
         while (rs.next()) {
-            return true;
+            return rs.getString("user_id");
         }
 
-        return false;
+        return null;
     }
 
 }

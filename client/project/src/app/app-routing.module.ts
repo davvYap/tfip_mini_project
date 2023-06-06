@@ -4,6 +4,7 @@ import { LoginComponent } from './component/login/login.component';
 import { DashboardComponent } from './component/dashboard/dashboard.component';
 import { loginGuard } from './service/route-guard';
 import { LogoutComponent } from './component/logout/logout.component';
+import { InvestmentComponent } from './component/investment/investment.component';
 
 const routes: Routes = [
   { path: '', component: LoginComponent },
@@ -12,6 +13,10 @@ const routes: Routes = [
     path: 'dashboard',
     component: DashboardComponent,
     canActivate: [loginGuard],
+  },
+  {
+    path: 'investment',
+    component: InvestmentComponent,
   },
   { path: 'logout', component: LogoutComponent },
   { path: '**', redirectTo: '/', pathMatch: 'full' },

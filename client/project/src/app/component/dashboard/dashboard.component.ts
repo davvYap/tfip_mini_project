@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Chart } from 'chart.js';
+import { LoginStatus, UserTheme } from 'src/app/models';
+import { GetService } from 'src/app/service/get.service';
+import { ThemeService } from 'src/app/service/theme.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,11 +26,22 @@ export class DashboardComponent implements OnInit {
   miscValue!: number;
   totalValue!: number;
 
+  constructor(private getSvc: GetService, private themeSvc: ThemeService) {}
+
   ngOnInit(): void {
     Chart.defaults.color = '#fff';
     Chart.defaults.font.size = 14;
     Chart.defaults.font.weight = '300';
     Chart.defaults.borderColor = '#fff';
+
+    // GET USER THEME IN MONGO
+    this.getSvc.checkLoginStatus().then((res: LoginStatus) => {
+      let userId = res.userId;
+      this.getSvc.getUserTheme(userId).then((res: UserTheme) => {
+        this.themeSvc.switchTheme(res.theme);
+      });
+    });
+
     // this.stocksValue = 8000;
     // this.cryptoValue = 1200;
     this.savingsValue = 8500;
@@ -87,6 +101,7 @@ export class DashboardComponent implements OnInit {
           labels: {
             // color: textColor,
             color: '#fff',
+            padding: 10,
           },
         },
         title: {
