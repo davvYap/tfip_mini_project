@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { MenuItem, PrimeNGConfig } from 'primeng/api';
+import { ThemeService } from './service/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,12 @@ import { MenuItem, PrimeNGConfig } from 'primeng/api';
 export class AppComponent implements OnInit {
   items!: MenuItem[];
 
-  constructor(private primengConfig: PrimeNGConfig) {}
+  themes: string[] = ['mira', 'mdc-dark-deeppurple', 'viva-dark'];
+
+  constructor(
+    private primengConfig: PrimeNGConfig,
+    private themeSvc: ThemeService
+  ) {}
 
   ngOnInit(): void {
     this.primengConfig.ripple = true;
@@ -58,16 +64,19 @@ export class AppComponent implements OnInit {
         icon: 'pi pi-fw pi-pencil',
         items: [
           {
-            label: 'Left',
+            label: 'Mira',
             icon: 'pi pi-fw pi-align-left',
+            command: () => this.changeMiraTheme(0),
           },
           {
-            label: 'Right',
+            label: 'MDC Dark',
             icon: 'pi pi-fw pi-align-right',
+            command: () => this.changeMiraTheme(1),
           },
           {
-            label: 'Center',
+            label: 'Viva Dark',
             icon: 'pi pi-fw pi-align-center',
+            command: () => this.changeMiraTheme(2),
           },
           {
             label: 'Justify',
@@ -147,5 +156,8 @@ export class AppComponent implements OnInit {
     ];
   }
 
-  handleButtonClick() {}
+  changeMiraTheme(i: number) {
+    let theme = this.themes[i];
+    this.themeSvc.switchTheme(theme);
+  }
 }

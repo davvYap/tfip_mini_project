@@ -14,6 +14,7 @@ export class DashboardComponent implements OnInit {
   guideLineDataForSP500!: number[];
   portfolioPerformanceData!: number[];
 
+  savingsValue!: number;
   stocksValue!: number;
   cryptoValue!: number;
   investmentsValue!: number;
@@ -21,9 +22,10 @@ export class DashboardComponent implements OnInit {
   miscValue!: number;
 
   ngOnInit(): void {
-    this.stocksValue = 8000;
-    this.cryptoValue = 1200;
-    this.investmentsValue = 6900;
+    // this.stocksValue = 8000;
+    // this.cryptoValue = 1200;
+    this.savingsValue = 8500;
+    this.investmentsValue = 6900 + 8000 + 1200;
     this.propertiesValue = 57500;
     this.miscValue = 1200;
 
@@ -40,12 +42,13 @@ export class DashboardComponent implements OnInit {
     const textColor = documentStyle.getPropertyValue('--text-color');
 
     this.donutData = {
-      labels: ['Stocks', 'Crypto', 'Investments', 'Property', 'Misc.'],
+      labels: ['Savings', 'Investments', 'Property', 'Misc.'],
       datasets: [
         {
           data: [
-            this.stocksValue,
-            this.cryptoValue,
+            // this.stocksValue,
+            // this.cryptoValue,
+            this.savingsValue,
             this.investmentsValue,
             this.propertiesValue,
             this.miscValue,
@@ -54,14 +57,12 @@ export class DashboardComponent implements OnInit {
             documentStyle.getPropertyValue('--blue-500'),
             documentStyle.getPropertyValue('--yellow-500'),
             documentStyle.getPropertyValue('--green-500'),
-            documentStyle.getPropertyValue('--red-500'),
             documentStyle.getPropertyValue('--purple-500'),
           ],
           hoverBackgroundColor: [
             documentStyle.getPropertyValue('--blue-400'),
             documentStyle.getPropertyValue('--yellow-400'),
             documentStyle.getPropertyValue('--green-400'),
-            documentStyle.getPropertyValue('--red-400'),
             documentStyle.getPropertyValue('--purple-400'),
           ],
         },

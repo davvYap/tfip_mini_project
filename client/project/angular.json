@@ -22,7 +22,21 @@
             "styles": [
               "src/styles.css",
               "node_modules/primeng/resources/primeng.min.css",
-              "node_modules/primeng/resources/themes/mira/theme.css"
+              {
+                "input": "src/theme/theme-mira.css",
+                "bundleName": "mira",
+                "inject": false
+              },
+              {
+                "input": "src/theme/theme-mdc-dark-deeppurple.css",
+                "bundleName": "mdc-dark-deeppurple",
+                "inject": false
+              },
+              {
+                "input": "src/theme/theme-viva-dark.css",
+                "bundleName": "viva-dark",
+                "inject": false
+              }
             ],
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.min.js",
