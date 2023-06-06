@@ -21,6 +21,23 @@ export class GetService {
     return lastValueFrom(
       this.http.get<LoginStatus>('http://localhost:8080/api/login', {
         params: qp,
+        withCredentials: true,
+      })
+    );
+  }
+
+  checkLoginStatus(): Promise<LoginStatus> {
+    return lastValueFrom(
+      this.http.get<LoginStatus>('http://localhost:8080/api/isLogin', {
+        withCredentials: true,
+      })
+    );
+  }
+
+  logout(): Promise<LoginStatus> {
+    return lastValueFrom(
+      this.http.get<LoginStatus>('http://localhost:8080/api/logout', {
+        withCredentials: true,
       })
     );
   }

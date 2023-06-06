@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Chart } from 'chart.js';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,15 +21,24 @@ export class DashboardComponent implements OnInit {
   investmentsValue!: number;
   propertiesValue!: number;
   miscValue!: number;
+  totalValue!: number;
 
   ngOnInit(): void {
+    Chart.defaults.color = '#fff';
+    Chart.defaults.font.size = 14;
+    Chart.defaults.font.weight = '300';
+    Chart.defaults.borderColor = '#fff';
     // this.stocksValue = 8000;
     // this.cryptoValue = 1200;
     this.savingsValue = 8500;
     this.investmentsValue = 6900 + 8000 + 1200;
     this.propertiesValue = 57500;
     this.miscValue = 1200;
-
+    this.totalValue =
+      this.savingsValue +
+      this.investmentsValue +
+      this.propertiesValue +
+      this.miscValue;
     this.guideLineDataForSP500 = [65, 59, 80, 81, 56, 55, 10];
     this.portfolioPerformanceData = [28, 48, 40, 19, 86, 27, 30];
 
@@ -75,7 +85,8 @@ export class DashboardComponent implements OnInit {
       plugins: {
         legend: {
           labels: {
-            color: textColor,
+            // color: textColor,
+            color: '#fff',
           },
         },
         title: {
@@ -141,7 +152,8 @@ export class DashboardComponent implements OnInit {
       plugins: {
         legend: {
           labels: {
-            color: textColor,
+            // color: textColor,
+            color: '#fff',
           },
         },
       },

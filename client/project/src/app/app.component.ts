@@ -1,6 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { MenuItem, PrimeNGConfig } from 'primeng/api';
+import { MenuItem, MessageService, PrimeNGConfig } from 'primeng/api';
 import { ThemeService } from './service/theme.service';
+import { GetService } from './service/get.service';
+import { NavigationEnd, Router } from '@angular/router';
+import { LoginStatus } from './models';
+import { PostService } from './service/post.service';
+import { RoutePersistenceService } from './service/route-persistence.service';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +19,10 @@ export class AppComponent implements OnInit {
 
   constructor(
     private primengConfig: PrimeNGConfig,
-    private themeSvc: ThemeService
+    private themeSvc: ThemeService,
+    private getSvc: GetService,
+    private router: Router,
+    private routerPerSvc: RoutePersistenceService
   ) {}
 
   ngOnInit(): void {
@@ -26,6 +34,12 @@ export class AppComponent implements OnInit {
       menu: 1000, // overlay menus
       tooltip: 1100, // tooltip
     };
+
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.routerPerSvc.saveCurrentRoute(event.url);
+      }
+    });
 
     this.items = [
       {
@@ -91,6 +105,7 @@ export class AppComponent implements OnInit {
           {
             label: 'New',
             icon: 'pi pi-fw pi-user-plus',
+            command: () => this.checkLoginStatus(),
           },
           {
             label: 'Delete',
@@ -149,9 +164,15 @@ export class AppComponent implements OnInit {
         ],
       },
       {
+        label: 'Dashboard',
+        icon: 'pi pi-fw pi-desktop',
+        routerLink: '/dashboard',
+      },
+      {
         label: 'Quit',
         icon: 'pi pi-fw pi-power-off',
-        routerLink: '/login',
+        command: () => this.logout(),
+        // routerLink: '/login',
       },
     ];
   }
@@ -159,5 +180,22 @@ export class AppComponent implements OnInit {
   changeMiraTheme(i: number) {
     let theme = this.themes[i];
     this.themeSvc.switchTheme(theme);
+  }
+
+  logout() {
+    this.getSvc.isLogin = false;
+    this.getSvc.logout();
+    this.router.navigate(['/login']);
+  }
+
+  checkLoginStatus(): void {
+    this.getSvc
+      .checkLoginStatus()
+      .then((res: LoginStatus) => {
+        console.log('user login >>> ', res.isLogin);
+      })
+      .catch((err) => {
+        console.log('user login >>> ', err.isLogin);
+      });
   }
 }
