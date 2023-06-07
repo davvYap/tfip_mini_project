@@ -12,6 +12,7 @@ import { DashboardComponent } from './component/dashboard/dashboard.component';
 import { LogoutComponent } from './component/logout/logout.component';
 import { MessageService } from 'primeng/api';
 import { InvestmentComponent } from './component/investment/investment.component';
+import { InvestmentDashboardComponent } from './component/investment-dashboard/investment-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { InvestmentComponent } from './component/investment/investment.component
     DashboardComponent,
     LogoutComponent,
     InvestmentComponent,
+    InvestmentDashboardComponent,
   ],
   imports: [
     BrowserModule,

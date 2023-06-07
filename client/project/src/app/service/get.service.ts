@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { LoginStatus, Stock, StocksData, UserTheme } from '../models';
+import {
+  LoginStatus,
+  PurchasedStock,
+  Stock,
+  StocksData,
+  UserTheme,
+} from '../models';
 import { Observable, lastValueFrom } from 'rxjs';
 
 @Injectable({
@@ -61,6 +67,12 @@ export class GetService {
   getStockPrice(symbol: string): Promise<Stock> {
     return lastValueFrom(
       this.http.get<Stock>(`http://localhost:8080/api/${symbol}/price`)
+    );
+  }
+
+  getUserStocksMongo(userId: string): Observable<PurchasedStock> {
+    return this.http.get<PurchasedStock>(
+      `http://localhost:8080/api/${userId}/stocks`
     );
   }
 }

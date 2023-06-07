@@ -29,7 +29,7 @@ export class PostService {
   addStock(userId: string, stock: PurchasedStock): Promise<MessageResponse> {
     return lastValueFrom(
       this.http.post<MessageResponse>(
-        `http://localhost:8080/api/addStock/${userId}`,
+        `http://localhost:8080/api/${userId}/addStock`,
         stock
       )
     );

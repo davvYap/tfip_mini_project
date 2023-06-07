@@ -1,6 +1,6 @@
 <p-menubar [model]="items">
-  <ng-template pTemplate="start">
-    <img src="/assets/images/investment_logo.png" height="30" class="mr-2" />
+  <ng-template pTemplate="start" class="mx-2">
+    <img src="/assets/images/puzzle.png" height="30" class="mr-2" />
   </ng-template>
   <ng-template #menuItemTempalte let-item>
     <a *ngIf="!item.routerLink" [href]="item.url" [target]="item.target">

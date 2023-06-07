@@ -15,6 +15,8 @@ export class InvestmentComponent implements OnInit, OnDestroy {
   filteredStocksSymbol!: String[];
   maxDate!: Date;
   stocksData$!: Subscription;
+  stockSymbolTrimmed!: string;
+  stockNameTrimmed!: string;
 
   constructor(
     private fb: FormBuilder,
@@ -41,7 +43,7 @@ export class InvestmentComponent implements OnInit, OnDestroy {
       quantity: this.fb.control('', [Validators.required]),
       price: this.fb.control('', [Validators.required]),
       date: this.fb.control('', [Validators.required]),
-      fees: this.fb.control('', [Validators.required]),
+      fees: this.fb.control(0.0),
     });
   }
 
@@ -62,18 +64,27 @@ export class InvestmentComponent implements OnInit, OnDestroy {
     });
   }
 
+  onSelectStock(event: any) {
+    console.log('event >>> ', event);
+    let stockSymbol: string = event;
+
+    const index: number = stockSymbol.indexOf(' | ');
+    const lastIndex: number = stockSymbol.lastIndexOf(' (');
+    this.stockSymbolTrimmed = stockSymbol.substring(0, index);
+    this.stockNameTrimmed = stockSymbol.substring(index + 3, lastIndex);
+    // console.log('stockselected >>> ', this.stockNameTrimmed);
+    let stockPrice: number = 0;
+
+    this.getSvc.getStockPrice(this.stockSymbolTrimmed).then((res) => {
+      stockPrice = Number(res.price);
+      this.investmentForm.controls['price'].setValue(stockPrice);
+    });
+  }
+
   addStock() {
     let stockPurchased = this.investmentForm.value as PurchasedStock;
-    let stockName = '';
-
-    for (let i = 0; i < this.stocks.length; i++) {
-      let stock = this.stocks[i];
-      if (stock.symbol.toLowerCase() == stockPurchased.symbol.toLowerCase()) {
-        stockName = stock.instrument_name;
-      }
-    }
-
-    stockPurchased.name = stockName;
+    stockPurchased.symbol = this.stockSymbolTrimmed;
+    stockPurchased.name = this.stockNameTrimmed;
 
     let timeLong = this.investmentForm.get('date')?.value.getTime();
     stockPurchased.date = timeLong;
@@ -88,24 +99,10 @@ export class InvestmentComponent implements OnInit, OnDestroy {
       .catch((err) => {
         alert(err.message);
       });
+    this.clearForm();
   }
 
   clearForm() {
-    this.investmentForm.reset();
-  }
-
-  onSelectStock(event: any) {
-    console.log('event >>> ', event);
-    let stockSymbol: string = event;
-
-    const index: number = stockSymbol.indexOf(' | ');
-    const stockSymbolTrimmed: string = stockSymbol.substring(0, index);
-    console.log('stockselected >>> ', stockSymbol.substring(0, index));
-    let stockPrice: number = 0;
-
-    this.getSvc.getStockPrice(stockSymbolTrimmed).then((res) => {
-      stockPrice = Number(res.price);
-      this.investmentForm.controls['price'].setValue(stockPrice);
-    });
+    this.investmentForm = this.createForm();
   }
 }
