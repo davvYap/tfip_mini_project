@@ -76,4 +76,5 @@ public class UserController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("message", "Stock added").build().toString());
     }
+
 }

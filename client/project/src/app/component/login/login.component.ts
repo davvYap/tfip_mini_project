@@ -17,6 +17,9 @@ import { ThemeService } from 'src/app/service/theme.service';
 })
 export class LoginComponent implements OnInit, AfterViewInit {
   form!: FormGroup;
+  imgSrc: string = '/assets/images/user2.png';
+  imgClass: string = 'user-img';
+
   constructor(
     private primengConfig: PrimeNGConfig,
     private fb: FormBuilder,
@@ -59,7 +62,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
         this.router.navigate(['/dashboard']);
       })
       .catch((err) => {
-        alert('Invalid username or password');
+        this.imgSrc = '/assets/images/user.png';
+        this.imgClass = 'user-img-shake';
       });
   }
 
@@ -69,5 +73,9 @@ export class LoginComponent implements OnInit, AfterViewInit {
       summary: 'Success',
       detail: 'Logout Successfully',
     });
+  }
+
+  resetImg() {
+    this.imgSrc = '/assets/images/user2.png';
   }
 }

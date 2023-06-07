@@ -41,7 +41,7 @@ public class UserRepository {
         Query query = Query.query(Criteria.where("user_id").is(userId));
         Update udpateOps = new Update()
                 .set("user_id", userId)
-                .push("stocks", stock);
+                .push("stocks", stock.toDocument());
 
         UpdateResult upsertDoc = mongo.upsert(query, udpateOps, "stocks");
         return upsertDoc.getModifiedCount() > 0;

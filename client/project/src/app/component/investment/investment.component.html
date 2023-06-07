@@ -10,7 +10,9 @@
                   formControlName="symbol"
                   [suggestions]="filteredStocksSymbol"
                   (completeMethod)="filterStock($event)"
+                  [forceSelection]="true"
                   placeholder="stock symbol"
+                  (onSelect)="onSelectStock($event)"
                 ></p-autoComplete>
                 <label htmlFor="number-input">Symbol</label>
               </span>

@@ -5,8 +5,14 @@ export interface LoginStatus {
 
 export interface Stock {
   symbol: string;
-  name: string;
-  price: number;
+  instrument_name: string;
+  exchange: string;
+  currency: string;
+  price: string;
+}
+
+export interface StocksData {
+  data: Stock[];
 }
 
 export interface PurchasedStock {
@@ -14,7 +20,7 @@ export interface PurchasedStock {
   price: string;
   quantity: string;
   fees: string;
-  date: string;
+  date: number;
   name: string;
 }
 

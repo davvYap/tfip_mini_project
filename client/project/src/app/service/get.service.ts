@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { LoginStatus, Stock, UserTheme } from '../models';
+import { LoginStatus, Stock, StocksData, UserTheme } from '../models';
 import { Observable, lastValueFrom } from 'rxjs';
 
 @Injectable({
@@ -51,33 +51,16 @@ export class GetService {
     );
   }
 
-  getStocks(): Stock[] {
-    return [
-      {
-        symbol: 'AAPL',
-        name: 'APPLE',
-        price: 182,
-      },
-      {
-        symbol: 'MSFT',
-        name: 'MICROSOFT',
-        price: 290,
-      },
-      {
-        symbol: 'AMZN',
-        name: 'AMAZON',
-        price: 232,
-      },
-      {
-        symbol: 'TSM',
-        name: 'TAIWAN SEMICONDUCTOR MANUFACTURING CO., LTD.',
-        price: 98,
-      },
-      {
-        symbol: 'META',
-        name: 'META ',
-        price: 298,
-      },
-    ];
+  getStocks(symbol: string): Observable<StocksData> {
+    let qp = new HttpParams().set('symbol', symbol);
+    return this.http.get<StocksData>('http://localhost:8080/api/stocks', {
+      params: qp,
+    });
+  }
+
+  getStockPrice(symbol: string): Promise<Stock> {
+    return lastValueFrom(
+      this.http.get<Stock>(`http://localhost:8080/api/${symbol}/price`)
+    );
   }
 }

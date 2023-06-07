@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { PurchasedStock, Stock } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
@@ -8,11 +9,12 @@ import { PostService } from 'src/app/service/post.service';
   templateUrl: './investment.component.html',
   styleUrls: ['./investment.component.css'],
 })
-export class InvestmentComponent implements OnInit {
+export class InvestmentComponent implements OnInit, OnDestroy {
   investmentForm!: FormGroup;
   stocks!: Stock[];
   filteredStocksSymbol!: String[];
   maxDate!: Date;
+  stocksData$!: Subscription;
 
   constructor(
     private fb: FormBuilder,
@@ -22,20 +24,23 @@ export class InvestmentComponent implements OnInit {
 
   ngOnInit() {
     this.investmentForm = this.createForm();
-    this.stocks = this.getSvc.getStocks();
     let today = new Date();
     let tmr = new Date();
     tmr.setDate(today.getDate() + 1);
     this.maxDate = tmr;
   }
 
+  ngOnDestroy(): void {
+    if (this.stocksData$) this.stocksData$.unsubscribe();
+  }
+
   createForm(): FormGroup {
-    let date: string = new Date().toISOString().split('T')[0];
+    // let date: string = new Date().toISOString().split('T')[0];
     return this.fb.group({
       symbol: this.fb.control('', [Validators.required]),
       quantity: this.fb.control('', [Validators.required]),
       price: this.fb.control('', [Validators.required]),
-      date: this.fb.control(date, [Validators.required]),
+      date: this.fb.control('', [Validators.required]),
       fees: this.fb.control('', [Validators.required]),
     });
   }
@@ -43,43 +48,35 @@ export class InvestmentComponent implements OnInit {
   filterStock(event: any) {
     let filtered: String[] = [];
     let query = event.query;
-    for (let i = 0; i < this.stocks.length; i++) {
-      let stock = this.stocks[i];
-      if (stock.symbol.toLowerCase().indexOf(query.toLowerCase()) == 0) {
-        filtered.push(stock.symbol);
-      }
-    }
 
-    this.filteredStocksSymbol = filtered;
+    this.stocksData$ = this.getSvc.getStocks(query).subscribe((res) => {
+      this.stocks = res.data;
+      for (let i = 0; i < this.stocks.length; i++) {
+        let stock = this.stocks[i];
+        if (stock.symbol.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+          let queryStock = `${stock.symbol} | ${stock.instrument_name} (${stock.exchange})`;
+          filtered.push(queryStock);
+        }
+      }
+      this.filteredStocksSymbol = filtered;
+    });
   }
 
   addStock() {
     let stockPurchased = this.investmentForm.value as PurchasedStock;
     let stockName = '';
+
     for (let i = 0; i < this.stocks.length; i++) {
       let stock = this.stocks[i];
       if (stock.symbol.toLowerCase() == stockPurchased.symbol.toLowerCase()) {
-        stockName = stock.name;
+        stockName = stock.instrument_name;
       }
     }
+
     stockPurchased.name = stockName;
-    let date: Date = this.investmentForm.get('date')?.value;
-    let day: string = date.getDate().toString();
-    let month: string = (date.getUTCMonth() + 1).toString();
-    let year: string = date.getFullYear().toString();
-    let dayMonthYear: string = day + '-' + month + '-' + year;
-    stockPurchased.date = dayMonthYear;
 
-    let quantity: string = this.investmentForm
-      .get('quantity')
-      ?.value.toString();
-    let price: string = this.investmentForm.get('price')?.value.toString();
-    let fees: string = this.investmentForm.get('fees')?.value.toString();
-
-    stockPurchased.quantity = quantity;
-    stockPurchased.price = price;
-    stockPurchased.fees = fees;
-
+    let timeLong = this.investmentForm.get('date')?.value.getTime();
+    stockPurchased.date = timeLong;
     console.log('Stock >>> ', stockPurchased);
 
     let userId: string = this.getSvc.userId;
@@ -95,5 +92,20 @@ export class InvestmentComponent implements OnInit {
 
   clearForm() {
     this.investmentForm.reset();
+  }
+
+  onSelectStock(event: any) {
+    console.log('event >>> ', event);
+    let stockSymbol: string = event;
+
+    const index: number = stockSymbol.indexOf(' | ');
+    const stockSymbolTrimmed: string = stockSymbol.substring(0, index);
+    console.log('stockselected >>> ', stockSymbol.substring(0, index));
+    let stockPrice: number = 0;
+
+    this.getSvc.getStockPrice(stockSymbolTrimmed).then((res) => {
+      stockPrice = Number(res.price);
+      this.investmentForm.controls['price'].setValue(stockPrice);
+    });
   }
 }
