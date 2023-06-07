@@ -1,13 +1,136 @@
-<div class="container">
+<div class="container mt-5">
   <div class="row justify-content-center align-items-center">
     <div class="col-8 m-3 text-center">
-      <form [formGroup]="investmentForm">
-        <p-autoComplete
-          formControlName="symbol"
-          [suggestions]="filteredStocks"
-          (completeMethod)="filterStock($event)"
-          field="symbol"
-        ></p-autoComplete>
+      <form [formGroup]="investmentForm" (submit)="addStock()">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-8 text-center">
+            <div class="ncard flex justify-content-center">
+              <span class="p-float-label">
+                <p-autoComplete
+                  formControlName="symbol"
+                  [suggestions]="filteredStocksSymbol"
+                  (completeMethod)="filterStock($event)"
+                  placeholder="stock symbol"
+                ></p-autoComplete>
+                <label htmlFor="number-input">Symbol</label>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row justify-content-center align-items-center">
+          <div class="col-8 text-center">
+            <div class="ncard flex justify-content-center">
+              <span class="p-float-label">
+                <p-inputNumber
+                  formControlName="price"
+                  [showButtons]="true"
+                  buttonLayout="horizontal"
+                  inputId="horizontal"
+                  spinnerMode="horizontal"
+                  [step]="10.0"
+                  decrementButtonClass="p-button-danger"
+                  incrementButtonClass="p-button-success"
+                  incrementButtonIcon="pi pi-plus"
+                  decrementButtonIcon="pi pi-minus"
+                  mode="currency"
+                  currency="USD"
+                ></p-inputNumber>
+                <label htmlFor="number-input">Price</label>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row justify-content-center align-items-center">
+          <div class="col-8 text-center">
+            <div class="ncard flex justify-content-center">
+              <span class="p-float-label">
+                <p-inputNumber
+                  formControlName="quantity"
+                  mode="decimal"
+                  [showButtons]="true"
+                  inputId="minmax-buttons"
+                  [min]="0.1"
+                  [max]="10000"
+                >
+                </p-inputNumber>
+                <label htmlFor="number-input">Quantity</label>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row justify-content-center align-items-center">
+          <div class="col-8 text-center">
+            <div class="ncard flex justify-content-center">
+              <span class="p-float-label">
+                <p-calendar
+                  formControlName="date"
+                  [touchUI]="true"
+                  [readonlyInput]="true"
+                  [showButtonBar]="true"
+                  [showIcon]="true"
+                  [maxDate]="maxDate"
+                  dateFormat="dd-mm-yy"
+                ></p-calendar>
+                <label htmlFor="number-input">Date</label>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row justify-content-center align-items-center">
+          <div class="col-8 text-center">
+            <div class="ncard flex justify-content-center">
+              <span class="p-float-label">
+                <p-inputNumber
+                  formControlName="fees"
+                  [showButtons]="true"
+                  buttonLayout="horizontal"
+                  inputId="horizontal"
+                  spinnerMode="horizontal"
+                  [step]="0.5"
+                  decrementButtonClass="p-button-danger"
+                  incrementButtonClass="p-button-success"
+                  incrementButtonIcon="pi pi-plus"
+                  decrementButtonIcon="pi pi-minus"
+                  mode="currency"
+                  currency="USD"
+                ></p-inputNumber>
+                <label htmlFor="number-input">Fees</label>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row justify-content-center align-items-center my-3">
+          <div class="col-8 text-center">
+            <span class="p-buttonset">
+              <button
+                pButton
+                pRipple
+                label="Save"
+                icon="pi pi-check"
+                [disabled]="investmentForm.invalid"
+              ></button>
+              <button
+                pButton
+                pRipple
+                label="Clear"
+                icon="pi pi-trash"
+                (click)="clearForm()"
+              ></button>
+              <button
+                pButton
+                pRipple
+                label="Cancel"
+                icon="pi pi-times"
+                [routerLink]="'/dashboard'"
+              ></button>
+            </span>
+          </div>
+        </div>
       </form>
     </div>
   </div>

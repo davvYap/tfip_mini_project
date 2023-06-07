@@ -9,6 +9,19 @@ export interface Stock {
   price: number;
 }
 
+export interface PurchasedStock {
+  symbol: string;
+  price: string;
+  quantity: string;
+  fees: string;
+  date: string;
+  name: string;
+}
+
 export interface UserTheme {
   theme: string;
+}
+
+export interface MessageResponse {
+  message: string;
 }

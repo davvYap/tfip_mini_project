@@ -36,6 +36,16 @@
                 "input": "src/theme/theme-viva-dark.css",
                 "bundleName": "viva-dark",
                 "inject": false
+              },
+              {
+                "input": "src/theme/theme-lara-dark-teal.css",
+                "bundleName": "lara-dark-teal",
+                "inject": false
+              },
+              {
+                "input": "src/theme/theme-nano.css",
+                "bundleName": "nano",
+                "inject": false
               }
             ],
             "scripts": [

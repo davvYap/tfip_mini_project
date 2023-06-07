@@ -10,6 +10,8 @@ import { ChartModule } from 'primeng/chart';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { CheckboxModule } from 'primeng/checkbox';
 import { RadioButtonModule } from 'primeng/radiobutton';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { CalendarModule } from 'primeng/calendar';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -23,6 +25,8 @@ const primeModules: any[] = [
   AutoCompleteModule,
   CheckboxModule,
   RadioButtonModule,
+  InputNumberModule,
+  CalendarModule,
 ];
 
 @NgModule({

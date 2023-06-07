@@ -15,7 +15,13 @@ import { RoutePersistenceService } from './service/route-persistence.service';
 export class AppComponent implements OnInit {
   items!: MenuItem[];
 
-  themes: string[] = ['mira', 'mdc-dark-deeppurple', 'viva-dark'];
+  themes: string[] = [
+    'mira',
+    'mdc-dark-deeppurple',
+    'viva-dark',
+    'lara-dark-teal',
+    'nano',
+  ];
 
   constructor(
     private primengConfig: PrimeNGConfig,
@@ -81,19 +87,35 @@ export class AppComponent implements OnInit {
         icon: 'pi pi-fw pi-pencil',
         items: [
           {
-            label: 'Mira',
-            icon: 'pi pi-fw pi-align-left',
-            command: () => this.changeTheme(0),
-          },
-          {
-            label: 'MDC Dark',
-            icon: 'pi pi-fw pi-align-right',
-            command: () => this.changeTheme(1),
-          },
-          {
-            label: 'Viva Dark',
-            icon: 'pi pi-fw pi-align-center',
-            command: () => this.changeTheme(2),
+            label: 'Themes',
+            icon: 'pi pi-fw pi-th-large',
+            items: [
+              {
+                label: 'Mira',
+                icon: 'pi pi-fw pi-images',
+                command: () => this.changeTheme(0),
+              },
+              {
+                label: 'MDC Dark',
+                icon: 'pi pi-fw pi-images',
+                command: () => this.changeTheme(1),
+              },
+              {
+                label: 'Viva Dark',
+                icon: 'pi pi-fw pi-images',
+                command: () => this.changeTheme(2),
+              },
+              {
+                label: 'Lara Dark Teal',
+                icon: 'pi pi-fw pi-images',
+                command: () => this.changeTheme(3),
+              },
+              {
+                label: 'Nano',
+                icon: 'pi pi-fw pi-images',
+                command: () => this.changeTheme(4),
+              },
+            ],
           },
           {
             label: 'Justify',

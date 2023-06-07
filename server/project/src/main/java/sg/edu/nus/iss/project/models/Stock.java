@@ -3,7 +3,8 @@ package sg.edu.nus.iss.project.models;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.bson.Document;
 
@@ -16,7 +17,7 @@ public class Stock {
     private double quantity;
     private double strikePrice;
     private String symbol;
-    private LocalDateTime purchasedDate;
+    private LocalDate purchasedDate;
     private double fees;
 
     public String getStockName() {
@@ -51,14 +52,6 @@ public class Stock {
         this.symbol = symbol;
     }
 
-    public LocalDateTime getPurchasedDate() {
-        return purchasedDate;
-    }
-
-    public void setPurchasedDate(LocalDateTime purchasedDate) {
-        this.purchasedDate = purchasedDate;
-    }
-
     public double getFees() {
         return fees;
     }
@@ -87,15 +80,30 @@ public class Stock {
             try (InputStream is = new ByteArrayInputStream(js.getBytes())) {
                 JsonReader jr = Json.createReader(is);
                 JsonObject jsObj = jr.readObject();
-                s.setStockName(jsObj.getString("stockName"));
-                s.setStrikePrice(Double.parseDouble(jsObj.getString("strikePrice")));
+                s.setStockName(jsObj.getString("name"));
+                s.setStrikePrice(Double.parseDouble(jsObj.getString("price")));
                 s.setSymbol(jsObj.getString("symbol"));
                 s.setQuantity(Double.parseDouble(jsObj.getString("quantity")));
-                s.setPurchasedDate(LocalDateTime.parse(jsObj.getString("purchasedDate")));
+                LocalDate date = convertFromString(jsObj.getString("date"));
+                s.setPurchasedDate(date);
                 s.setFees(Double.parseDouble(jsObj.getString("fees")));
             }
         }
         return s;
+    }
+
+    public static LocalDate convertFromString(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-M-yyyy");
+        LocalDate localDate = LocalDate.parse(date, formatter);
+        return localDate;
+    }
+
+    public LocalDate getPurchasedDate() {
+        return purchasedDate;
+    }
+
+    public void setPurchasedDate(LocalDate purchasedDate) {
+        this.purchasedDate = purchasedDate;
     }
 
 }
