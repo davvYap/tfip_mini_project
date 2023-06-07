@@ -70,8 +70,8 @@ export class GetService {
     );
   }
 
-  getUserStocksMongo(userId: string): Observable<PurchasedStock> {
-    return this.http.get<PurchasedStock>(
+  getUserStocksMongo(userId: string): Observable<PurchasedStock[]> {
+    return this.http.get<PurchasedStock[]>(
       `http://localhost:8080/api/${userId}/stocks`
     );
   }

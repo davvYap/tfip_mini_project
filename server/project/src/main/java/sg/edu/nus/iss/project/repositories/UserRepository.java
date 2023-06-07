@@ -1,7 +1,10 @@
 package sg.edu.nus.iss.project.repositories;
 
+import java.util.List;
+
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -9,6 +12,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import com.mongodb.client.result.UpdateResult;
+import com.mysql.cj.x.protobuf.MysqlxCrud.Order.Direction;
 
 import sg.edu.nus.iss.project.models.Stock;
 
@@ -45,5 +49,19 @@ public class UserRepository {
 
         UpdateResult upsertDoc = mongo.upsert(query, udpateOps, "stocks");
         return upsertDoc.getModifiedCount() > 0;
+    }
+
+    public List<Stock> retrieveUserStocks(String userId, int limit, int skip) {
+        Query query = Query.query(Criteria.where("user_id").is(userId)).limit(limit).skip(skip);
+
+        Document d = mongo.findOne(query, Document.class, "stocks");
+
+        if (d != null) {
+            List<Stock> stocks = d.getList("stocks", Document.class).stream()
+                    .map(Stock::convertFromDocument)
+                    .toList();
+            return stocks;
+        }
+        return null;
     }
 }

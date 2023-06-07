@@ -19,6 +19,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   form!: FormGroup;
   imgSrc: string = '/assets/images/user2.png';
   imgClass: string = 'user-img';
+  loginTitle!: string;
 
   constructor(
     private primengConfig: PrimeNGConfig,
@@ -32,7 +33,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.primengConfig.ripple = true;
     this.getSvc.isLogin = false;
-
+    this.loginTitle = 'Login';
     this.form = this.createForm();
   }
 
@@ -64,6 +65,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
       .catch((err) => {
         this.imgSrc = '/assets/images/user.png';
         this.imgClass = 'user-img-shake';
+        this.loginTitle = 'Wrong username or password...';
       });
   }
 
@@ -75,7 +77,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
     });
   }
 
-  resetImg() {
+  resetLoginPage() {
     this.imgSrc = '/assets/images/user2.png';
+    this.loginTitle = 'Login';
   }
 }

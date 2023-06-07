@@ -1,5 +1,7 @@
 package sg.edu.nus.iss.project.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,5 +24,9 @@ public class UserService {
 
     public boolean upsertUserStocks(String userId, Stock stock) {
         return userRepo.upsertUserStocks(userId, stock);
+    }
+
+    public List<Stock> retrieveUserStocks(String userId, int limit, int skip) {
+        return userRepo.retrieveUserStocks(userId, limit, skip);
     }
 }

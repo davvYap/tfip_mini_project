@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Chart } from 'chart.js';
 import { LoginStatus, UserTheme } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
@@ -26,7 +27,20 @@ export class DashboardComponent implements OnInit {
   miscValue!: number;
   totalValue!: number;
 
-  constructor(private getSvc: GetService, private themeSvc: ThemeService) {}
+  // CATEGORIES
+  categories: string[] = ['Savings', 'Investments', 'Property', 'Misc.'];
+  categoriesRoutes: string[] = [
+    '/savings',
+    '/investment-dashboard',
+    '/properties',
+    '/misc',
+  ];
+
+  constructor(
+    private getSvc: GetService,
+    private themeSvc: ThemeService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     Chart.defaults.color = '#fff';
@@ -66,7 +80,7 @@ export class DashboardComponent implements OnInit {
     const textColor = documentStyle.getPropertyValue('--text-color');
 
     this.donutData = {
-      labels: ['Savings', 'Investments', 'Property', 'Misc.'],
+      labels: this.categories,
       datasets: [
         {
           data: [
@@ -113,6 +127,13 @@ export class DashboardComponent implements OnInit {
             bottom: 0,
           },
         },
+      },
+      onClick: (event: any, activeElements: any) => {
+        if (activeElements.length > 0) {
+          const index = activeElements[0].index;
+          // console.log(index);
+          this.router.navigate([this.categoriesRoutes[index]]);
+        }
       },
     };
   }

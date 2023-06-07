@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.services.UserService;
+import java.util.List;
 
 @Controller
 @CrossOrigin(origins = "*")
@@ -58,7 +60,7 @@ public class UserController {
                 .body(Json.createObjectBuilder().add("message", "Update theme successfully").build().toString());
     }
 
-    @PostMapping(path = "/addStock/{userId}")
+    @PostMapping(path = "/{userId}/addStock")
     @ResponseBody
     public ResponseEntity<String> addStock(@PathVariable String userId, @RequestBody String stockJson)
             throws IOException {
@@ -75,6 +77,24 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("message", "Stock added").build().toString());
+    }
+
+    @GetMapping(path = "/{userId}/stocks")
+    public ResponseEntity<String> getUserStocks(@PathVariable String userId,
+            @RequestParam(defaultValue = "10") int limit, @RequestParam(defaultValue = "0") int skip) {
+        List<Stock> stocks = userSvc.retrieveUserStocks(userId, limit, skip);
+        if (stocks == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "No stocks found").build().toString());
+        }
+        JsonArrayBuilder jsArr = Json.createArrayBuilder();
+        for (Stock stock : stocks) {
+            jsArr.add(stock.toJsonObject());
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsArr.build().toString());
     }
 
 }

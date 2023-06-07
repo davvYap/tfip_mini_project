@@ -71,14 +71,24 @@ public class Stock {
     public Document toDocument() {
         Document doc = new Document();
 
-        doc.append("stockName", stockName);
+        doc.append("name", stockName);
         doc.append("quantity", quantity);
-        doc.append("strikePrice", strikePrice);
+        doc.append("price", strikePrice);
         doc.append("symbol", symbol);
-        doc.append("purchasedDate", purchasedDate);
+        doc.append("date", purchasedDate);
         doc.append("fees", fees);
         return doc;
+    }
 
+    public JsonObject toJsonObject() {
+        return Json.createObjectBuilder()
+                .add("name", stockName)
+                .add("quantity", quantity)
+                .add("price", strikePrice)
+                .add("fees", fees)
+                .add("symbol", symbol)
+                .add("date", purchasedDate)
+                .build();
     }
 
     public static Stock convertFromJsonObject(String js) throws IOException {
@@ -99,10 +109,18 @@ public class Stock {
         return s;
     }
 
-    public static LocalDateTime convertFromString(String date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-M-yyyy");
-        LocalDateTime datetime = LocalDateTime.parse(date, formatter);
-        return datetime;
+    public static Stock convertFromDocument(Document d) {
+        Stock s = null;
+        if (d != null) {
+            s = new Stock();
+            s.setSymbol(d.getString("symbol"));
+            s.setStockName(d.getString("name"));
+            s.setPurchasedDate(d.getLong("date"));
+            s.setQuantity(d.getDouble("quantity"));
+            s.setStrikePrice(d.getDouble("price"));
+            s.setFees(d.getDouble("fees"));
+        }
+        return s;
     }
 
 }
