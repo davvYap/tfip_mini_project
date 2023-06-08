@@ -14,16 +14,3 @@ h1 {
   /* border: 1px solid rgba(255, 255, 255, 0.31);
     border-radius: 16px; */
 }
-
-.diplay-flex {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  border: 1px outset white;
-  border-radius: 10px;
-}
-
-.diplay-flex:hover {
-  cursor: pointer;
-}

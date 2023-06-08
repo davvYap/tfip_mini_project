@@ -2,9 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import {
   LoginStatus,
+  MessageResponse,
   PurchasedStock,
+  PurchasedStocksCount,
   Stock,
   StocksData,
+  StonkStockPrice,
   UserTheme,
 } from '../models';
 import { Observable, lastValueFrom } from 'rxjs';
@@ -16,8 +19,20 @@ export class GetService {
   isLogin!: boolean;
   isLoginRecently: boolean = false;
   userId!: string;
+  totalStockValue!: number;
+  dashBoardYearlyGoalData: number[] = [
+    10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120,
+  ];
 
   constructor(private http: HttpClient) {}
+
+  getdashBoardYearlyGoalData(): Promise<number[]> {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(this.dashBoardYearlyGoalData);
+      }, 1000);
+    });
+  }
 
   verifyLogin(username: string, password: string): Promise<LoginStatus> {
     let qp = new HttpParams()
@@ -70,9 +85,31 @@ export class GetService {
     );
   }
 
+  getStonkStockPrice(symbol: string): Observable<StonkStockPrice> {
+    let qp = new HttpParams().set('userId', this.userId);
+    return this.http.get<StonkStockPrice>(
+      `http://localhost:8080/api/${symbol}/stonkprice`,
+      { params: qp }
+    );
+  }
+
   getUserStocksMongo(userId: string): Observable<PurchasedStock[]> {
     return this.http.get<PurchasedStock[]>(
       `http://localhost:8080/api/${userId}/stocks`
+    );
+  }
+
+  getUserStocksCount(userId: string): Observable<PurchasedStocksCount[]> {
+    return this.http.get<PurchasedStocksCount[]>(
+      `http://localhost:8080/api/${userId}/stocksCount`
+    );
+  }
+
+  getUserTotalStockValue(userId: string): Promise<MessageResponse> {
+    return lastValueFrom(
+      this.http.get<MessageResponse>(
+        `http://localhost:8080/api/${userId}/stocksValue`
+      )
     );
   }
 }

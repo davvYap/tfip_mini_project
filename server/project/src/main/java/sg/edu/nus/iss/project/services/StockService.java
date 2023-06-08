@@ -15,70 +15,101 @@ import jakarta.json.Json;
 @Service
 public class StockService {
 
-    @Value("${rapid.api.key}")
-    private String rapidApiKey;
+	@Value("${rapid.api.key}")
+	private String rapidApiKey;
 
-    private static final String TWELVE_DATA_SEARCH_ENDPOINT = "https://twelve-data1.p.rapidapi.com/symbol_search";
-    private static final String TWELVE_DATA_PRICE_ENDPOINT = "https://twelve-data1.p.rapidapi.com/price";
+	private static final String TWELVE_DATA_SEARCH_ENDPOINT = "https://twelve-data1.p.rapidapi.com/symbol_search";
+	private static final String TWELVE_DATA_PRICE_ENDPOINT = "https://twelve-data1.p.rapidapi.com/price";
+	private static final String REAL_STONKS_PRICE_ENDPOINT = "https://realstonks.p.rapidapi.com";
 
-    public ResponseEntity<String> getStockData(String symbol, int outputsize) {
-        String url = UriComponentsBuilder.fromUriString(TWELVE_DATA_SEARCH_ENDPOINT)
-                .queryParam("symbol", symbol)
-                .queryParam("outputsize", outputsize)
-                .toUriString();
+	public ResponseEntity<String> getStockData(String symbol, int outputsize) {
+		String url = UriComponentsBuilder.fromUriString(TWELVE_DATA_SEARCH_ENDPOINT)
+				.queryParam("symbol", symbol)
+				.queryParam("outputsize", outputsize)
+				.toUriString();
 
-        RequestEntity req = RequestEntity.get(url)
-                .header("X-RapidAPI-Key", rapidApiKey)
-                .header("X-RapidAPI-Host", "twelve-data1.p.rapidapi.com")
-                .build();
+		RequestEntity req = RequestEntity.get(url)
+				.header("X-RapidAPI-Key", rapidApiKey)
+				.header("X-RapidAPI-Host", "twelve-data1.p.rapidapi.com")
+				.build();
 
-        RestTemplate template = new RestTemplate();
+		RestTemplate template = new RestTemplate();
 
-        ResponseEntity<String> resp = null;
+		ResponseEntity<String> resp = null;
 
-        try {
-            resp = template.exchange(req, String.class);
-        } catch (RestClientException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder()
-                            .add("message", e.getMessage())
-                            .build().toString());
-        }
+		try {
+			resp = template.exchange(req, String.class);
+		} catch (RestClientException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder()
+							.add("message", e.getMessage())
+							.build().toString());
+		}
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(resp.getBody());
-    }
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(resp.getBody());
+	}
 
-    public ResponseEntity<String> getStockPrice(String symbol, int outputsize) {
+	public ResponseEntity<String> getStockPrice(String symbol, int outputsize) {
 
-        String url = UriComponentsBuilder.fromUriString(TWELVE_DATA_PRICE_ENDPOINT)
-                .queryParam("symbol", symbol)
-                .queryParam("outputsize", outputsize)
-                .toUriString();
+		String url = UriComponentsBuilder.fromUriString(TWELVE_DATA_PRICE_ENDPOINT)
+				.queryParam("symbol", symbol)
+				.queryParam("outputsize", outputsize)
+				.toUriString();
 
-        RequestEntity req = RequestEntity.get(url)
-                .header("X-RapidAPI-Key", rapidApiKey)
-                .header("X-RapidAPI-Host", "twelve-data1.p.rapidapi.com")
-                .build();
+		RequestEntity req = RequestEntity.get(url)
+				.header("X-RapidAPI-Key", rapidApiKey)
+				.header("X-RapidAPI-Host", "twelve-data1.p.rapidapi.com")
+				.build();
 
-        RestTemplate template = new RestTemplate();
+		RestTemplate template = new RestTemplate();
 
-        ResponseEntity<String> resp = null;
+		ResponseEntity<String> resp = null;
 
-        try {
-            resp = template.exchange(req, String.class);
-        } catch (RestClientException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder()
-                            .add("message", e.getMessage())
-                            .build().toString());
-        }
+		try {
+			resp = template.exchange(req, String.class);
+		} catch (RestClientException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder()
+							.add("message", e.getMessage())
+							.build().toString());
+		}
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(resp.getBody());
-    }
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(resp.getBody());
+	}
+
+	public ResponseEntity<String> getRealStonksPrice(String symbol) {
+		String combined = REAL_STONKS_PRICE_ENDPOINT + "/" + symbol;
+		String url = UriComponentsBuilder.fromUriString(combined)
+				.toUriString();
+
+		RequestEntity req = RequestEntity.get(url)
+				.header("X-RapidAPI-Key", rapidApiKey)
+				.header("X-RapidAPI-Host", "realstonks.p.rapidapi.com")
+				.build();
+
+		RestTemplate template = new RestTemplate();
+
+		ResponseEntity<String> resp = null;
+
+		try {
+			resp = template.exchange(req, String.class);
+		} catch (RestClientException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder()
+							.add("message", e.getMessage())
+							.build().toString());
+		}
+
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(resp.getBody());
+	}
+
 }

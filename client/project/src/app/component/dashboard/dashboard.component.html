@@ -26,7 +26,29 @@
 
     <!-- LINE CHART -->
     <div class="col-7 card g-2">
+      <p-button
+        (click)="op.toggle($event)"
+        icon="pi pi-chart-line"
+        label="Set Goal"
+        styleClass="p-button-rounded p-button-outlined"
+      ></p-button>
       <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
     </div>
   </div>
 </div>
+
+<p-overlayPanel #op>
+  <ng-template pTemplate="content">
+    <h6>Enter your yearly goal</h6>
+    <form [formGroup]="goalForm">
+      <input
+        pInputText
+        pKeyFilter="money"
+        class="p-inputtext-sm"
+        placeholder="Your goal $$$"
+        formControlName="goal"
+        (keypress)="submitGoal($event)"
+      />
+    </form>
+  </ng-template>
+</p-overlayPanel>

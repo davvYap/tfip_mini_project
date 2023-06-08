@@ -123,4 +123,13 @@ public class Stock {
         return s;
     }
 
+    public StockCount toStockCount() {
+        StockCount sc = new StockCount();
+        sc.setSymbol(symbol);
+        sc.setQuantity(quantity);
+        sc.setCost(strikePrice * quantity);
+        sc.setName(stockName);
+        return sc;
+    }
+
 }

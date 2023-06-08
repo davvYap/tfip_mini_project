@@ -13,6 +13,8 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CalendarModule } from 'primeng/calendar';
 import { OrderListModule } from 'primeng/orderlist';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { KeyFilterModule } from 'primeng/keyfilter';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -29,6 +31,8 @@ const primeModules: any[] = [
   InputNumberModule,
   CalendarModule,
   OrderListModule,
+  OverlayPanelModule,
+  KeyFilterModule,
 ];
 
 @NgModule({

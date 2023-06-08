@@ -15,19 +15,33 @@ export interface StocksData {
   data: Stock[];
 }
 
+export interface StonkStockPrice {
+  price: number;
+  total_vol: string;
+  change_percentage: number;
+}
+
 export interface PurchasedStock {
   symbol: string;
-  price: string;
-  quantity: string;
-  fees: string;
+  price: number;
+  quantity: number;
+  fees: number;
   date: number;
   name: string;
 }
 
+export interface PurchasedStocksCount {
+  symbol: string;
+  name: string;
+  quantity: number;
+  cost: number;
+  marketPrice: number;
+}
 export interface UserTheme {
   theme: string;
 }
 
 export interface MessageResponse {
   message: string;
+  value: number;
 }

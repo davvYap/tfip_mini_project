@@ -6,27 +6,31 @@
     <div class="row justify-content-evenly align-items-center">
       <div class="col-4 text-center my-2">
         <p-orderList
-          [value]="stocks"
+          [value]="stocksCount"
           [listStyle]="{ 'max-height': '30rem' }"
           header="Stocks"
-          filterBy="name"
-          filterPlaceholder="Filter by name"
+          filterBy="symbol"
+          filterPlaceholder="Filter by symbol"
         >
           <ng-template let-stock pTemplate="item">
             <div class="flex align-items-center p-2 w-full flex-wrap">
               <div class="w-full text-center lg:w-auto lg:text-left">
-                <span class="pi pi-apple"></span>
-              </div>
-              <div class="flex-1">
-                <h5 class="mb-2">{{ stock.name }}</h5>
                 <i class="pi pi-tag vertical-align-middle mr-2"></i>
                 <span class="vertical-align-middle line-height-1">{{
                   stock.symbol
                 }}</span>
               </div>
+              <div class="flex-1">
+                <h5 class="mb-2">
+                  {{ stock.name }}
+                </h5>
+                <h5 class="mb-2">
+                  {{ stock.marketPrice | currency }}
+                </h5>
+              </div>
               <div class="flex flex-column align-items-end">
-                <h6 class="mb-2">
-                  {{ "$ " + stock.price }} | {{ stock.date | date }}
+                <h6 class="mb-2 text-muted">
+                  {{ stock.cost | currency }} | {{ stock.quantity }}
                 </h6>
                 <!-- <p-tag
                   [value]="product.inventoryStatus"
@@ -38,41 +42,7 @@
         </p-orderList>
       </div>
 
-      <div class="col-4 text-center my-2">
-        <p-scroller
-          [items]="stocks"
-          [itemSize]="50"
-          [showLoader]="true"
-          [delay]="250"
-          [loading]="lazyLoading"
-          [lazy]="true"
-          (onLazyLoad)="onLazyLoad($event)"
-          styleClass="border-1 surface-border"
-          [style]="{ width: '400px', height: '600px' }"
-        >
-          <ng-template pTemplate="item" let-item let-options="options">
-            <div
-              class="diplay-flex p-2"
-              [ngClass]="'surface-ground'"
-              style="height: 100px"
-              [routerLink]="'/investment'"
-            >
-              <h5>
-                {{ item.name }}
-              </h5>
-              <h6>
-                <span
-                  ><i class="pi pi-tag vertical-align-middle mr-2"></i
-                ></span>
-                {{ item.symbol }}
-              </h6>
-              <h6>
-                {{ item.price | currency : "USD" }} | {{ item.date | date }}
-              </h6>
-            </div>
-          </ng-template>
-        </p-scroller>
-      </div>
+      <div class="col-4 text-center my-2"></div>
     </div>
   </div>
 </div>

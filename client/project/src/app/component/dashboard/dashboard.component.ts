@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Chart } from 'chart.js';
 import { LoginStatus, UserTheme } from 'src/app/models';
@@ -16,7 +17,7 @@ export class DashboardComponent implements OnInit {
 
   lineData!: any;
   lineOptions!: any;
-  guideLineDataForSP500!: number[];
+  guideLineDataForYearlyGoal!: number[];
   portfolioPerformanceData!: number[];
 
   savingsValue!: number;
@@ -26,6 +27,8 @@ export class DashboardComponent implements OnInit {
   propertiesValue!: number;
   miscValue!: number;
   totalValue!: number;
+
+  goalForm!: FormGroup;
 
   // CATEGORIES
   categories: string[] = ['Savings', 'Investments', 'Property', 'Misc.'];
@@ -39,7 +42,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private getSvc: GetService,
     private themeSvc: ThemeService,
-    private router: Router
+    private router: Router,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
@@ -47,6 +51,8 @@ export class DashboardComponent implements OnInit {
     Chart.defaults.font.size = 14;
     Chart.defaults.font.weight = '300';
     Chart.defaults.borderColor = '#fff';
+
+    this.goalForm = this.createGoalForm();
 
     // GET USER THEME IN MONGO
     this.getSvc.checkLoginStatus().then((res: LoginStatus) => {
@@ -56,23 +62,60 @@ export class DashboardComponent implements OnInit {
       });
     });
 
+    // GET USER STOCK VALUE
+    this.getSvc.getUserTotalStockValue(this.getSvc.userId).then((res) => {
+      this.stocksValue = res.value;
+      this.totalValue = this.stocksValue;
+    });
+
     // this.stocksValue = 8000;
     // this.cryptoValue = 1200;
     this.savingsValue = 8500;
     this.investmentsValue = 6900 + 8000 + 1200;
     this.propertiesValue = 57500;
     this.miscValue = 1200;
-    this.totalValue =
-      this.savingsValue +
-      this.investmentsValue +
-      this.propertiesValue +
-      this.miscValue;
-    this.guideLineDataForSP500 = [65, 59, 80, 81, 56, 55, 10];
+    // this.totalValue =
+    // this.savingsValue +
+    // this.investmentsValue +
+    // this.propertiesValue +
+    // this.miscValue;
     this.portfolioPerformanceData = [28, 48, 40, 19, 86, 27, 30];
 
     this.initiateDonutChart();
 
-    this.initiateLineChart();
+    this.getSvc.getdashBoardYearlyGoalData().then((res) => {
+      this.guideLineDataForYearlyGoal = res;
+      this.initiateLineChart();
+    });
+  }
+
+  createGoalForm(): FormGroup {
+    return this.fb.group({
+      goal: this.fb.control('', Validators.required),
+    });
+  }
+
+  submitGoal(event: any) {
+    if (event.key === 'Enter') {
+      const goal: number = this.goalForm.value.goal;
+      console.log(goal);
+      console.log(event.key);
+      this.getSvc.dashBoardYearlyGoalData = this.setYearlyGuideLine(goal);
+      console.log(this.getSvc.dashBoardYearlyGoalData); //WORK
+      this.guideLineDataForYearlyGoal = this.getSvc.dashBoardYearlyGoalData;
+      this.initiateLineChart(); // data not updated
+      console.log(this.guideLineDataForYearlyGoal);
+    }
+  }
+
+  setYearlyGuideLine(goal: number): number[] {
+    let months = 12;
+    let yearlyGoal: number[] = [];
+    for (let i = 0; i < months; i++) {
+      let monthlyGoal = (goal / months) * (i + 1);
+      yearlyGoal.push(monthlyGoal);
+    }
+    return yearlyGoal;
   }
 
   initiateDonutChart() {
@@ -163,12 +206,12 @@ export class DashboardComponent implements OnInit {
       ],
       datasets: [
         {
-          label: 'S&P 500',
+          label: 'Yearly Goal',
           fill: false,
           borderColor: documentStyle.getPropertyValue('--blue-500'),
           yAxisID: 'y',
           tension: 0.4,
-          data: this.guideLineDataForSP500,
+          data: this.guideLineDataForYearlyGoal,
         },
         {
           label: 'Portfolio',

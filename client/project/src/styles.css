@@ -67,9 +67,3 @@ body {
     transform: translateX(0);
   }
 }
-
-.surface-ground {
-  font-family: Arial, Helvetica, sans-serif;
-  color: white;
-  background-color: rgb(22, 29, 33);
-}
