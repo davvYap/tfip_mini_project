@@ -24,7 +24,6 @@ import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
-import jakarta.json.JsonValue;
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockCount;
 import sg.edu.nus.iss.project.services.StockService;
@@ -84,7 +83,21 @@ public class UserController {
                     .body(Json.createObjectBuilder().add("message", "Invalid JSON").build().toString());
         }
 
+        // SAVE TO MONGO
         userSvc.upsertUserStocks(userId, stock);
+
+        // SAVE THE MARKET PRICE OF THE STOCKS TO REDIS
+        String stockMarketValueString = stockSvc.getRealStonksPrice(stock.getSymbol()).getBody();
+        double stockMarketValue = getStonkStockPrice(stockMarketValueString);
+        userSvc.saveUserStockMarketValueRedis(userId, stock.getSymbol(), stockMarketValue);
+
+        // SAVE LATEST TOTAL MARKET VALUE OF STOCKS IN REDIS
+        Optional<Double> currTotalValueOpt = userSvc.retrieveStockTotalValueRedis(userId);
+        if (currTotalValueOpt.isPresent()) {
+            double currTotalValue = currTotalValueOpt.get();
+            double latestTotalValue = currTotalValue + (stockMarketValue * stock.getQuantity());
+            userSvc.saveStockTotalValueRedis(userId, latestTotalValue);
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -111,7 +124,7 @@ public class UserController {
 
     @GetMapping(path = "/{userId}/stocksCount")
     public ResponseEntity<String> getUserStocksCount(@PathVariable String userId,
-            @RequestParam(defaultValue = "10") int limit, @RequestParam(defaultValue = "0") int skip) {
+            @RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "0") int skip) {
         List<StockCount> sc = userSvc.retrieveUserStocksCount(userId, limit, skip);
 
         if (sc == null) {

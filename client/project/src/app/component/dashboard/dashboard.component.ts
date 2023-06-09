@@ -102,9 +102,7 @@ export class DashboardComponent implements OnInit {
       console.log(event.key);
       this.getSvc.dashBoardYearlyGoalData = this.setYearlyGuideLine(goal);
       console.log(this.getSvc.dashBoardYearlyGoalData); //WORK
-      this.guideLineDataForYearlyGoal = this.getSvc.dashBoardYearlyGoalData;
-      this.initiateLineChart(); // data not updated
-      console.log(this.guideLineDataForYearlyGoal);
+      this.ngOnInit();
     }
   }
 

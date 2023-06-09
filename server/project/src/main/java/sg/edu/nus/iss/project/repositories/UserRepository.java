@@ -71,9 +71,12 @@ public class UserRepository {
             List<Stock> stocks = d.getList("stocks", Document.class).stream()
                     .map(Stock::convertFromDocument)
                     .toList();
+            if (stocks.size() > limit + 1) {
+                List<Stock> limitedStocks = stocks.subList(skip, limit + 1);
+                return limitedStocks;
+            }
 
-            List<Stock> limitedStocks = stocks.subList(skip, limit + 1);
-            return limitedStocks;
+            return stocks;
         }
         return null;
     }

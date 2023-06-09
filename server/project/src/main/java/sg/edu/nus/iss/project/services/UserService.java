@@ -35,6 +35,7 @@ public class UserService {
 
     public List<StockCount> retrieveUserStocksCount(String userId, int limit, int skip) {
         List<Stock> stocks = userRepo.retrieveUserStocks(userId, limit, skip);
+
         List<StockCount> stocksCount = new LinkedList<>();
         for (Stock stock : stocks) {
             int combinedCount = 0;

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { PurchasedStock, PurchasedStocksCount, Stock } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 
@@ -22,15 +22,25 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.stocks$ = this.getSvc
       .getUserStocksCount(this.getSvc.userId)
       .subscribe((data) => {
-        this.stocksCount = data;
-        for (let i = 0; i < this.stocksCount.length; i++) {
-          const stock = this.stocksCount[i];
+        // this.stocksCount = data;
+        const oberservables = [];
+        for (let i = 0; i < data.length; i++) {
+          const stock = data[i];
           this.stockPrice$ = this.getSvc
             .getStonkStockPrice(stock.symbol)
             .subscribe((res) => {
               stock.marketPrice = res.price * stock.quantity;
+              console.log('market price >>> ', stock.marketPrice);
             });
+          oberservables.push(stock);
         }
+        console.log('Observables >>> ', oberservables);
+        combineLatest([oberservables]).subscribe((updatedStocks) => {
+          console.log('Updated stocks >>> ', updatedStocks);
+          console.log('data >>> ', data);
+          this.stocksCount = this.sortStockByMarketPrice(updatedStocks);
+          console.log('sorted >>> ', this.stocksCount);
+        });
       });
   }
 
@@ -42,6 +52,15 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   sortStockByDate(PurchasedStocks: PurchasedStock[]): PurchasedStock[] {
     const sorted = PurchasedStocks.sort((a, b) => {
       return b.date - a.date;
+    });
+    return sorted;
+  }
+
+  sortStockByMarketPrice(
+    PurchasedStocks: PurchasedStocksCount[]
+  ): PurchasedStocksCount[] {
+    const sorted = PurchasedStocks.sort((a, b) => {
+      return b.marketPrice - a.marketPrice;
     });
     return sorted;
   }
