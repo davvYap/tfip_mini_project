@@ -101,7 +101,7 @@ export class DashboardComponent implements OnInit {
       console.log(goal);
       console.log(event.key);
       this.getSvc.dashBoardYearlyGoalData = this.setYearlyGuideLine(goal);
-      console.log(this.getSvc.dashBoardYearlyGoalData); //WORK
+      console.log(this.getSvc.dashBoardYearlyGoalData);
       this.ngOnInit();
     }
   }
@@ -189,10 +189,10 @@ export class DashboardComponent implements OnInit {
 
     this.lineData = {
       labels: [
-        'January',
-        'February',
-        'March',
-        'April',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
         'May',
         'June',
         'July',
@@ -207,7 +207,7 @@ export class DashboardComponent implements OnInit {
           label: 'Yearly Goal',
           fill: false,
           borderColor: documentStyle.getPropertyValue('--blue-500'),
-          yAxisID: 'y',
+          // yAxisID: 'y',
           tension: 0.4,
           data: this.guideLineDataForYearlyGoal,
         },
@@ -215,7 +215,7 @@ export class DashboardComponent implements OnInit {
           label: 'Portfolio',
           fill: false,
           borderColor: documentStyle.getPropertyValue('--green-500'),
-          yAxisID: 'y1',
+          // yAxisID: 'y1',
           tension: 0.4,
           data: this.portfolioPerformanceData,
         },
@@ -254,18 +254,18 @@ export class DashboardComponent implements OnInit {
             color: surfaceBorder,
           },
         },
-        y1: {
-          type: 'linear',
-          display: true,
-          position: 'right',
-          ticks: {
-            color: textColorSecondary,
-          },
-          grid: {
-            drawOnChartArea: false,
-            color: surfaceBorder,
-          },
-        },
+        // y1: {
+        //   type: 'linear',
+        //   display: true,
+        //   position: 'right',
+        //   ticks: {
+        //     color: textColorSecondary,
+        //   },
+        //   grid: {
+        //     drawOnChartArea: false,
+        //     color: surfaceBorder,
+        //   },
+        // },
       },
     };
   }

@@ -36,6 +36,7 @@ export interface PurchasedStocksCount {
   quantity: number;
   cost: number;
   marketPrice: number;
+  performance: number;
 }
 export interface UserTheme {
   theme: string;

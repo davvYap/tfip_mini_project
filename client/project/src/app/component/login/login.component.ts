@@ -60,6 +60,9 @@ export class LoginComponent implements OnInit, AfterViewInit {
         this.getSvc.isLogin = res.isLogin;
         this.getSvc.isLoginRecently = res.isLogin;
         this.getSvc.userId = res.userId;
+        localStorage.setItem('isLogin', 'true');
+        localStorage.setItem('userId', res.userId);
+        localStorage.setItem('isLoginRecently', 'true');
         this.router.navigate(['/dashboard']);
       })
       .catch((err) => {

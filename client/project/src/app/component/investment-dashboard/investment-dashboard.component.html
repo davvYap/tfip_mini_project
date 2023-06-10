@@ -26,6 +26,9 @@
                 </h5>
                 <h5 class="mb-2">
                   {{ stock.marketPrice | currency }}
+                  <span [className]="getPerformanceClass(stock.performance)">
+                    ({{ stock.performance | percent : "1.2-2" }})
+                  </span>
                 </h5>
               </div>
               <div class="flex flex-column align-items-end">

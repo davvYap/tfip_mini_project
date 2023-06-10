@@ -9,6 +9,13 @@ export const loginGuard: CanActivateFn = (route, state) => {
   const routePerSvc = inject(RoutePersistenceService);
 
   let isLogin!: boolean;
+
+  if (localStorage.getItem('isLogin') === 'true') {
+    getSvc.isLogin = true;
+    getSvc.userId = localStorage.getItem('userId') || '';
+    getSvc.isLoginRecently = true;
+    return true;
+  }
   getSvc.checkLoginStatus().then((res) => {
     isLogin = res.isLogin;
     getSvc.isLogin = res.isLogin;

@@ -212,6 +212,9 @@ export class AppComponent implements OnInit {
   logout() {
     this.getSvc.isLogin = false;
     this.getSvc.logout();
+    localStorage.removeItem('isLogin');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('isLoginRecently');
     this.router.navigate(['/login']);
   }
 

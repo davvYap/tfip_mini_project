@@ -1,5 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable, Subscription, combineLatest } from 'rxjs';
+import {
+  Observable,
+  Subscription,
+  combineLatest,
+  finalize,
+  map,
+  tap,
+} from 'rxjs';
 import { PurchasedStock, PurchasedStocksCount, Stock } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 
@@ -23,24 +30,22 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       .getUserStocksCount(this.getSvc.userId)
       .subscribe((data) => {
         // this.stocksCount = data;
-        const oberservables = [];
+        this.stocksCount = [];
+
         for (let i = 0; i < data.length; i++) {
           const stock = data[i];
           this.stockPrice$ = this.getSvc
             .getStonkStockPrice(stock.symbol)
             .subscribe((res) => {
               stock.marketPrice = res.price * stock.quantity;
+              stock.performance = (stock.marketPrice - stock.cost) / stock.cost;
               console.log('market price >>> ', stock.marketPrice);
+              console.log('performance >>> ', stock.performance);
+              this.stocksCount = [...this.stocksCount];
+              this.stocksCount.push(stock);
+              this.stocksCount = this.sortStockByMarketPrice(this.stocksCount);
             });
-          oberservables.push(stock);
         }
-        console.log('Observables >>> ', oberservables);
-        combineLatest([oberservables]).subscribe((updatedStocks) => {
-          console.log('Updated stocks >>> ', updatedStocks);
-          console.log('data >>> ', data);
-          this.stocksCount = this.sortStockByMarketPrice(updatedStocks);
-          console.log('sorted >>> ', this.stocksCount);
-        });
       });
   }
 
@@ -63,6 +68,9 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       return b.marketPrice - a.marketPrice;
     });
     return sorted;
+  }
+  getPerformanceClass(performance: number): string {
+    return performance > 0 ? 'positive' : 'negative';
   }
 
   // getStockPrice(symbol: string): number {

@@ -144,7 +144,7 @@ public class UserController {
 
     @GetMapping(path = "/{userId}/stocksValue")
     public ResponseEntity<String> getUserStocksValue(@PathVariable String userId,
-            @RequestParam(defaultValue = "10") int limit, @RequestParam(defaultValue = "0") int skip)
+            @RequestParam(defaultValue = "100") int limit, @RequestParam(defaultValue = "0") int skip)
             throws IOException {
 
         Optional<Double> optTotalValue = userSvc.retrieveStockTotalValueRedis(userId);

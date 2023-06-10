@@ -14,3 +14,11 @@ h1 {
   /* border: 1px solid rgba(255, 255, 255, 0.31);
     border-radius: 16px; */
 }
+
+.positive {
+  color: lightgreen;
+}
+
+.negative {
+  color: lightcoral;
+}
