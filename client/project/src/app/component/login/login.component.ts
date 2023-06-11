@@ -39,7 +39,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     setTimeout(() => {
-      if (!this.getSvc.isLogin && this.getSvc.isLoginRecently)
+      if (!this.getSvc.isLogin && this.getSvc.isLogout)
         this.showLogoutMessage();
     });
   }
@@ -58,11 +58,10 @@ export class LoginComponent implements OnInit, AfterViewInit {
       .verifyLogin(username, password)
       .then((res) => {
         this.getSvc.isLogin = res.isLogin;
-        this.getSvc.isLoginRecently = res.isLogin;
         this.getSvc.userId = res.userId;
+        this.getSvc.isLogin$.next(true);
         localStorage.setItem('isLogin', 'true');
         localStorage.setItem('userId', res.userId);
-        localStorage.setItem('isLoginRecently', 'true');
         this.router.navigate(['/dashboard']);
       })
       .catch((err) => {

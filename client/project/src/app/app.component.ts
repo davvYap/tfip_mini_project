@@ -42,164 +42,177 @@ export class AppComponent implements OnInit {
       tooltip: 1100, // tooltip
     };
 
-    //IMPORTANT To prevent refresh page routes to login page
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.routerPerSvc.saveCurrentRoute(event.url);
-      }
-    });
-
     this.items = [
       {
-        label: 'File',
-        icon: 'pi pi-fw pi-file',
-        items: [
-          {
-            label: 'New',
-            icon: 'pi pi-fw pi-plus',
-            items: [
-              {
-                label: 'Investment',
-                icon: 'pi pi-fw pi-bitcoin',
-                routerLink: '/investment',
-              },
-              {
-                label: 'Video',
-                icon: 'pi pi-fw pi-video',
-              },
-            ],
-          },
-          {
-            label: 'Delete',
-            icon: 'pi pi-fw pi-trash',
-          },
-          {
-            separator: true,
-          },
-          {
-            label: 'Export',
-            icon: 'pi pi-fw pi-external-link',
-          },
-        ],
+        label: 'Assest Management',
+        icon: 'pi pi-fw pi-dollar',
+        command: () => this.logout(),
       },
-      {
-        label: 'Edit',
-        icon: 'pi pi-fw pi-pencil',
-        items: [
+    ];
+
+    this.getSvc.isLogin$.subscribe((isLogin: boolean) => {
+      if (isLogin) {
+        this.items = [
           {
-            label: 'Themes',
-            icon: 'pi pi-fw pi-th-large',
+            label: 'File',
+            icon: 'pi pi-fw pi-file',
             items: [
               {
-                label: 'Mira',
-                icon: 'pi pi-fw pi-images',
-                command: () => this.changeTheme(0),
-              },
-              {
-                label: 'MDC Dark',
-                icon: 'pi pi-fw pi-images',
-                command: () => this.changeTheme(1),
-              },
-              {
-                label: 'Viva Dark',
-                icon: 'pi pi-fw pi-images',
-                command: () => this.changeTheme(2),
-              },
-              {
-                label: 'Lara Dark Teal',
-                icon: 'pi pi-fw pi-images',
-                command: () => this.changeTheme(3),
-              },
-              {
-                label: 'Nano',
-                icon: 'pi pi-fw pi-images',
-                command: () => this.changeTheme(4),
-              },
-            ],
-          },
-          {
-            label: 'Justify',
-            icon: 'pi pi-fw pi-align-justify',
-          },
-        ],
-      },
-      {
-        label: 'Users',
-        icon: 'pi pi-fw pi-user',
-        items: [
-          {
-            label: 'New',
-            icon: 'pi pi-fw pi-user-plus',
-            command: () => this.checkLoginStatus(),
-          },
-          {
-            label: 'Delete',
-            icon: 'pi pi-fw pi-user-minus',
-          },
-          {
-            label: 'Search',
-            icon: 'pi pi-fw pi-users',
-            items: [
-              {
-                label: 'Filter',
-                icon: 'pi pi-fw pi-filter',
+                label: 'New',
+                icon: 'pi pi-fw pi-plus',
                 items: [
                   {
-                    label: 'Print',
-                    icon: 'pi pi-fw pi-print',
+                    label: 'Investment',
+                    icon: 'pi pi-fw pi-bitcoin',
+                    routerLink: '/investment',
+                  },
+                  {
+                    label: 'Video',
+                    icon: 'pi pi-fw pi-video',
                   },
                 ],
               },
               {
-                icon: 'pi pi-fw pi-bars',
-                label: 'List',
+                label: 'Delete',
+                icon: 'pi pi-fw pi-trash',
+              },
+              {
+                separator: true,
+              },
+              {
+                label: 'Export',
+                icon: 'pi pi-fw pi-external-link',
               },
             ],
           },
-        ],
-      },
-      {
-        label: 'Events',
-        icon: 'pi pi-fw pi-calendar',
-        items: [
           {
             label: 'Edit',
             icon: 'pi pi-fw pi-pencil',
             items: [
               {
-                label: 'Save',
-                icon: 'pi pi-fw pi-calendar-plus',
+                label: 'Themes',
+                icon: 'pi pi-fw pi-th-large',
+                items: [
+                  {
+                    label: 'Mira',
+                    icon: 'pi pi-fw pi-images',
+                    command: () => this.changeTheme(0),
+                  },
+                  {
+                    label: 'MDC Dark',
+                    icon: 'pi pi-fw pi-images',
+                    command: () => this.changeTheme(1),
+                  },
+                  {
+                    label: 'Viva Dark',
+                    icon: 'pi pi-fw pi-images',
+                    command: () => this.changeTheme(2),
+                  },
+                  {
+                    label: 'Lara Dark Teal',
+                    icon: 'pi pi-fw pi-images',
+                    command: () => this.changeTheme(3),
+                  },
+                  {
+                    label: 'Nano',
+                    icon: 'pi pi-fw pi-images',
+                    command: () => this.changeTheme(4),
+                  },
+                ],
               },
               {
-                label: 'Delete',
-                icon: 'pi pi-fw pi-calendar-minus',
+                label: 'Justify',
+                icon: 'pi pi-fw pi-align-justify',
               },
             ],
           },
           {
-            label: 'Archieve',
-            icon: 'pi pi-fw pi-calendar-times',
+            label: 'Users',
+            icon: 'pi pi-fw pi-user',
             items: [
               {
-                label: 'Remove',
-                icon: 'pi pi-fw pi-calendar-minus',
+                label: 'New',
+                icon: 'pi pi-fw pi-user-plus',
+                command: () => this.checkLoginStatus(),
+              },
+              {
+                label: 'Delete',
+                icon: 'pi pi-fw pi-user-minus',
+              },
+              {
+                label: 'Search',
+                icon: 'pi pi-fw pi-users',
+                items: [
+                  {
+                    label: 'Filter',
+                    icon: 'pi pi-fw pi-filter',
+                    items: [
+                      {
+                        label: 'Print',
+                        icon: 'pi pi-fw pi-print',
+                      },
+                    ],
+                  },
+                  {
+                    icon: 'pi pi-fw pi-bars',
+                    label: 'List',
+                  },
+                ],
               },
             ],
           },
-        ],
-      },
-      {
-        label: 'Dashboard',
-        icon: 'pi pi-fw pi-desktop',
-        routerLink: '/dashboard',
-      },
-      {
-        label: 'Quit',
-        icon: 'pi pi-fw pi-power-off',
-        command: () => this.logout(),
-        // routerLink: '/login',
-      },
-    ];
+          {
+            label: 'Events',
+            icon: 'pi pi-fw pi-calendar',
+            items: [
+              {
+                label: 'Edit',
+                icon: 'pi pi-fw pi-pencil',
+                items: [
+                  {
+                    label: 'Save',
+                    icon: 'pi pi-fw pi-calendar-plus',
+                  },
+                  {
+                    label: 'Delete',
+                    icon: 'pi pi-fw pi-calendar-minus',
+                  },
+                ],
+              },
+              {
+                label: 'Archieve',
+                icon: 'pi pi-fw pi-calendar-times',
+                items: [
+                  {
+                    label: 'Remove',
+                    icon: 'pi pi-fw pi-calendar-minus',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            label: 'Dashboard',
+            icon: 'pi pi-fw pi-desktop',
+            routerLink: '/dashboard',
+          },
+          {
+            label: 'Quit',
+            icon: 'pi pi-fw pi-power-off',
+            command: () => this.logout(),
+            // routerLink: '/login',
+          },
+        ];
+      } else {
+        this.items = [
+          {
+            label: 'Assest Management',
+            icon: 'pi pi-fw pi-dollar',
+            command: () => console.log('Assets Management'),
+          },
+        ];
+      }
+    });
   }
 
   changeTheme(i: number) {
@@ -211,6 +224,8 @@ export class AppComponent implements OnInit {
 
   logout() {
     this.getSvc.isLogin = false;
+    this.getSvc.isLogout = true;
+    this.getSvc.isLogin$.next(false);
     this.getSvc.logout();
     localStorage.removeItem('isLogin');
     localStorage.removeItem('userId');

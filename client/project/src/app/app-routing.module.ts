@@ -8,7 +8,7 @@ import { InvestmentComponent } from './component/investment/investment.component
 import { InvestmentDashboardComponent } from './component/investment-dashboard/investment-dashboard.component';
 
 const routes: Routes = [
-  { path: '', component: LoginComponent },
+  { path: '', component: DashboardComponent, canActivate: [loginGuard] },
   { path: 'login', component: LoginComponent },
   {
     path: 'dashboard',
@@ -18,6 +18,7 @@ const routes: Routes = [
   {
     path: 'investment-dashboard',
     component: InvestmentDashboardComponent,
+    canActivate: [loginGuard],
   },
   {
     path: 'investment',

@@ -101,7 +101,8 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Json.createObjectBuilder().add("message", "Stock added").build().toString());
+                .body(Json.createObjectBuilder()
+                        .add("message", "%s is added into portfolio".formatted(stock.getSymbol())).build().toString());
     }
 
     @GetMapping(path = "/{userId}/stocks")

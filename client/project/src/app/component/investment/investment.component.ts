@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MessageService } from 'primeng/api';
 import { Subscription } from 'rxjs';
 import { PurchasedStock, Stock } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
@@ -21,7 +22,8 @@ export class InvestmentComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private getSvc: GetService,
-    private postSvc: PostService
+    private postSvc: PostService,
+    private messageSvc: MessageService
   ) {}
 
   ngOnInit() {
@@ -94,15 +96,31 @@ export class InvestmentComponent implements OnInit, OnDestroy {
     this.postSvc
       .addStock(userId, stockPurchased)
       .then((res) => {
-        alert(res.message);
+        this.showAddStockSuccessfullyMessage(res.message);
       })
       .catch((err) => {
-        alert(err.message);
+        this.showErrorMessage(err.message);
       });
     this.clearForm();
   }
 
   clearForm() {
     this.investmentForm = this.createForm();
+  }
+
+  showAddStockSuccessfullyMessage(message: string) {
+    this.messageSvc.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: message,
+    });
+  }
+
+  showErrorMessage(message: string) {
+    this.messageSvc.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: message,
+    });
   }
 }

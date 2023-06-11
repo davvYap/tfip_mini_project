@@ -10,15 +10,16 @@ import {
   StonkStockPrice,
   UserTheme,
 } from '../models';
-import { Observable, lastValueFrom } from 'rxjs';
+import { Observable, Subject, lastValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GetService {
   isLogin!: boolean;
-  isLoginRecently: boolean = false;
+  isLogout: boolean = false;
   userId!: string;
+  isLogin$ = new Subject<boolean>();
   totalStockValue!: number;
   dashBoardYearlyGoalData: number[] = [
     10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120,
