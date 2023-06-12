@@ -13,6 +13,7 @@ export const loginGuard: CanActivateFn = (route, state) => {
   if (localStorage.getItem('isLogin') === 'true') {
     getSvc.isLogin = true;
     getSvc.userId = localStorage.getItem('userId') || '';
+    getSvc.isLogin$.next(true);
     return true;
   }
   getSvc.checkLoginStatus().then((res) => {

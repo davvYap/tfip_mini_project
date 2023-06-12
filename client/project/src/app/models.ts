@@ -38,11 +38,19 @@ export interface PurchasedStocksCount {
   marketPrice: number;
   performance: number;
 }
-export interface UserTheme {
+export interface UserSettings {
   theme: string;
+  goal: number;
 }
 
 export interface MessageResponse {
   message: string;
   value: number;
+}
+
+export interface StockPrice {
+  date: string;
+  close: number;
+  volume: number;
+  symbol: string;
 }

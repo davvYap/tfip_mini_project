@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Chart } from 'chart.js';
-import { LoginStatus, UserTheme } from 'src/app/models';
+import { LoginStatus, UserSettings } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
+import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
 
 @Component({
@@ -41,6 +42,7 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private getSvc: GetService,
+    private postSvc: PostService,
     private themeSvc: ThemeService,
     private router: Router,
     private fb: FormBuilder
@@ -57,7 +59,7 @@ export class DashboardComponent implements OnInit {
     // GET USER THEME IN MONGO
     this.getSvc.checkLoginStatus().then((res: LoginStatus) => {
       let userId = res.userId;
-      this.getSvc.getUserTheme(userId).then((res: UserTheme) => {
+      this.getSvc.getUserTheme(userId).then((res: UserSettings) => {
         this.themeSvc.switchTheme(res.theme);
       });
     });
@@ -83,8 +85,8 @@ export class DashboardComponent implements OnInit {
 
     this.initiateDonutChart();
 
-    this.getSvc.getdashBoardYearlyGoalData().then((res) => {
-      this.guideLineDataForYearlyGoal = res;
+    this.getSvc.getUserGoal(this.getSvc.userId).then((res) => {
+      this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
       this.initiateLineChart();
     });
   }
@@ -100,8 +102,13 @@ export class DashboardComponent implements OnInit {
       const goal: number = this.goalForm.value.goal;
       console.log(goal);
       console.log(event.key);
-      this.getSvc.dashBoardYearlyGoalData = this.setYearlyGuideLine(goal);
-      console.log(this.getSvc.dashBoardYearlyGoalData);
+      this.postSvc.updateUserGoal(this.getSvc.userId, goal).then((res) => {
+        console.log(res);
+      });
+      this.getSvc.getUserGoal(this.getSvc.userId).then((res) => {
+        this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
+        this.initiateLineChart();
+      });
       this.ngOnInit();
     }
   }

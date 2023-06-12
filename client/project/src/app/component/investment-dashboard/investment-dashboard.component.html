@@ -45,7 +45,14 @@
         </p-orderList>
       </div>
 
-      <div class="col-4 text-center my-2"></div>
+      <!-- LINE CHART -->
+      <div class="col-7 card g-2">
+        <p-chart
+          type="line"
+          [data]="lineData"
+          [options]="lineOptions"
+        ></p-chart>
+      </div>
     </div>
   </div>
 </div>

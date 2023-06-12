@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockCount;
+import sg.edu.nus.iss.project.models.StockPrice;
 import sg.edu.nus.iss.project.repositories.UserRepository;
 
 @Service
@@ -23,6 +24,14 @@ public class UserService {
 
     public String retrieveUserTheme(String userId) {
         return userRepo.retrieveUserTheme(userId);
+    }
+
+    public Boolean upsertUserGoal(String userId, double goal) {
+        return userRepo.upsertUserGoal(userId, goal);
+    }
+
+    public double retrieveUserGoal(String userId) {
+        return userRepo.retrieveUserGoal(userId);
     }
 
     public boolean upsertUserStocks(String userId, Stock stock) {
@@ -74,5 +83,13 @@ public class UserService {
 
     public Optional<Double> retrieveUserStockMarketValueRedis(String userId, String symbol) {
         return userRepo.retrieveUserStockMarketValueRedis(userId, symbol);
+    }
+
+    public Boolean upsertStockMonthlyPerformance(String symbol, List<StockPrice> prices) {
+        return userRepo.upsertStockMonthlyPerformance(symbol, prices);
+    }
+
+    public Optional<List<StockPrice>> retrieveStockMonthlyPerformance(String symbol) {
+        return userRepo.retrieveStockMonthlyPerformance(symbol);
     }
 }

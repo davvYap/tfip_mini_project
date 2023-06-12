@@ -6,11 +6,12 @@ import {
   PurchasedStock,
   PurchasedStocksCount,
   Stock,
+  StockPrice,
   StocksData,
   StonkStockPrice,
-  UserTheme,
+  UserSettings,
 } from '../models';
-import { Observable, Subject, lastValueFrom } from 'rxjs';
+import { Observable, Subject, last, lastValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -21,19 +22,8 @@ export class GetService {
   userId!: string;
   isLogin$ = new Subject<boolean>();
   totalStockValue!: number;
-  dashBoardYearlyGoalData: number[] = [
-    10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120,
-  ];
 
   constructor(private http: HttpClient) {}
-
-  getdashBoardYearlyGoalData(): Promise<number[]> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(this.dashBoardYearlyGoalData);
-      }, 1000);
-    });
-  }
 
   verifyLogin(username: string, password: string): Promise<LoginStatus> {
     let qp = new HttpParams()
@@ -64,10 +54,19 @@ export class GetService {
     );
   }
 
-  getUserTheme(userId: string): Promise<UserTheme> {
+  getUserTheme(userId: string): Promise<UserSettings> {
     let qp = new HttpParams().set('userId', userId);
     return lastValueFrom(
-      this.http.get<UserTheme>('http://localhost:8080/api/theme', {
+      this.http.get<UserSettings>('http://localhost:8080/api/theme', {
+        params: qp,
+      })
+    );
+  }
+
+  getUserGoal(userId: string): Promise<UserSettings> {
+    let qp = new HttpParams().set('userId', userId);
+    return lastValueFrom(
+      this.http.get<UserSettings>('http://localhost:8080/api/goal', {
         params: qp,
       })
     );
@@ -112,5 +111,46 @@ export class GetService {
         `http://localhost:8080/api/${userId}/stocksValue`
       )
     );
+  }
+
+  getStockMonthlyPrice(
+    symbol: string,
+    sdate: string,
+    edate: string
+  ): Promise<StockPrice[]> {
+    let qp = new HttpParams().set('sdate', sdate).append('edate', edate);
+
+    return lastValueFrom(
+      this.http.get<StockPrice[]>(
+        `http://localhost:8080/api/${symbol}/monthly_price`,
+        { params: qp }
+      )
+    );
+  }
+
+  getEndOfMonth(months: string[], month: string): string {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = months.indexOf(month);
+
+    const endOfMonth = new Date(currentYear, currentMonth + 1, 0);
+    const endOfMonthDate = endOfMonth.getDate();
+
+    for (let i = endOfMonthDate; i >= 1; i--) {
+      const tempDate = new Date(currentYear, currentMonth, i);
+      const dayOfWeek = tempDate.getDay();
+
+      // 0 represents Sunday and 6 represents Saturday
+      if (dayOfWeek > 0 && dayOfWeek < 6) {
+        // const formattedDate = tempDate.toISOString().split('T')[0];
+        const formattedDate = `${tempDate.getFullYear()}-${(
+          tempDate.getMonth() + 1
+        )
+          .toString()
+          .padStart(2, '0')}-${tempDate.getDate().toString().padStart(2, '0')}`;
+        return formattedDate;
+      }
+    }
+    return ''; // No suitable date found (unlikely scenario)
   }
 }

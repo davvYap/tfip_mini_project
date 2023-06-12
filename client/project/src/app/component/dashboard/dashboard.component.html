@@ -26,12 +26,15 @@
 
     <!-- LINE CHART -->
     <div class="col-7 card g-2">
-      <p-button
-        (click)="op.toggle($event)"
-        icon="pi pi-chart-line"
-        label="Set Goal"
-        styleClass="p-button-rounded p-button-outlined"
-      ></p-button>
+      <div class="d-flex flex-row-reverse">
+        <p-button
+          (click)="op.toggle($event)"
+          icon="pi pi-chart-line"
+          label="Set Goal"
+          styleClass="p-button-rounded p-button-outlined"
+          pTooltip="Set your goal here"
+        ></p-button>
+      </div>
       <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
     </div>
   </div>

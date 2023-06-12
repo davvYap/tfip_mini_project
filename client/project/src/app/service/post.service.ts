@@ -9,7 +9,7 @@ import { lastValueFrom } from 'rxjs';
 export class PostService {
   constructor(private http: HttpClient) {}
 
-  updateUserTheme(userId: string, theme: string): Promise<any> {
+  updateUserTheme(userId: string, theme: string): Promise<MessageResponse> {
     let data = new HttpParams()
       .set('userId', userId)
       .append('userTheme', theme);
@@ -20,9 +20,34 @@ export class PostService {
     );
 
     return lastValueFrom(
-      this.http.post<any>('http://localhost:8080/api/theme', data.toString(), {
-        headers: httpheader,
-      })
+      this.http.post<MessageResponse>(
+        'http://localhost:8080/api/theme',
+        data.toString(),
+        {
+          headers: httpheader,
+        }
+      )
+    );
+  }
+
+  updateUserGoal(userId: string, goal: number): Promise<MessageResponse> {
+    let data = new HttpParams()
+      .set('userId', userId)
+      .append('userGoal', goal.toString());
+
+    const httpheader = new HttpHeaders().set(
+      'Content-Type',
+      'application/x-www-form-urlencoded'
+    );
+
+    return lastValueFrom(
+      this.http.post<MessageResponse>(
+        'http://localhost:8080/api/goal',
+        data.toString(),
+        {
+          headers: httpheader,
+        }
+      )
     );
   }
 

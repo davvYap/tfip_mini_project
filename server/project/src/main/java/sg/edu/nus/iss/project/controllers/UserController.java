@@ -71,6 +71,35 @@ public class UserController {
                 .body(Json.createObjectBuilder().add("message", "Update theme successfully").build().toString());
     }
 
+    @GetMapping(path = "/goal")
+    @ResponseBody
+    public ResponseEntity<String> getUserGoal(@RequestParam String userId) {
+        double goal = userSvc.retrieveUserGoal(userId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("goal", goal).build().toString());
+    }
+
+    @PostMapping(path = "/goal")
+    @ResponseBody
+    public ResponseEntity<String> updateGoal(@RequestBody MultiValueMap<String, String> input) {
+        String userId = input.getFirst("userId");
+        double userGoal = Double.parseDouble(input.getFirst("userGoal"));
+
+        Boolean updatedGoal = userSvc.upsertUserGoal(userId, userGoal);
+
+        if (!updatedGoal) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "Update goal failed").build().toString());
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("message", "Update goal successfully").build().toString());
+    }
+
     @PostMapping(path = "/{userId}/addStock")
     @ResponseBody
     public ResponseEntity<String> addStock(@PathVariable String userId, @RequestBody String stockJson)

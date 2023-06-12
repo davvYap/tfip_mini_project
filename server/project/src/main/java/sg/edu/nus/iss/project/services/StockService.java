@@ -21,6 +21,7 @@ public class StockService {
 	private static final String TWELVE_DATA_SEARCH_ENDPOINT = "https://twelve-data1.p.rapidapi.com/symbol_search";
 	private static final String TWELVE_DATA_PRICE_ENDPOINT = "https://twelve-data1.p.rapidapi.com/price";
 	private static final String REAL_STONKS_PRICE_ENDPOINT = "https://realstonks.p.rapidapi.com";
+	private static final String YH_FINANCE_API = "https://yh-finance-complete.p.rapidapi.com/yhfhistorical";
 
 	public ResponseEntity<String> getStockData(String symbol, int outputsize) {
 		String url = UriComponentsBuilder.fromUriString(TWELVE_DATA_SEARCH_ENDPOINT)
@@ -91,6 +92,37 @@ public class StockService {
 		RequestEntity req = RequestEntity.get(url)
 				.header("X-RapidAPI-Key", rapidApiKey)
 				.header("X-RapidAPI-Host", "realstonks.p.rapidapi.com")
+				.build();
+
+		RestTemplate template = new RestTemplate();
+
+		ResponseEntity<String> resp = null;
+
+		try {
+			resp = template.exchange(req, String.class);
+		} catch (RestClientException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder()
+							.add("message", e.getMessage())
+							.build().toString());
+		}
+
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(resp.getBody());
+	}
+
+	public ResponseEntity<String> getStockMonthlyPrice(String symbol, String sdate, String edate) {
+		String url = UriComponentsBuilder.fromUriString(YH_FINANCE_API)
+				.queryParam("ticker", symbol)
+				.queryParam("sdate", sdate)
+				.queryParam("edate", edate)
+				.toUriString();
+
+		RequestEntity req = RequestEntity.get(url)
+				.header("X-RapidAPI-Key", rapidApiKey)
+				.header("X-RapidAPI-Host", "yh-finance-complete.p.rapidapi.com")
 				.build();
 
 		RestTemplate template = new RestTemplate();

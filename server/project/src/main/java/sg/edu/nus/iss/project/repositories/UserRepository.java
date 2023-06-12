@@ -22,6 +22,7 @@ import org.springframework.stereotype.Repository;
 import com.mongodb.client.result.UpdateResult;
 
 import sg.edu.nus.iss.project.models.Stock;
+import sg.edu.nus.iss.project.models.StockPrice;
 
 @Repository
 public class UserRepository {
@@ -49,6 +50,24 @@ public class UserRepository {
             return "viva-dark";
         }
         return d.getString("theme_name");
+    }
+
+    public Boolean upsertUserGoal(String userId, double goal) {
+        Query query = Query.query(Criteria.where("user_id").is(userId));
+        Update updateOps = new Update()
+                .set("user_id", userId)
+                .set("goal", goal);
+        UpdateResult upsertDoc = mongo.upsert(query, updateOps, "user_goal");
+        return upsertDoc.getModifiedCount() > 0;
+    }
+
+    public double retrieveUserGoal(String userId) {
+        Query query = Query.query(Criteria.where("user_id").is(userId));
+        Document d = mongo.findOne(query, Document.class, "user_goal");
+        if (d == null) {
+            return 10000;
+        }
+        return d.getDouble("goal");
     }
 
     public Boolean upsertUserStocks(String userId, Stock stock) {
@@ -108,6 +127,34 @@ public class UserRepository {
             return Optional.empty();
         }
         return Optional.of(Double.parseDouble(marketprice));
+    }
+
+    public Boolean upsertStockMonthlyPerformance(String symbol, List<StockPrice> prices) {
+
+        Query query = Query.query(Criteria.where("symbol").is(symbol));
+        List<Document> d = prices.stream()
+                .map(StockPrice::toDocument).toList();
+
+        Update udpateOps = new Update()
+                .set("prices", d);
+
+        UpdateResult upsertDoc = mongo.upsert(query, udpateOps, "stocks_monthly_performance");
+        return upsertDoc.getModifiedCount() > 0;
+    }
+
+    public Optional<List<StockPrice>> retrieveStockMonthlyPerformance(String symbol) {
+        Query query = Query.query(Criteria.where("symbol").is(symbol));
+        Document d = mongo.findOne(query, Document.class, "stocks_monthly_performance");
+
+        if (d == null) {
+            return Optional.empty();
+        }
+        System.out.println("Checking mongo for %s monthly performance".formatted(symbol));
+        List<StockPrice> prices = d.getList("prices", Document.class).stream()
+                .map(doc -> StockPrice.convertFromDocument(doc)).toList();
+
+        return Optional.of(prices);
+
     }
 
     // EXTRA
