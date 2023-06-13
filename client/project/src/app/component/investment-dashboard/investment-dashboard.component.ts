@@ -1,5 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import {
+  Observable,
+  Subject,
+  Subscription,
+  filter,
+  map,
+  switchMap,
+} from 'rxjs';
 import {
   PurchasedStock,
   PurchasedStocksCount,
@@ -7,6 +14,7 @@ import {
   StockPrice,
 } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
+import { ThemeService } from 'src/app/service/theme.service';
 
 @Component({
   selector: 'app-investment-dashboard',
@@ -15,7 +23,7 @@ import { GetService } from 'src/app/service/get.service';
 })
 export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   stocks!: PurchasedStock[];
-  stocksCount!: PurchasedStocksCount[];
+  stocksCount!: PurchasedStocksCount[]; // HERE CAN GET ALL USER STOCK SYMBOL
   stocks$!: Subscription;
   stockPrice$!: Subscription;
   lazyLoading: boolean = true;
@@ -24,15 +32,20 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   lineData!: any;
   lineOptions!: any;
   sp500data!: number[];
+  nasdaq100data!: number[];
   stockPerformanceData!: number[];
   startDate!: string;
   currDate!: string;
   months: string[] = [];
   endOfMonth!: string[];
+  eventCaller = new Subject<PurchasedStocksCount[]>();
 
-  constructor(private getSvc: GetService) {}
+  constructor(private getSvc: GetService, private themeSvc: ThemeService) {}
 
   ngOnInit() {
+    this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
+
+    // GET USER STOCK PORTFOLIO
     this.stocks$ = this.getSvc
       .getUserStocksCount(this.getSvc.userId)
       .subscribe((data) => {
@@ -51,18 +64,20 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
               this.stocksCount = [...this.stocksCount];
               this.stocksCount.push(stock);
               this.stocksCount = this.sortStockByMarketPrice(this.stocksCount);
+              this.eventCaller.next(this.stocksCount);
             });
         }
       });
 
+    // GET LINE CHART
     this.months = [
       'Jan',
       'Feb',
       'Mar',
       'Apr',
       'May',
-      'June',
-      'July',
+      'Jun',
+      'Jul',
       'Aug',
       'Sep',
       'Oct',
@@ -72,20 +87,22 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.startDate = this.getStartDateOfYear();
     this.currDate = this.getCurrentDate();
     this.endOfMonth = this.getEndOfMonth();
-    this.stockPerformanceData = [28, 48, 40, 19, 86, 27, 30];
+    this.stockPerformanceData = [1.2, 2.3, 3.3, 4.5, 3.7, 4.3, 5.1];
 
     // console.log(this.startDate);
     // console.log(this.currDate);
     // console.log(this.endOfMonth);
+
+    // GET VOO MONTHLY PERFORMANCE
     this.getSvc
-      .getStockMonthlyPrice('AAPL', this.startDate, this.currDate)
+      .getStockMonthlyPricePromise('VOO', this.startDate, this.currDate)
       .then((stockPrice: StockPrice[]) => {
         for (let i = 0; i < stockPrice.length; i++) {
           const stock = stockPrice[i];
           const date = stock.date.substring(0, 10);
           stock.date = date;
         }
-        const performance: number[] = this.getMonthlyPerformance(
+        const performance: number[] = this.getStockMonthlyPerformance(
           stockPrice,
           this.endOfMonth
         );
@@ -93,6 +110,52 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         this.sp500data = performance;
         this.initiateLineChart();
       });
+
+    // GET QQQ MONTHLY PERFORMANCE
+    this.getSvc
+      .getStockMonthlyPricePromise('QQQ', this.startDate, this.currDate)
+      .then((stockPrice: StockPrice[]) => {
+        for (let i = 0; i < stockPrice.length; i++) {
+          const stock = stockPrice[i];
+          const date = stock.date.substring(0, 10);
+          stock.date = date;
+        }
+        const performance: number[] = this.getStockMonthlyPerformance(
+          stockPrice,
+          this.endOfMonth
+        );
+        console.log(performance.reverse());
+        this.nasdaq100data = performance;
+        this.initiateLineChart();
+      });
+
+    // GET USER STOCK PERFORMANCE
+    for (let i = 0; i < this.months.length; i++) {
+      const month: string = this.months[i];
+      let capital: number = 0;
+      let totalStockMarketPrice: number = 0;
+      this.getSvc
+        .getUserStockByMonth(this.getSvc.userId, month)
+        .subscribe((res: PurchasedStock[]) => {
+          console.log(res);
+          for (let i = 0; i < res.length; i++) {
+            const stock: PurchasedStock = res[i];
+            capital += stock.price * stock.quantity;
+            const stockMarketPrices: number[] = this.getStockMonthlyMarketPrice(
+              stock.symbol
+            );
+
+            const stockPerformance = this.calculateUserStockPerformance(
+              stock.price,
+              stock.quantity,
+              stockMarketPrices
+            );
+
+            // console.log(stockMarketPrices);
+          }
+          console.log(capital);
+        });
+    }
   }
 
   ngOnDestroy(): void {
@@ -138,6 +201,14 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           // yAxisID: 'y',
           tension: 0.4,
           data: this.sp500data,
+        },
+        {
+          label: 'NASDAQ 100',
+          fill: true,
+          borderColor: documentStyle.getPropertyValue('--blue-500'),
+          // yAxisID: 'y',
+          tension: 0.4,
+          data: this.nasdaq100data,
         },
         {
           label: 'Portfolio',
@@ -235,39 +306,61 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     return endOfMonth;
   }
 
-  getMonthlyPerformance(
+  getStockMonthlyPerformance(
     stockPrices: StockPrice[],
     endOfMonth: string[]
   ): number[] {
     let sp: number[] = [];
+    const firstPurchasePrice: number =
+      stockPrices[stockPrices.length - 1].close;
     for (let i = 0; i < stockPrices.length; i++) {
       const stockPrice = stockPrices[i];
       for (let j = 0; j < endOfMonth.length; j++) {
         if (stockPrice.date === endOfMonth[j]) {
-          sp.push(stockPrice.close);
+          sp.push(
+            ((stockPrice.close - firstPurchasePrice) / firstPurchasePrice) * 100
+          );
         }
       }
     }
     return sp;
   }
 
-  // LAZY LOADING
-  // onLazyLoad(event: any) {
-  //   this.lazyLoading = true;
+  getStockMonthlyMarketPrice(symbol: string): number[] {
+    let sp: number[] = [];
+    this.getSvc
+      .getStockMonthlyPricePromise(symbol, this.startDate, this.currDate)
+      .then((stockPrices: StockPrice[]) => {
+        for (let i = 0; i < stockPrices.length; i++) {
+          const stockPrice = stockPrices[i];
+          for (let j = 0; j < this.endOfMonth.length; j++) {
+            if (stockPrice.date === this.endOfMonth[j]) {
+              sp.push(stockPrice.close);
+            }
+          }
+        }
+        sp.reverse();
+      });
+    return sp;
+  }
 
-  //   if (this.loadLazyTimeout) {
-  //     clearTimeout(this.loadLazyTimeout);
-  //   }
+  calculateUserStockPerformance(
+    strikePrice: number,
+    quantity: number,
+    monthlyMarketPrice: number[]
+  ): number[] {
+    console.log('monthlyMarketPrice', monthlyMarketPrice); // HERE have results
+    let performance: number[] = [];
+    let capital = strikePrice * quantity;
 
-  //   //imitate delay of a backend call
-  //   this.loadLazyTimeout = setTimeout(() => {
-  //     const { first, last } = event;
-  //     const lazyItems = [...this.stocks];
-  //     for (let i = first; i < last; i++) {
-  //       lazyItems[i] = this.stocks[i];
-  //     }
-  //     this.stocks = lazyItems;
-  //     this.lazyLoading = false;
-  //   }, Math.random() * 1000 + 250);
-  // }
+    console.log('length of array', monthlyMarketPrice.length); // HERE array length is 0
+    for (let i = 0; i < monthlyMarketPrice.length; i++) {
+      console.log('monthlyMarketPrice[i]', monthlyMarketPrice[i]);
+      performance.push(
+        ((quantity * monthlyMarketPrice[i] - capital) / capital) * 100
+      );
+    }
+    console.log('peformance', performance);
+    return performance;
+  }
 }

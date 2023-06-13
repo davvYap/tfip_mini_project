@@ -113,7 +113,7 @@ export class GetService {
     );
   }
 
-  getStockMonthlyPrice(
+  getStockMonthlyPricePromise(
     symbol: string,
     sdate: string,
     edate: string
@@ -125,6 +125,30 @@ export class GetService {
         `http://localhost:8080/api/${symbol}/monthly_price`,
         { params: qp }
       )
+    );
+  }
+
+  getStockMonthlyPrice(
+    symbol: string,
+    sdate: string,
+    edate: string
+  ): Observable<StockPrice[]> {
+    let qp = new HttpParams().set('sdate', sdate).append('edate', edate);
+
+    return this.http.get<StockPrice[]>(
+      `http://localhost:8080/api/${symbol}/monthly_price`,
+      { params: qp }
+    );
+  }
+
+  getUserStockByMonth(
+    userId: string,
+    month: string
+  ): Observable<PurchasedStock[]> {
+    let qp = new HttpParams().set('month', month);
+    return this.http.get<PurchasedStock[]>(
+      `http://localhost:8080/api/${userId}/stocks_by_month`,
+      { params: qp }
     );
   }
 

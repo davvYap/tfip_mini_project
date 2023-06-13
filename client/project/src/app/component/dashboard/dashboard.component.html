@@ -9,7 +9,9 @@
       <h3>
         Total Assets Value
         <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-        {{ totalValue | currency }}
+        <span *ngIf="totalValue; else loading">
+          {{ totalValue | currency }}
+        </span>
       </h3>
     </p-fieldset>
   </div>
@@ -55,3 +57,7 @@
     </form>
   </ng-template>
 </p-overlayPanel>
+
+<ng-template #loading>
+  Fetching data <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i
+></ng-template>

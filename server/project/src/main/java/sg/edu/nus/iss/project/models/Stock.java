@@ -3,6 +3,7 @@ package sg.edu.nus.iss.project.models;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 
 import org.bson.Document;
 
@@ -17,6 +18,7 @@ public class Stock {
     private String symbol;
     private long purchasedDate;
     private double fees;
+    private LocalDate date;
 
     public String getStockName() {
         return stockName;
@@ -64,6 +66,14 @@ public class Stock {
 
     public void setPurchasedDate(long purchasedDate) {
         this.purchasedDate = purchasedDate;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public Document toDocument() {

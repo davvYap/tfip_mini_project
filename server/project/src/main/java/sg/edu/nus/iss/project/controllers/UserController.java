@@ -31,6 +31,8 @@ import sg.edu.nus.iss.project.services.UserService;
 import java.util.List;
 import java.util.Optional;
 
+import javax.swing.text.html.Option;
+
 @Controller
 @CrossOrigin(origins = "*")
 @RequestMapping("/api")
@@ -75,7 +77,6 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<String> getUserGoal(@RequestParam String userId) {
         double goal = userSvc.retrieveUserGoal(userId);
-
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("goal", goal).build().toString());
@@ -208,6 +209,30 @@ public class UserController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("value", totalStockValue).build()
                         .toString());
+    }
+
+    @GetMapping(path = "/{userId}/stocks_by_month")
+    @ResponseBody
+    public ResponseEntity<String> getUserStocksByMonth(@PathVariable String userId,
+            @RequestParam(defaultValue = "100") int limit,
+            @RequestParam(defaultValue = "0") int skip, @RequestParam String month) {
+
+        Optional<List<Stock>> stocksOpt = userSvc.retrieveUserStockByMonth(userId, limit, skip, month);
+        if (stocksOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "No stocks found").build().toString());
+        }
+        List<Stock> stocks = stocksOpt.get();
+
+        JsonArrayBuilder jsArr = Json.createArrayBuilder();
+        for (Stock stock : stocks) {
+            jsArr.add(stock.toJsonObject());
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsArr.build().toString());
     }
 
     // EXTRA

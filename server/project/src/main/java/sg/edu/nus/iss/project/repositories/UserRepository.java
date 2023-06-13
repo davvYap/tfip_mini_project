@@ -139,6 +139,7 @@ public class UserRepository {
                 .set("prices", d);
 
         UpdateResult upsertDoc = mongo.upsert(query, udpateOps, "stocks_monthly_performance");
+        System.out.println("Mongo saved stock monthly performance for %s".formatted(symbol));
         return upsertDoc.getModifiedCount() > 0;
     }
 

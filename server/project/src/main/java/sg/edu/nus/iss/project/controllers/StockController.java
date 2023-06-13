@@ -73,6 +73,7 @@ public class StockController {
     public ResponseEntity<String> getMonthlyPrice(@PathVariable String symbol, @RequestParam String sdate,
             @RequestParam String edate) throws IOException {
 
+        // CHECK FROM MONGO
         Optional<List<StockPrice>> pricesOpt = userSvc.retrieveStockMonthlyPerformance(symbol);
         if (pricesOpt.isPresent()) {
             List<StockPrice> prices = pricesOpt.get();

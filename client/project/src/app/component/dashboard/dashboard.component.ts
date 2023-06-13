@@ -57,11 +57,10 @@ export class DashboardComponent implements OnInit {
     this.goalForm = this.createGoalForm();
 
     // GET USER THEME IN MONGO
-    this.getSvc.checkLoginStatus().then((res: LoginStatus) => {
-      let userId = res.userId;
-      this.getSvc.getUserTheme(userId).then((res: UserSettings) => {
-        this.themeSvc.switchTheme(res.theme);
-      });
+    this.getSvc.getUserTheme(this.getSvc.userId).then((res: UserSettings) => {
+      console.log('theme >>> ', res.theme);
+      this.themeSvc.switchTheme(res.theme);
+      localStorage.setItem('theme', res.theme);
     });
 
     // GET USER STOCK VALUE

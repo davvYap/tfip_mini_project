@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { PurchasedStock, Stock } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
+import { ThemeService } from 'src/app/service/theme.service';
 @Component({
   selector: 'app-investment',
   templateUrl: './investment.component.html',
@@ -23,10 +24,12 @@ export class InvestmentComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private getSvc: GetService,
     private postSvc: PostService,
-    private messageSvc: MessageService
+    private messageSvc: MessageService,
+    private themeSvc: ThemeService
   ) {}
 
   ngOnInit() {
+    this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.investmentForm = this.createForm();
     let today = new Date();
     let tmr = new Date();
