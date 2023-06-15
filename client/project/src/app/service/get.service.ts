@@ -100,6 +100,14 @@ export class GetService {
     );
   }
 
+  getUserStocksMongoPromise(userId: string): Promise<PurchasedStock[]> {
+    return lastValueFrom(
+      this.http.get<PurchasedStock[]>(
+        `http://localhost:8080/api/${userId}/stocks`
+      )
+    );
+  }
+
   getUserStocksCount(userId: string): Observable<PurchasedStocksCount[]> {
     return this.http.get<PurchasedStocksCount[]>(
       `http://localhost:8080/api/${userId}/stocksCount`

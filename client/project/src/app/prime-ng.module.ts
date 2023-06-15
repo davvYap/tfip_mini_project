@@ -17,6 +17,8 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { TooltipModule } from 'primeng/tooltip';
 import { TabViewModule } from 'primeng/tabview';
+import { AvatarModule } from 'primeng/avatar';
+import { TableModule } from 'primeng/table';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -37,6 +39,8 @@ const primeModules: any[] = [
   KeyFilterModule,
   TooltipModule,
   TabViewModule,
+  AvatarModule,
+  TableModule,
 ];
 
 @NgModule({

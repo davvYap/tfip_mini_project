@@ -28,6 +28,8 @@ export interface PurchasedStock {
   fees: number;
   date: number;
   name: string;
+  marketPrice: number;
+  percentage: number;
 }
 
 export interface PurchasedStocksCount {
