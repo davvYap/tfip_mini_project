@@ -6,12 +6,20 @@ import {
   filter,
   map,
   switchMap,
+  mergeMap,
+  tap,
+  of,
+  forkJoin,
+  concatMap,
 } from 'rxjs';
 import {
   PurchasedStock,
   PurchasedStocksCount,
   Stock,
   StockPrice,
+  StocksMonthlyPrice,
+  StocksMonthlyQuantity,
+  UserMonthlyCapital,
 } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { ThemeService } from 'src/app/service/theme.service';
@@ -33,12 +41,18 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   lineOptions!: any;
   sp500data!: number[];
   nasdaq100data!: number[];
-  stockPerformanceData!: number[];
+  userStockData!: number[];
   startDate!: string;
   currDate!: string;
   months: string[] = [];
   endOfMonth!: string[];
   eventCaller = new Subject<PurchasedStocksCount[]>();
+
+  obs1$!: Observable<PurchasedStocksCount[]>;
+  stocksMonthlyPrice: StocksMonthlyPrice[] = [];
+  stockMonthlyQuantiy: StocksMonthlyQuantity[] = [];
+  userMonthlyCapital: UserMonthlyCapital[] = [];
+  userMonthlyPerformance: number[] = [];
 
   constructor(private getSvc: GetService, private themeSvc: ThemeService) {}
 
@@ -87,13 +101,13 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.startDate = this.getStartDateOfYear();
     this.currDate = this.getCurrentDate();
     this.endOfMonth = this.getEndOfMonth();
-    this.stockPerformanceData = [1.2, 2.3, 3.3, 4.5, 3.7, 4.3, 5.1];
+    this.userStockData = [];
 
     // console.log(this.startDate);
     // console.log(this.currDate);
     // console.log(this.endOfMonth);
 
-    // GET VOO MONTHLY PERFORMANCE
+    //NOTE GET VOO MONTHLY PERFORMANCE
     this.getSvc
       .getStockMonthlyPricePromise('VOO', this.startDate, this.currDate)
       .then((stockPrice: StockPrice[]) => {
@@ -106,12 +120,12 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           stockPrice,
           this.endOfMonth
         );
-        console.log(performance.reverse());
+        // console.log('sp500', performance);
         this.sp500data = performance;
-        this.initiateLineChart();
+        // this.initiateLineChart();
       });
 
-    // GET QQQ MONTHLY PERFORMANCE
+    //NOTE GET QQQ MONTHLY PERFORMANCE
     this.getSvc
       .getStockMonthlyPricePromise('QQQ', this.startDate, this.currDate)
       .then((stockPrice: StockPrice[]) => {
@@ -124,38 +138,162 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           stockPrice,
           this.endOfMonth
         );
-        console.log(performance.reverse());
+        // console.log('nasdaq100', performance);
         this.nasdaq100data = performance;
-        this.initiateLineChart();
+        // this.initiateLineChart();
       });
 
-    // GET USER STOCK PERFORMANCE
-    for (let i = 0; i < this.months.length; i++) {
-      const month: string = this.months[i];
-      let capital: number = 0;
-      let totalStockMarketPrice: number = 0;
-      this.getSvc
-        .getUserStockByMonth(this.getSvc.userId, month)
-        .subscribe((res: PurchasedStock[]) => {
-          console.log(res);
-          for (let i = 0; i < res.length; i++) {
-            const stock: PurchasedStock = res[i];
-            capital += stock.price * stock.quantity;
-            const stockMarketPrices: number[] = this.getStockMonthlyMarketPrice(
-              stock.symbol
+    //NOTE GET USER STOCK PERFORMANCE
+    this.getSvc
+      .getUserStocksCount(this.getSvc.userId)
+      .pipe(
+        tap((sc) => {
+          // GET USER EACH MONTH CAPTIAL SPENT ON STOCKS
+          const observables$: Observable<PurchasedStock[]>[] = [];
+          for (let i = 0; i < this.months.length; i++) {
+            const month = this.months[i];
+            const observable = this.getSvc.getUserStockByMonth(
+              this.getSvc.userId,
+              month
             );
-
-            const stockPerformance = this.calculateUserStockPerformance(
-              stock.price,
-              stock.quantity,
-              stockMarketPrices
-            );
-
-            // console.log(stockMarketPrices);
+            observables$.push(observable);
           }
-          console.log(capital);
-        });
-    }
+
+          forkJoin(observables$).subscribe((results) => {
+            for (let i = 0; i < results.length; i++) {
+              let totalCost = 0;
+              const month = this.months[i];
+              const stocks: PurchasedStock[] = results[i];
+
+              for (let j = 0; j < stocks.length; j++) {
+                totalCost +=
+                  stocks[j].price * stocks[j].quantity + stocks[j].fees;
+              }
+
+              // console.log(`${month}`, totalCost);
+              this.userMonthlyCapital.push({
+                month: month,
+                capital: totalCost,
+              });
+            }
+
+            // console.log('userTotalCapitalPerMonth', this.userMonthlyCapital);
+          });
+        }),
+        switchMap((sc) => {
+          // GET EACH STOCK MONTHLY QUANTITY
+          sc.forEach((stock) => {
+            let stkQty: number[] = [];
+            for (let i = 0; i < this.months.length; i++) {
+              const month = this.months[i];
+              this.getSvc
+                .getStockQtyByMonth(this.getSvc.userId, month, stock.symbol)
+                .subscribe((qty) => {
+                  stkQty.push(qty.quantity);
+                });
+            }
+            this.stockMonthlyQuantiy.push({
+              symbol: stock.symbol,
+              quantity: stkQty,
+            });
+          });
+          // console.log('stockMonthlyQuantity', this.stockMonthlyQuantiy);
+          const smq = [...this.stockMonthlyQuantiy];
+          //   console.log('smq1', smq);
+          const observables = forkJoin({
+            sc: of(sc),
+            sq: of(smq),
+          });
+          return observables;
+        }),
+        switchMap((observables) => {
+          // GET EACH STOCK MONTHLY PRICE
+          const stockPricesObservables$: Observable<StocksMonthlyPrice>[] =
+            observables.sc.map((stockCount) => {
+              // map() => stream() in java
+              const symbol: string = stockCount.symbol;
+              return this.getSvc
+                .getStockMonthlyPrice(symbol, this.startDate, this.currDate)
+                .pipe(
+                  map((stockPrice: StockPrice[]) => {
+                    for (let i = 0; i < stockPrice.length; i++) {
+                      const stock = stockPrice[i];
+                      const date = stock.date.substring(0, 10);
+                      stock.date = date;
+                    }
+                    const marketPrice: number[] = this.getStockMonthlyPrice(
+                      stockPrice,
+                      this.endOfMonth
+                    );
+                    return {
+                      symbol: symbol,
+                      marketPrice: marketPrice,
+                    };
+                  })
+                );
+            });
+
+          // to check the results
+          forkJoin(stockPricesObservables$).subscribe((results) => {
+            this.stocksMonthlyPrice = results;
+            // console.log('stockMonthlyPrice', this.stocksMonthlyPrice);
+          });
+
+          // combine all results to calculate user performance
+          forkJoin(stockPricesObservables$)
+            .pipe(
+              concatMap((res) => {
+                const mergeResult = {
+                  sp: res,
+                  sq: observables.sq,
+                };
+                return of(mergeResult);
+              }),
+              switchMap((finalResults) => {
+                // console.log('smq last', finalResults.sq);
+                // console.log('smp last', finalResults.sp);
+                // console.log('uc last', this.userMonthlyCapital);
+                this.userStockData = this.calculateUserPerformance(
+                  finalResults.sq,
+                  finalResults.sp,
+                  this.userMonthlyCapital,
+                  this.months
+                );
+                console.log('userStockData', this.userStockData);
+                return of(finalResults);
+              })
+            )
+            .subscribe((res) => {
+              this.initiateLineChart();
+            });
+
+          // observables.sc.forEach((stockCount) => {
+          //   const symbol: string = stockCount.symbol;
+          //   this.getSvc
+          //     .getStockMonthlyPrice(symbol, this.startDate, this.currDate)
+          //     .subscribe((stockPrice: StockPrice[]) => {
+          //       for (let i = 0; i < stockPrice.length; i++) {
+          //         const stock = stockPrice[i];
+          //         const date = stock.date.substring(0, 10);
+          //         stock.date = date;
+          //       }
+          //       const marketPrice: number[] = this.getStockMonthlyPrice(
+          //         stockPrice,
+          //         this.endOfMonth
+          //       );
+          //       // console.log(`${symbol}`, performance);
+          //       this.userStockData = marketPrice;
+          //       this.stocksMonthlyPrice.push({
+          //         symbol: symbol,
+          //         marketPrice: marketPrice,
+          //       });
+          //     });
+          // });
+          // console.log('stockMonthlyPrice', this.stocksMonthlyPrice);
+          return of(observables);
+        })
+      )
+      .subscribe();
   }
 
   ngOnDestroy(): void {
@@ -216,7 +354,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           borderColor: documentStyle.getPropertyValue('--green-500'),
           // yAxisID: 'y1',
           tension: 0.4,
-          data: this.stockPerformanceData,
+          data: this.userStockData,
         },
       ],
     };
@@ -303,6 +441,17 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       const endDate = this.getSvc.getEndOfMonth(months, month);
       endOfMonth.push(endDate);
     }
+
+    const today = new Date();
+    const yesterday = new Date(today.setDate(today.getDate() - 1));
+    const formattedDate = `${yesterday.getFullYear()}-${(
+      yesterday.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}-${yesterday.getDate().toString().padStart(2, '0')}`;
+    endOfMonth.push(formattedDate);
+
+    // include yesterday date
     return endOfMonth;
   }
 
@@ -323,44 +472,94 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         }
       }
     }
-    return sp;
+    return sp.reverse();
   }
 
-  getStockMonthlyMarketPrice(symbol: string): number[] {
-    let sp: number[] = [];
-    this.getSvc
-      .getStockMonthlyPricePromise(symbol, this.startDate, this.currDate)
-      .then((stockPrices: StockPrice[]) => {
-        for (let i = 0; i < stockPrices.length; i++) {
-          const stockPrice = stockPrices[i];
-          for (let j = 0; j < this.endOfMonth.length; j++) {
-            if (stockPrice.date === this.endOfMonth[j]) {
-              sp.push(stockPrice.close);
+  calculateAccumulateStockMarketPrice(
+    month: string,
+    months: string[],
+    smq: StocksMonthlyQuantity[],
+    smp: StocksMonthlyPrice[]
+  ): number {
+    const index: number = months.indexOf(month);
+    let totalMonthlyMarketPrice = 0;
+    for (let i = 0; i < index + 1; i++) {
+      //   console.log('i', i);
+      // get user stocks month performance
+      for (let j = 0; j < smq.length; j++) {
+        for (let k = 0; k < smp.length; k++) {
+          const sqRep = smq[j];
+          const spRep = smp[k];
+          if (sqRep.symbol === spRep.symbol) {
+            // console.log(`sqRep: ${sqRep.symbol} --- spRep: ${spRep.symbol}`);
+            if (!isNaN(sqRep.quantity[i]) && !isNaN(spRep.marketPrice[index])) {
+              totalMonthlyMarketPrice +=
+                sqRep.quantity[i] * spRep.marketPrice[index];
             }
+            // console.log('total mp', totalMonthlyMarketPrice);
           }
         }
-        sp.reverse();
-      });
-    return sp;
+      }
+    }
+    return totalMonthlyMarketPrice;
   }
 
-  calculateUserStockPerformance(
-    strikePrice: number,
-    quantity: number,
-    monthlyMarketPrice: number[]
+  getStockMonthlyPrice(
+    stockPrices: StockPrice[],
+    endOfMonth: string[]
   ): number[] {
-    console.log('monthlyMarketPrice', monthlyMarketPrice); // HERE have results
-    let performance: number[] = [];
-    let capital = strikePrice * quantity;
-
-    console.log('length of array', monthlyMarketPrice.length); // HERE array length is 0
-    for (let i = 0; i < monthlyMarketPrice.length; i++) {
-      console.log('monthlyMarketPrice[i]', monthlyMarketPrice[i]);
-      performance.push(
-        ((quantity * monthlyMarketPrice[i] - capital) / capital) * 100
-      );
+    let sp: number[] = [];
+    for (let i = 0; i < stockPrices.length; i++) {
+      const stockPrice = stockPrices[i];
+      for (let j = 0; j < endOfMonth.length; j++) {
+        if (stockPrice.date === endOfMonth[j]) {
+          sp.push(stockPrice.close);
+        }
+      }
     }
-    console.log('peformance', performance);
-    return performance;
+    return sp.reverse();
+  }
+
+  calculateUserPerformance(
+    smq: StocksMonthlyQuantity[],
+    smp: StocksMonthlyPrice[],
+    uc: UserMonthlyCapital[],
+    months: string[]
+  ): number[] {
+    // console.log('function smq', smq);
+    // console.log('function smp', smp);
+    // console.log('function uc', uc);
+    let totalCap = 0;
+    uc.map((cap) => {
+      totalCap += cap.capital;
+    });
+    console.log('total capital', totalCap);
+    let userPerformance: number[] = [];
+    let previousMonthAccCapital = 0;
+    for (let i = 0; i < months.length; i++) {
+      //   console.log(`${this.months[i]}`);
+      const month = months[i];
+
+      let totalMonthlyMarketPrice = this.calculateAccumulateStockMarketPrice(
+        month,
+        months,
+        smq,
+        smp
+      );
+
+      if (uc[i].month === month && totalMonthlyMarketPrice != 0) {
+        // console.log(`cap for ${month}`, uc[i].capital);
+        const cap = uc[i].capital + previousMonthAccCapital;
+        // console.log('cap', cap);
+        const price = totalMonthlyMarketPrice;
+        // console.log('price', price);
+        const performance: number = ((price - cap) / cap) * 100;
+        userPerformance.push(performance);
+        // console.log('performance', performance);
+        previousMonthAccCapital += uc[i].capital;
+        // console.log('prev cap', previousMonthAccCapital);
+      }
+    }
+    return userPerformance;
   }
 }

@@ -220,6 +220,7 @@ export class AppComponent implements OnInit {
     this.themeSvc.switchTheme(theme);
     let userId = this.getSvc.userId;
     this.postSvc.updateUserTheme(userId, theme);
+    localStorage.setItem('theme', theme);
   }
 
   logout() {

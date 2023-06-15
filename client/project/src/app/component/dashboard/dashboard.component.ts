@@ -58,7 +58,6 @@ export class DashboardComponent implements OnInit {
 
     // GET USER THEME IN MONGO
     this.getSvc.getUserTheme(this.getSvc.userId).then((res: UserSettings) => {
-      console.log('theme >>> ', res.theme);
       this.themeSvc.switchTheme(res.theme);
       localStorage.setItem('theme', res.theme);
     });

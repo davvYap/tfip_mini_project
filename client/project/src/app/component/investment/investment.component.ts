@@ -48,7 +48,7 @@ export class InvestmentComponent implements OnInit, OnDestroy {
       quantity: this.fb.control('', [Validators.required]),
       price: this.fb.control('', [Validators.required]),
       date: this.fb.control('', [Validators.required]),
-      fees: this.fb.control(0.0),
+      fees: this.fb.control(''),
     });
   }
 
@@ -91,7 +91,8 @@ export class InvestmentComponent implements OnInit, OnDestroy {
     stockPurchased.symbol = this.stockSymbolTrimmed;
     stockPurchased.name = this.stockNameTrimmed;
 
-    let timeLong = this.investmentForm.get('date')?.value.getTime();
+    let timeLong: number = this.investmentForm.get('date')?.value?.getTime();
+    console.log('timeLong', timeLong);
     stockPurchased.date = timeLong;
     console.log('Stock >>> ', stockPurchased);
 

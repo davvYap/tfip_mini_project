@@ -31,8 +31,6 @@ import sg.edu.nus.iss.project.services.UserService;
 import java.util.List;
 import java.util.Optional;
 
-import javax.swing.text.html.Option;
-
 @Controller
 @CrossOrigin(origins = "*")
 @RequestMapping("/api")
@@ -121,14 +119,6 @@ public class UserController {
         double stockMarketValue = getStonkStockPrice(stockMarketValueString);
         userSvc.saveUserStockMarketValueRedis(userId, stock.getSymbol(), stockMarketValue);
 
-        // SAVE LATEST TOTAL MARKET VALUE OF STOCKS IN REDIS
-        Optional<Double> currTotalValueOpt = userSvc.retrieveStockTotalValueRedis(userId);
-        if (currTotalValueOpt.isPresent()) {
-            double currTotalValue = currTotalValueOpt.get();
-            double latestTotalValue = currTotalValue + (stockMarketValue * stock.getQuantity());
-            userSvc.saveStockTotalValueRedis(userId, latestTotalValue);
-        }
-
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder()
@@ -137,7 +127,7 @@ public class UserController {
 
     @GetMapping(path = "/{userId}/stocks")
     public ResponseEntity<String> getUserStocks(@PathVariable String userId,
-            @RequestParam(defaultValue = "10") int limit, @RequestParam(defaultValue = "0") int skip) {
+            @RequestParam(defaultValue = "100") int limit, @RequestParam(defaultValue = "0") int skip) {
         List<Stock> stocks = userSvc.retrieveUserStocks(userId, limit, skip);
         if (stocks == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -155,7 +145,7 @@ public class UserController {
 
     @GetMapping(path = "/{userId}/stocksCount")
     public ResponseEntity<String> getUserStocksCount(@PathVariable String userId,
-            @RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "0") int skip) {
+            @RequestParam(defaultValue = "100") int limit, @RequestParam(defaultValue = "0") int skip) {
         List<StockCount> sc = userSvc.retrieveUserStocksCount(userId, limit, skip);
 
         if (sc == null) {
@@ -178,14 +168,15 @@ public class UserController {
             @RequestParam(defaultValue = "100") int limit, @RequestParam(defaultValue = "0") int skip)
             throws IOException {
 
-        Optional<Double> optTotalValue = userSvc.retrieveStockTotalValueRedis(userId);
-        if (optTotalValue.isPresent()) {
-            double totalStockValueRedis = optTotalValue.get();
-            return ResponseEntity.status(HttpStatus.OK)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("value", totalStockValueRedis).build()
-                            .toString());
-        }
+        // Optional<Double> optTotalValue =
+        // userSvc.retrieveStockTotalValueRedis(userId);
+        // if (optTotalValue.isPresent()) {
+        // double totalStockValueRedis = optTotalValue.get();
+        // return ResponseEntity.status(HttpStatus.OK)
+        // .contentType(MediaType.APPLICATION_JSON)
+        // .body(Json.createObjectBuilder().add("value", totalStockValueRedis).build()
+        // .toString());
+        // }
 
         List<StockCount> sc = userSvc.retrieveUserStocksCount(userId, limit, skip);
 
@@ -197,14 +188,20 @@ public class UserController {
         double totalStockValue = 0.0;
         for (StockCount stockCount : sc) {
             String stkSymbol = stockCount.getSymbol();
-            ResponseEntity<String> realStonkPrice = stockSvc.getRealStonksPrice(stkSymbol);
-            double marketPrice = getStonkStockPrice(realStonkPrice.getBody());
-            userSvc.saveUserStockMarketValueRedis(userId, stkSymbol, marketPrice);
+            double marketPrice = 0;
+            // check redis whether the latest market price is there
+            Optional<Double> optPrice = userSvc.retrieveUserStockMarketValueRedis(userId, stkSymbol);
+            if (optPrice.isEmpty()) {
+                ResponseEntity<String> realStonkPrice = stockSvc.getRealStonksPrice(stkSymbol);
+                marketPrice = getStonkStockPrice(realStonkPrice.getBody());
+                userSvc.saveUserStockMarketValueRedis(userId, stkSymbol, marketPrice);
+            }
+            marketPrice = optPrice.get();
             totalStockValue += stockCount.getQuantity() * marketPrice;
         }
-        if (totalStockValue != 0.0) {
-            userSvc.saveStockTotalValueRedis(userId, totalStockValue);
-        }
+        // if (totalStockValue != 0.0) {
+        // userSvc.saveStockTotalValueRedis(userId, totalStockValue);
+        // }
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("value", totalStockValue).build()
@@ -233,6 +230,18 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsArr.build().toString());
+    }
+
+    @GetMapping(path = "/{userId}/stock_qty_month")
+    @ResponseBody
+    public ResponseEntity<String> getUserStocksQtyByMonth(@PathVariable String userId,
+            @RequestParam(defaultValue = "100") int limit,
+            @RequestParam(defaultValue = "0") int skip, @RequestParam String month, @RequestParam String symbol) {
+        Optional<Double> opt = userSvc.retrieveUserStockQuantityByMonth(userId, limit, skip, month, symbol);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("quantity", opt.get()).build().toString());
     }
 
     // EXTRA

@@ -7,6 +7,7 @@ import {
   PurchasedStocksCount,
   Stock,
   StockPrice,
+  StockQuantity,
   StocksData,
   StonkStockPrice,
   UserSettings,
@@ -104,6 +105,13 @@ export class GetService {
       `http://localhost:8080/api/${userId}/stocksCount`
     );
   }
+  getUserStocksCountPromise(userId: string): Promise<PurchasedStocksCount[]> {
+    return lastValueFrom(
+      this.http.get<PurchasedStocksCount[]>(
+        `http://localhost:8080/api/${userId}/stocksCount`
+      )
+    );
+  }
 
   getUserTotalStockValue(userId: string): Promise<MessageResponse> {
     return lastValueFrom(
@@ -148,6 +156,18 @@ export class GetService {
     let qp = new HttpParams().set('month', month);
     return this.http.get<PurchasedStock[]>(
       `http://localhost:8080/api/${userId}/stocks_by_month`,
+      { params: qp }
+    );
+  }
+
+  getStockQtyByMonth(
+    userId: string,
+    month: string,
+    symbol: string
+  ): Observable<StockQuantity> {
+    let qp = new HttpParams().set('month', month).append('symbol', symbol);
+    return this.http.get<StockQuantity>(
+      `http://localhost:8080/api/${userId}/stock_qty_month`,
       { params: qp }
     );
   }

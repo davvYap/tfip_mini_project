@@ -2,6 +2,7 @@ package sg.edu.nus.iss.project.services;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,16 +74,8 @@ public class UserService {
         return stocksCount;
     }
 
-    public void saveStockTotalValueRedis(String userId, double value) {
-        userRepo.saveStockTotalValueRedis(userId, value);
-    }
-
     public void saveUserStockMarketValueRedis(String userId, String symbol, double value) {
         userRepo.saveUserStockMarketValueRedis(userId, symbol, value);
-    }
-
-    public Optional<Double> retrieveStockTotalValueRedis(String userId) {
-        return userRepo.retrieveStockTotalValueRedis(userId);
     }
 
     public Optional<Double> retrieveUserStockMarketValueRedis(String userId, String symbol) {
@@ -93,6 +86,10 @@ public class UserService {
         return userRepo.upsertStockMonthlyPerformance(symbol, prices);
     }
 
+    public Boolean insertStockMonthlyPerformance(String symbol, List<StockPrice> prices) {
+        return userRepo.insertStockMonthlyPerformance(symbol, prices);
+    }
+
     public Optional<List<StockPrice>> retrieveStockMonthlyPerformance(String symbol) {
         return userRepo.retrieveStockMonthlyPerformance(symbol);
     }
@@ -101,6 +98,11 @@ public class UserService {
     public Optional<List<Stock>> retrieveUserStockByMonth(String userId, int limit, int skip, String month) {
 
         String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+        for (String mon : months) {
+            if (mon.equalsIgnoreCase(month)) {
+                month = mon;
+            }
+        }
 
         // SAVE EACH STOCK INTO LIST BASED ON MONTH
         List<Stock> janStocks = new LinkedList<>();
@@ -126,7 +128,7 @@ public class UserService {
 
         for (Stock stock : userStocks) {
             int smonth = stock.getDate().getMonthValue();
-            System.out.println(smonth);
+            // System.out.println(smonth);
 
             switch (smonth) {
                 case 1:
@@ -182,7 +184,7 @@ public class UserService {
         allStocks.add(octStocks);
         allStocks.add(novStocks);
         allStocks.add(decStocks);
-        System.out.println(allStocks);
+        // System.out.println(allStocks);
 
         Map<String, List<Stock>> allStockMap = new HashMap<>();
         for (int i = 0; i < allStocks.size(); i++) {
@@ -195,5 +197,36 @@ public class UserService {
 
         return Optional.of(allStockMap.get(month));
     }
+
+    public Optional<Double> retrieveUserStockQuantityByMonth(String userId, int limit, int skip, String month,
+            String symbol) {
+        String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+        List<String> monthsList = Arrays.asList(months);
+        List<Stock> userStocks = userRepo.retrieveUserStocks(userId, limit, skip);
+        int index = monthsList.indexOf(month);
+        double totalQuantity = 0.0;
+        for (Stock stock : userStocks) {
+            long time = stock.getPurchasedDate();
+            Instant instant = Instant.ofEpochMilli(time);
+            LocalDate date = instant.atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            stock.setDate(date);
+            int smonth = stock.getDate().getMonthValue();
+
+            if (stock.getSymbol().equalsIgnoreCase(symbol) && smonth == index + 1) {
+                totalQuantity += stock.getQuantity();
+            }
+        }
+        return Optional.of(totalQuantity);
+
+    }
+
+    // ***** UNUSED *****
+    // public void saveStockTotalValueRedis(String userId, double value) {
+    // userRepo.saveStockTotalValueRedis(userId, value);
+    // }
+
+    // public Optional<Double> retrieveStockTotalValueRedis(String userId) {
+    // return userRepo.retrieveStockTotalValueRedis(userId);
+    // }
 
 }

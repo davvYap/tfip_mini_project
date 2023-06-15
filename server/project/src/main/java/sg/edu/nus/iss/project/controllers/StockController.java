@@ -103,7 +103,7 @@ public class StockController {
             }
         }
         // SAVE TO MONGO
-        userSvc.upsertStockMonthlyPerformance(symbol, spList);
+        userSvc.insertStockMonthlyPerformance(symbol, spList);
 
         return stockSvc.getStockMonthlyPrice(symbol, sdate, edate);
     }

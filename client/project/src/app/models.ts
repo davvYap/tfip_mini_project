@@ -54,3 +54,22 @@ export interface StockPrice {
   volume: number;
   symbol: string;
 }
+
+export interface StocksMonthlyPrice {
+  symbol: string;
+  marketPrice: number[];
+}
+
+export interface StocksMonthlyQuantity {
+  symbol: string;
+  quantity: number[];
+}
+
+export interface UserMonthlyCapital {
+  month: string;
+  capital: number;
+}
+
+export interface StockQuantity {
+  quantity: number;
+}

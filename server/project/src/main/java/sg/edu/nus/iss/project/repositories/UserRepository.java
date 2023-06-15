@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +21,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.fasterxml.jackson.databind.ser.std.CalendarSerializer;
 import com.mongodb.client.result.UpdateResult;
 
 import sg.edu.nus.iss.project.models.Stock;
@@ -100,24 +103,9 @@ public class UserRepository {
         return null;
     }
 
-    public void saveStockTotalValueRedis(String userId, double value) {
-        redis.opsForHash().put(userId, "total_stock_value", String.valueOf(value));
-        // redis.expire(userId, 1, TimeUnit.DAYS);
-        redis.expireAt(userId, expirationDayInInstance());
-        System.out.println("Redis saved total stock value for %s".formatted(userId));
-    }
-
     public void saveUserStockMarketValueRedis(String userId, String symbol, double value) {
         redis.opsForHash().put(userId, symbol, String.valueOf(value));
         System.out.println("Redis saved stock market value for %s".formatted(symbol));
-    }
-
-    public Optional<Double> retrieveStockTotalValueRedis(String userId) {
-        String value = (String) redis.opsForHash().get(userId, "total_stock_value");
-        if (value == null) {
-            return Optional.empty();
-        }
-        return Optional.of(Double.parseDouble(value));
     }
 
     public Optional<Double> retrieveUserStockMarketValueRedis(String userId, String symbol) {
@@ -141,6 +129,28 @@ public class UserRepository {
         UpdateResult upsertDoc = mongo.upsert(query, udpateOps, "stocks_monthly_performance");
         System.out.println("Mongo saved stock monthly performance for %s".formatted(symbol));
         return upsertDoc.getModifiedCount() > 0;
+    }
+
+    public Boolean insertStockMonthlyPerformance(String symbol, List<StockPrice> prices) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date expiryDay = calendar.getTime();
+
+        List<Document> d = prices.stream()
+                .map(StockPrice::toDocument).toList();
+
+        Document toInsert = new Document("symbol", symbol)
+                .append("prices", d)
+                .append("expireAt", expiryDay);
+
+        Document newDoc = mongo.insert(toInsert, "stocks_monthly_performance");
+        System.out.println("Mongo saved stock monthly performance for %s".formatted(symbol));
+
+        return !newDoc.isEmpty();
     }
 
     public Optional<List<StockPrice>> retrieveStockMonthlyPerformance(String symbol) {
@@ -170,4 +180,20 @@ public class UserRepository {
 
         return endOfDayInstant;
     }
+
+    // ***** UNUSED *****
+    // public void saveStockTotalValueRedis(String userId, double value) {
+    // redis.opsForHash().put(userId, "total_stock_value", String.valueOf(value));
+    // // redis.expire(userId, 1, TimeUnit.DAYS);
+    // redis.expireAt(userId, expirationDayInInstance());
+    // System.out.println("Redis saved total stock value for %s".formatted(userId));
+    // }
+
+    // public Optional<Double> retrieveStockTotalValueRedis(String userId) {
+    // String value = (String) redis.opsForHash().get(userId, "total_stock_value");
+    // if (value == null) {
+    // return Optional.empty();
+    // }
+    // return Optional.of(Double.parseDouble(value));
+    // }
 }
