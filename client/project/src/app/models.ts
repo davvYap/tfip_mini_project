@@ -22,6 +22,7 @@ export interface StonkStockPrice {
 }
 
 export interface PurchasedStock {
+  purchaseId: string;
   symbol: string;
   price: number;
   quantity: number;

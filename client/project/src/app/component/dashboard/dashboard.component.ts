@@ -49,10 +49,7 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    Chart.defaults.color = '#fff';
-    Chart.defaults.font.size = 14;
-    Chart.defaults.font.weight = '300';
-    Chart.defaults.borderColor = '#fff';
+    this.themeSvc.initiateChartSetting();
 
     this.goalForm = this.createGoalForm();
 
@@ -65,7 +62,7 @@ export class DashboardComponent implements OnInit {
     // GET USER STOCK VALUE
     this.getSvc.getUserTotalStockValue(this.getSvc.userId).then((res) => {
       this.stocksValue = res.value;
-      this.totalValue = this.stocksValue;
+      this.totalValue = this.stocksValue; // NOTE temporarily
     });
 
     // this.stocksValue = 8000;

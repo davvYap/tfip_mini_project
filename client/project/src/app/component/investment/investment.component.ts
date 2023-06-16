@@ -6,6 +6,7 @@ import { PurchasedStock, Stock } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
+import { v4 as uuidv4 } from 'uuid';
 @Component({
   selector: 'app-investment',
   templateUrl: './investment.component.html',
@@ -48,7 +49,7 @@ export class InvestmentComponent implements OnInit, OnDestroy {
       quantity: this.fb.control('', [Validators.required]),
       price: this.fb.control('', [Validators.required]),
       date: this.fb.control('', [Validators.required]),
-      fees: this.fb.control(''),
+      fees: this.fb.control(0.0),
     });
   }
 
@@ -87,7 +88,9 @@ export class InvestmentComponent implements OnInit, OnDestroy {
   }
 
   addStock() {
+    let id: string = uuidv4().substring(0, 8);
     let stockPurchased = this.investmentForm.value as PurchasedStock;
+    stockPurchased.purchaseId = id;
     stockPurchased.symbol = this.stockSymbolTrimmed;
     stockPurchased.name = this.stockNameTrimmed;
 

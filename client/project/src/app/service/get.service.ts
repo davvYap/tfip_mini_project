@@ -23,6 +23,7 @@ export class GetService {
   userId!: string;
   isLogin$ = new Subject<boolean>();
   totalStockValue!: number;
+  passStock!: PurchasedStock;
 
   constructor(private http: HttpClient) {}
 

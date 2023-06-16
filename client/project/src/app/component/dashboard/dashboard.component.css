@@ -6,3 +6,9 @@
 h3 {
   font-family: "Righteous", cursive;
 }
+
+.custom {
+  background: var(--surface-card);
+  padding: 1.5rem;
+  border-radius: 6px;
+}

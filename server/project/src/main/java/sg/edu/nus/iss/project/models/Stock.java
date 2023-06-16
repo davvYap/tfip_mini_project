@@ -12,6 +12,7 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 
 public class Stock {
+    private String purchaseId;
     private String stockName;
     private double quantity;
     private double strikePrice;
@@ -19,6 +20,14 @@ public class Stock {
     private long purchasedDate;
     private double fees;
     private LocalDate date;
+
+    public String getPurchaseId() {
+        return purchaseId;
+    }
+
+    public void setPurchaseId(String purchaseId) {
+        this.purchaseId = purchaseId;
+    }
 
     public String getStockName() {
         return stockName;
@@ -78,7 +87,7 @@ public class Stock {
 
     public Document toDocument() {
         Document doc = new Document();
-
+        doc.append("purchase_id", purchaseId);
         doc.append("name", stockName);
         doc.append("quantity", quantity);
         doc.append("price", strikePrice);
@@ -88,8 +97,22 @@ public class Stock {
         return doc;
     }
 
+    public Document toDocumentSold(double profit) {
+        Document doc = new Document();
+        doc.append("sold_id", purchaseId);
+        doc.append("name", stockName);
+        doc.append("quantity", quantity);
+        doc.append("price", strikePrice);
+        doc.append("symbol", symbol);
+        doc.append("date", purchasedDate);
+        doc.append("fees", fees);
+        doc.append("net_profit", profit);
+        return doc;
+    }
+
     public JsonObject toJsonObject() {
         return Json.createObjectBuilder()
+                .add("purchaseId", purchaseId)
                 .add("name", stockName)
                 .add("quantity", quantity)
                 .add("price", strikePrice)
@@ -106,6 +129,7 @@ public class Stock {
             try (InputStream is = new ByteArrayInputStream(js.getBytes())) {
                 JsonReader jr = Json.createReader(is);
                 JsonObject jsObj = jr.readObject();
+                s.setPurchaseId(jsObj.getString("purchaseId"));
                 s.setStockName(jsObj.getString("name"));
                 s.setSymbol(jsObj.getString("symbol"));
                 s.setStrikePrice((jsObj.getJsonNumber("price").doubleValue()));
@@ -121,6 +145,7 @@ public class Stock {
         Stock s = null;
         if (d != null) {
             s = new Stock();
+            s.setPurchaseId(d.getString("purchase_id"));
             s.setSymbol(d.getString("symbol"));
             s.setStockName(d.getString("name"));
             s.setPurchasedDate(d.getLong("date"));

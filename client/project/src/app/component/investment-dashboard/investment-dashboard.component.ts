@@ -1,4 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Table } from 'primeng/table';
 import {
   Observable,
@@ -23,8 +25,12 @@ import {
   StonkStockPrice,
   UserMonthlyCapital,
 } from 'src/app/models';
+import { DeleteService } from 'src/app/service/delete.service';
 import { GetService } from 'src/app/service/get.service';
 import { ThemeService } from 'src/app/service/theme.service';
+import { InvestmentComponent } from '../investment/investment.component';
+import { SellStockComponent } from '../sell-stock/sell-stock.component';
+import { UpdateService } from 'src/app/service/update.service';
 
 @Component({
   selector: 'app-investment-dashboard',
@@ -58,44 +64,24 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   first = 0;
   loading: boolean = true;
 
-  constructor(private getSvc: GetService, private themeSvc: ThemeService) {}
+  dialogRef!: DynamicDialogRef;
+
+  constructor(
+    private getSvc: GetService,
+    private themeSvc: ThemeService,
+    private deleteSvc: DeleteService,
+    private confirmationSvc: ConfirmationService,
+    private messageSvc: MessageService,
+    private dialogSvc: DialogService,
+    private updateSvc: UpdateService
+  ) {}
 
   ngOnInit() {
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
+    this.themeSvc.initiateChartSetting();
 
     // HERE FOR TABLE
-    this.getSvc
-      .getUserStocksMongo(this.getSvc.userId)
-      .pipe(
-        switchMap((stocks: PurchasedStock[]) => {
-          let observables: Observable<StonkStockPrice>[] = [];
-          stocks.map((stock) => {
-            const observable = this.getSvc.getStonkStockPrice(stock.symbol);
-            observables.push(observable);
-          });
-          return forkJoin(observables).pipe(
-            map((results: StonkStockPrice[]) => {
-              for (let i = 0; i < results.length; i++) {
-                stocks[i].marketPrice = results[i].price;
-              }
-              //   console.log('stocks', stocks);
-              return stocks;
-            })
-          );
-        }),
-        map((stocks: PurchasedStock[]) => {
-          for (let i = 0; i < stocks.length; i++) {
-            const stock = stocks[i];
-            // console.log(`${stock.symbol} ${stock.price} ${stock.marketPrice}`);
-            stock.percentage = (stock.marketPrice - stock.price) / stock.price;
-          }
-          return stocks;
-        })
-      )
-      .subscribe((stocks) => {
-        this.stocks = stocks;
-        this.loading = false;
-      });
+    this.initiateStockTable();
 
     // HERE FOR LINECHART
     // GET USER STOCK PORTFOLIO
@@ -588,11 +574,101 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     return userPerformance;
   }
 
+  initiateStockTable() {
+    this.getSvc
+      .getUserStocksMongo(this.getSvc.userId)
+      .pipe(
+        switchMap((stocks: PurchasedStock[]) => {
+          let observables: Observable<StonkStockPrice>[] = [];
+          stocks.map((stock) => {
+            const observable = this.getSvc.getStonkStockPrice(stock.symbol);
+            observables.push(observable);
+          });
+          return forkJoin(observables).pipe(
+            map((results: StonkStockPrice[]) => {
+              for (let i = 0; i < results.length; i++) {
+                stocks[i].marketPrice = results[i].price;
+              }
+              // console.log('stocks', stocks);
+              return stocks;
+            })
+          );
+        }),
+        map((stocks: PurchasedStock[]) => {
+          for (let i = 0; i < stocks.length; i++) {
+            const stock = stocks[i];
+            // console.log(`${stock.symbol} ${stock.price} ${stock.marketPrice}`);
+            stock.percentage = (stock.marketPrice - stock.price) / stock.price;
+          }
+          return stocks;
+        })
+      )
+      .subscribe((stocks) => {
+        this.stocks = this.sortStockByDate(stocks);
+        this.loading = false;
+      });
+  }
+
   clear(table: Table) {
     table.clear();
   }
 
-  show(event: any) {
-    console.log(event);
+  deleteStock(purchaseId: string) {
+    this.deleteSvc.deleteStock(purchaseId, this.getSvc.userId);
+  }
+
+  confirmDelete(event: any, purchaseId: string, symbol: string) {
+    this.confirmationSvc.confirm({
+      target: event.target,
+      message: `Are you sure you want to delete ${symbol} ?`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.deleteStock(purchaseId);
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Confirmed',
+          detail: `You have deleted ${symbol} with order ID ${purchaseId}`,
+        });
+        setTimeout(() => {
+          this.ngOnInit();
+        }, 1000);
+      },
+      reject: () => {
+        this.messageSvc.add({
+          severity: 'info',
+          summary: 'Cancelled',
+          detail: 'You have cancel the delete',
+        });
+      },
+    });
+  }
+
+  refreshTable() {
+    this.loading = true;
+    setTimeout(() => {
+      this.initiateStockTable();
+    }, 500);
+  }
+
+  sellStock(stock: PurchasedStock) {
+    console.log('passed stock', stock);
+    this.getSvc.passStock = stock;
+    this.dialogRef = this.dialogSvc.open(SellStockComponent, {
+      header: 'Sell Order Details',
+      width: '70%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      dismissableMask: true,
+    });
+
+    this.dialogRef.onClose.subscribe((message: string) => {
+      this.messageSvc.add({
+        severity: 'success',
+        summary: 'Successful',
+        detail: message,
+      });
+      this.refreshTable();
+    });
   }
 }

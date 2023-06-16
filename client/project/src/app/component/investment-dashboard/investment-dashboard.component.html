@@ -103,7 +103,7 @@
             </ng-template>
             <ng-template pTemplate="header">
               <tr>
-                <th style="width: 14.3%">
+                <th style="width: 12%">
                   Symbol
                   <p-columnFilter
                     type="text"
@@ -111,18 +111,19 @@
                     display="menu"
                   ></p-columnFilter>
                 </th>
-                <th style="width: 14.3%">Name</th>
-                <th style="width: 14.3%" pSortableColumn="date">
+                <th style="width: 12.5%">Name</th>
+                <th style="width: 12.5%" pSortableColumn="date">
                   Purchase Date <p-sortIcon field="date"></p-sortIcon>
                 </th>
-                <th style="width: 14.3%" pSortableColumn="quantity">
+                <th style="width: 12%" pSortableColumn="quantity">
                   Quantity <p-sortIcon field="percentage"></p-sortIcon>
                 </th>
-                <th style="width: 14.3%">Strike Price</th>
-                <th style="width: 14.3%">Market Price</th>
-                <th style="width: 14.3%" pSortableColumn="percentage">
+                <th style="width: 12.5%">Bought Price</th>
+                <th style="width: 12.5%">Market Price</th>
+                <th style="width: 12%" pSortableColumn="percentage">
                   % Change <p-sortIcon field="percentage"></p-sortIcon>
                 </th>
+                <th style="width: 14%">Action</th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-stock>
@@ -133,7 +134,30 @@
                 <td>{{ stock.quantity }}</td>
                 <td>{{ stock.price | currency }}</td>
                 <td>{{ stock.marketPrice | currency }}</td>
-                <td>{{ stock.percentage | percent : "1.2-2" }}</td>
+                <td [className]="getPerformanceClass(stock.percentage)">
+                  {{ stock.percentage | percent : "1.2-2" }}
+                </td>
+                <td>
+                  <span class="me-2">
+                    <p-confirmPopup></p-confirmPopup>
+                    <p-button
+                      icon="pi pi-trash"
+                      type="button"
+                      styleClass="p-button-rounded p-button-danger"
+                      (onClick)="
+                        confirmDelete($event, stock.purchaseId, stock.symbol)
+                      "
+                    ></p-button>
+                  </span>
+                  <span class="ms-1">
+                    <p-button
+                      label="Sell"
+                      type="button"
+                      styleClass="p-button-rounded p-button-success"
+                      (onClick)="sellStock(stock)"
+                    ></p-button>
+                  </span>
+                </td>
               </tr>
             </ng-template>
             <ng-template pTemplate="paginatorleft">
@@ -141,13 +165,15 @@
                 type="button"
                 icon="pi pi-plus"
                 styleClass="p-button-text"
+                [routerLink]="'/investment'"
               ></p-button>
             </ng-template>
             <ng-template pTemplate="paginatorright">
               <p-button
                 type="button"
-                icon="pi pi-cloud"
+                icon="pi pi-refresh"
                 styleClass="p-button-text"
+                (onClick)="refreshTable()"
               ></p-button>
             </ng-template>
           </p-table>
@@ -163,4 +189,5 @@
       </p-tabPanel>
     </p-tabView>
   </div>
+  <p-toast></p-toast>
 </div>

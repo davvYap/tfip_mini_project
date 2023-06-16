@@ -11,9 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -122,10 +124,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder()
-                        .add("message", "%s is added into portfolio".formatted(stock.getSymbol())).build().toString());
+                        .add("message", "%s is added into portfolio with order ID %s".formatted(stock.getSymbol(),
+                                stock.getPurchaseId()))
+                        .build().toString());
     }
 
     @GetMapping(path = "/{userId}/stocks")
+    @ResponseBody
     public ResponseEntity<String> getUserStocks(@PathVariable String userId,
             @RequestParam(defaultValue = "100") int limit, @RequestParam(defaultValue = "0") int skip) {
         List<Stock> stocks = userSvc.retrieveUserStocks(userId, limit, skip);
@@ -141,6 +146,52 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsArr.build().toString());
+    }
+
+    @DeleteMapping(path = "/{userId}/delete_stock")
+    @ResponseBody
+    public ResponseEntity<String> deleteUserStock(@PathVariable String userId, @RequestParam String purchaseId) {
+        boolean deleted = userSvc.deleteUserStockMongo(userId, purchaseId);
+
+        if (!deleted) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder()
+                            .add("message", "Delete stock with purchaseId %s failed".formatted(purchaseId))
+                            .build().toString());
+        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder()
+                        .add("message", "Deleted stock with purchaseId %s successfully".formatted(purchaseId))
+                        .build().toString());
+    }
+
+    @PutMapping(path = "/{userId}/update_stock")
+    @ResponseBody
+    public ResponseEntity<String> updateUserStock(@PathVariable String userId, @RequestBody String stockJsonStr)
+            throws IOException {
+        System.out.println(userId);
+        Stock soldStock = Stock.convertFromJsonObject(stockJsonStr);
+        System.err.println(soldStock);
+
+        if (soldStock == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "Invalid JSON").build().toString());
+        }
+        boolean updated = userSvc.updateUserStockMongo(userId, soldStock);
+        if (!updated) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "Error update sell order.").build().toString());
+        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder()
+                        .add("message", "Updated sell order %s".formatted(soldStock.getPurchaseId())).build()
+                        .toString());
+
     }
 
     @GetMapping(path = "/{userId}/stocksCount")
@@ -168,16 +219,6 @@ public class UserController {
             @RequestParam(defaultValue = "100") int limit, @RequestParam(defaultValue = "0") int skip)
             throws IOException {
 
-        // Optional<Double> optTotalValue =
-        // userSvc.retrieveStockTotalValueRedis(userId);
-        // if (optTotalValue.isPresent()) {
-        // double totalStockValueRedis = optTotalValue.get();
-        // return ResponseEntity.status(HttpStatus.OK)
-        // .contentType(MediaType.APPLICATION_JSON)
-        // .body(Json.createObjectBuilder().add("value", totalStockValueRedis).build()
-        // .toString());
-        // }
-
         List<StockCount> sc = userSvc.retrieveUserStocksCount(userId, limit, skip);
 
         if (sc == null) {
@@ -195,13 +236,13 @@ public class UserController {
                 ResponseEntity<String> realStonkPrice = stockSvc.getRealStonksPrice(stkSymbol);
                 marketPrice = getStonkStockPrice(realStonkPrice.getBody());
                 userSvc.saveUserStockMarketValueRedis(userId, stkSymbol, marketPrice);
+            } else {
+                marketPrice = optPrice.get();
             }
-            marketPrice = optPrice.get();
             totalStockValue += stockCount.getQuantity() * marketPrice;
         }
-        // if (totalStockValue != 0.0) {
-        // userSvc.saveStockTotalValueRedis(userId, totalStockValue);
-        // }
+        userSvc.upsertUserYesterdayTotalValueMongo(userId, totalStockValue); // HERE NOTE
+
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("value", totalStockValue).build()

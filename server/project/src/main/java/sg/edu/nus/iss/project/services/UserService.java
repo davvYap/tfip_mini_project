@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import sg.edu.nus.iss.project.models.Stock;
@@ -82,16 +83,32 @@ public class UserService {
         return userRepo.retrieveUserStockMarketValueRedis(userId, symbol);
     }
 
-    public Boolean upsertStockMonthlyPerformance(String symbol, List<StockPrice> prices) {
-        return userRepo.upsertStockMonthlyPerformance(symbol, prices);
+    public boolean deleteUserStockMongo(String userId, String purchaseId) {
+        return userRepo.deleteUserStockMongo(userId, purchaseId);
     }
 
-    public Boolean insertStockMonthlyPerformance(String symbol, List<StockPrice> prices) {
-        return userRepo.insertStockMonthlyPerformance(symbol, prices);
+    public boolean updateUserStockMongo(String userId, Stock stock) {
+        return userRepo.updateUserStockMongo(userId, stock);
     }
 
-    public Optional<List<StockPrice>> retrieveStockMonthlyPerformance(String symbol) {
-        return userRepo.retrieveStockMonthlyPerformance(symbol);
+    public boolean upsertUserYesterdayTotalValueMongo(String userId, double value) {
+        return userRepo.upsertUserYesterdayTotalValueMongo(userId, value);
+    }
+
+    public Boolean insertStockMonthlyPerformanceMongo(String symbol, List<StockPrice> prices) {
+        return userRepo.insertStockMonthlyPerformanceMongo(symbol, prices);
+    }
+
+    // @Scheduled(fixedDelay = 1 * 60 * 1000) // 5mins in milliseconds
+    // Scheduled method to delete documents at the end of the day
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void deleteStockMonthlyPerformanceMongo() {
+        System.out.println("deleting mongo stock monthly performance...");
+        userRepo.deleteStockMonthlyPerformanceMongo();
+    }
+
+    public Optional<List<StockPrice>> retrieveStockMonthlyPerformanceMongo(String symbol) {
+        return userRepo.retrieveStockMonthlyPerformanceMongo(symbol);
     }
 
     // HERE
@@ -227,6 +244,11 @@ public class UserService {
 
     // public Optional<Double> retrieveStockTotalValueRedis(String userId) {
     // return userRepo.retrieveStockTotalValueRedis(userId);
+    // }
+
+    // public Boolean upsertStockMonthlyPerformance(String symbol, List<StockPrice>
+    // prices) {
+    // return userRepo.upsertStockMonthlyPerformance(symbol, prices);
     // }
 
 }

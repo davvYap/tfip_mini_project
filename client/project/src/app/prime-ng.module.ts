@@ -19,6 +19,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { TabViewModule } from 'primeng/tabview';
 import { AvatarModule } from 'primeng/avatar';
 import { TableModule } from 'primeng/table';
+import { ConfirmPopupModule } from 'primeng/confirmpopup';
+import { DynamicDialogModule } from 'primeng/dynamicdialog';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -41,6 +43,8 @@ const primeModules: any[] = [
   TabViewModule,
   AvatarModule,
   TableModule,
+  ConfirmPopupModule,
+  DynamicDialogModule,
 ];
 
 @NgModule({

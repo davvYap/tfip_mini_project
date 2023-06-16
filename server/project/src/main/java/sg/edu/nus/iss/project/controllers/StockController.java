@@ -74,7 +74,7 @@ public class StockController {
             @RequestParam String edate) throws IOException {
 
         // CHECK FROM MONGO
-        Optional<List<StockPrice>> pricesOpt = userSvc.retrieveStockMonthlyPerformance(symbol);
+        Optional<List<StockPrice>> pricesOpt = userSvc.retrieveStockMonthlyPerformanceMongo(symbol);
         if (pricesOpt.isPresent()) {
             List<StockPrice> prices = pricesOpt.get();
             JsonArrayBuilder jsArr = Json.createArrayBuilder();
@@ -88,24 +88,29 @@ public class StockController {
                     .body(jsArr.build().toString());
         }
 
-        String res = stockSvc.getStockMonthlyPrice(symbol, sdate, edate).getBody();
+        ResponseEntity<String> response = stockSvc.getStockMonthlyPrice(symbol, sdate, edate);
+        if (!response.getStatusCode().isError()) {
 
-        List<StockPrice> spList = new LinkedList<>();
+            String res = response.getBody();
 
-        if (res != null && !res.isEmpty()) {
-            try (InputStream is = new ByteArrayInputStream(res.getBytes())) {
-                JsonReader reader = Json.createReader(is);
-                JsonArray jrArr = reader.readArray();
-                for (JsonValue jsonValue : jrArr) {
-                    JsonObject jsObj = (JsonObject) jsonValue;
-                    spList.add(StockPrice.convertFromJsonObject(jsObj));
+            List<StockPrice> spList = new LinkedList<>();
+
+            if (res != null && !res.isEmpty()) {
+                try (InputStream is = new ByteArrayInputStream(res.getBytes())) {
+                    JsonReader reader = Json.createReader(is);
+                    JsonArray jrArr = reader.readArray();
+                    for (JsonValue jsonValue : jrArr) {
+                        JsonObject jsObj = (JsonObject) jsonValue;
+                        spList.add(StockPrice.convertFromJsonObject(jsObj));
+                    }
                 }
             }
+            // SAVE TO MONGO
+            userSvc.insertStockMonthlyPerformanceMongo(symbol, spList);
         }
-        // SAVE TO MONGO
-        userSvc.insertStockMonthlyPerformance(symbol, spList);
 
-        return stockSvc.getStockMonthlyPrice(symbol, sdate, edate);
+        return response;
+
     }
 
 }

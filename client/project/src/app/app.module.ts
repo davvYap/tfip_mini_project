@@ -10,9 +10,11 @@ import { PrimeNgModule } from './prime-ng.module';
 import { LoginComponent } from './component/login/login.component';
 import { DashboardComponent } from './component/dashboard/dashboard.component';
 import { LogoutComponent } from './component/logout/logout.component';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { InvestmentComponent } from './component/investment/investment.component';
 import { InvestmentDashboardComponent } from './component/investment-dashboard/investment-dashboard.component';
+import { DialogService } from 'primeng/dynamicdialog';
+import { SellStockComponent } from './component/sell-stock/sell-stock.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +24,7 @@ import { InvestmentDashboardComponent } from './component/investment-dashboard/i
     LogoutComponent,
     InvestmentComponent,
     InvestmentDashboardComponent,
+    SellStockComponent,
   ],
   imports: [
     BrowserModule,
@@ -32,7 +35,7 @@ import { InvestmentDashboardComponent } from './component/investment-dashboard/i
     FormsModule,
     HttpClientModule,
   ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService, DialogService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

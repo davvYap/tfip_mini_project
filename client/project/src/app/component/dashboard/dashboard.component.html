@@ -16,47 +16,53 @@
     </p-fieldset>
   </div>
 
-  <div class="row justify-content-evenly align-items-center">
-    <!-- DONUT CHART -->
-    <div class="col-4 card g-2">
-      <p-chart
-        type="doughnut"
-        [data]="donutData"
-        [options]="donutOptions"
-      ></p-chart>
-    </div>
-
-    <!-- LINE CHART -->
-    <div class="col-7 card g-2">
-      <div class="d-flex flex-row-reverse">
-        <p-button
-          (click)="op.toggle($event)"
-          icon="pi pi-chart-line"
-          label="Set Goal"
-          styleClass="p-button-rounded p-button-outlined"
-          pTooltip="Set your goal here"
-        ></p-button>
+  <div class="custom">
+    <div class="row justify-content-evenly align-items-center">
+      <!-- DONUT CHART -->
+      <div class="col-4 card g-2">
+        <p-chart
+          type="doughnut"
+          [data]="donutData"
+          [options]="donutOptions"
+        ></p-chart>
       </div>
-      <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
+
+      <!-- LINE CHART -->
+      <div class="col-7 card g-2">
+        <div class="d-flex flex-row-reverse">
+          <p-button
+            (click)="op.toggle($event)"
+            icon="pi pi-chart-line"
+            label="Set Goal"
+            styleClass="p-button-rounded"
+            pTooltip="Set your goal here"
+          ></p-button>
+        </div>
+        <p-chart
+          type="line"
+          [data]="lineData"
+          [options]="lineOptions"
+        ></p-chart>
+      </div>
     </div>
   </div>
-</div>
 
-<p-overlayPanel #op>
-  <ng-template pTemplate="content">
-    <h6>Enter your yearly goal</h6>
-    <form [formGroup]="goalForm">
-      <input
-        pInputText
-        pKeyFilter="money"
-        class="p-inputtext-sm"
-        placeholder="Your goal $$$"
-        formControlName="goal"
-        (keypress)="submitGoal($event)"
-      />
-    </form>
-  </ng-template>
-</p-overlayPanel>
+  <p-overlayPanel #op>
+    <ng-template pTemplate="content">
+      <h6>Enter your yearly goal</h6>
+      <form [formGroup]="goalForm">
+        <input
+          pInputText
+          pKeyFilter="money"
+          class="p-inputtext-sm"
+          placeholder="Your goal $$$"
+          formControlName="goal"
+          (keypress)="submitGoal($event)"
+        />
+      </form>
+    </ng-template>
+  </p-overlayPanel>
+</div>
 
 <ng-template #loading>
   Fetching data <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i
