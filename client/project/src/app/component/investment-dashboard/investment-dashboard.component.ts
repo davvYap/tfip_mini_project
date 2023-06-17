@@ -19,6 +19,7 @@ import {
   PurchasedStock,
   PurchasedStocksCount,
   Stock,
+  StockLogo,
   StockPrice,
   StocksMonthlyPrice,
   StocksMonthlyQuantity,
@@ -80,33 +81,15 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.themeSvc.initiateChartSetting();
 
+    // HERE FOR STOCK COUNT
+    this.stocksCount = [];
+    this.initiateStockCount();
+
     // HERE FOR TABLE
     this.initiateStockTable();
 
     // HERE FOR LINECHART
     // GET USER STOCK PORTFOLIO
-    this.stocks$ = this.getSvc
-      .getUserStocksCount(this.getSvc.userId)
-      .subscribe((data) => {
-        // this.stocksCount = data;
-        this.stocksCount = [];
-
-        for (let i = 0; i < data.length; i++) {
-          const stock = data[i];
-          this.stockPrice$ = this.getSvc
-            .getStonkStockPrice(stock.symbol)
-            .subscribe((res) => {
-              stock.marketPrice = res.price * stock.quantity;
-              stock.performance = (stock.marketPrice - stock.cost) / stock.cost;
-              // console.log('market price >>> ', stock.marketPrice);
-              // console.log('performance >>> ', stock.performance);
-              this.stocksCount = [...this.stocksCount];
-              this.stocksCount.push(stock);
-              this.stocksCount = this.sortStockByMarketPrice(this.stocksCount);
-              this.eventCaller.next(this.stocksCount);
-            });
-        }
-      });
 
     // GET LINE CHART
     this.months = [
@@ -330,6 +313,53 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
 
   getPerformanceClass(performance: number): string {
     return performance > 0 ? 'positive' : 'negative';
+  }
+
+  initiateStockCount() {
+    this.stocks$ = this.getSvc
+      .getUserStocksCount(this.getSvc.userId)
+      .pipe(
+        // get market price and performance
+        switchMap((stockCounts: PurchasedStocksCount[]) => {
+          let observables: Observable<StonkStockPrice>[] = [];
+          stockCounts.map((stockCount) => {
+            const observable = this.getSvc.getStonkStockPrice(
+              stockCount.symbol
+            );
+            observables.push(observable);
+          });
+          return forkJoin(observables).pipe(
+            map((results: StonkStockPrice[]) => {
+              for (let i = 0; i < results.length; i++) {
+                const stock = stockCounts[i];
+                stock.marketPrice = results[i].price * stock.quantity;
+                stock.performance =
+                  (stock.marketPrice - stock.cost) / stock.cost;
+              }
+              return stockCounts;
+            })
+          );
+        }),
+        // get logo
+        switchMap((stockCounts: PurchasedStocksCount[]) => {
+          let observables: Observable<StockLogo>[] = [];
+          stockCounts.map((stockCount) => {
+            const observable = this.getSvc.getStockLogo(stockCount.symbol);
+            observables.push(observable);
+          });
+          return forkJoin(observables).pipe(
+            map((results: StockLogo[]) => {
+              for (let i = 0; i < results.length; i++) {
+                stockCounts[i].logo = results[i].url;
+              }
+              return stockCounts;
+            })
+          );
+        })
+      )
+      .subscribe((stockCounts) => {
+        this.stocksCount = this.sortStockByMarketPrice(stockCounts);
+      });
   }
 
   initiateLineChart() {
@@ -578,6 +608,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.getSvc
       .getUserStocksMongo(this.getSvc.userId)
       .pipe(
+        // get market price
         switchMap((stocks: PurchasedStock[]) => {
           let observables: Observable<StonkStockPrice>[] = [];
           stocks.map((stock) => {
@@ -590,6 +621,22 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
                 stocks[i].marketPrice = results[i].price;
               }
               // console.log('stocks', stocks);
+              return stocks;
+            })
+          );
+        }),
+        // get stock logo
+        switchMap((stocks: PurchasedStock[]) => {
+          let observables: Observable<StockLogo>[] = [];
+          stocks.map((stock) => {
+            const observable = this.getSvc.getStockLogo(stock.symbol);
+            observables.push(observable);
+          });
+          return forkJoin(observables).pipe(
+            map((results: StockLogo[]) => {
+              for (let i = 0; i < results.length; i++) {
+                stocks[i].logo = results[i].url;
+              }
               return stocks;
             })
           );

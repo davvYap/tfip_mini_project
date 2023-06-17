@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -96,6 +97,26 @@ public class UserRepository {
             return stocks;
         }
         return null;
+    }
+
+    public boolean upsertUserStockLogo(String symbol, String url) {
+        Query query = Query.query(Criteria.where("symbol").is(symbol));
+        Update updateOps = new Update()
+                .set("symbol", symbol)
+                .set("url", url);
+        UpdateResult upsertDoc = mongo.upsert(query, updateOps, "stocks_logo");
+        System.out.println("Insert stock %s logo".formatted(symbol));
+        return upsertDoc.getModifiedCount() > 0;
+    }
+
+    public String retrieveUserStockLogo(String symbol) {
+        Query query = Query.query(Criteria.where("symbol").is(symbol));
+        Document doc = mongo.findOne(query, Document.class, "stocks_logo");
+        String logoUrl = "";
+        if (doc != null) {
+            logoUrl = doc.getString("url");
+        }
+        return logoUrl;
     }
 
     public Stock findUserStock(String userId, String purchaseId) {

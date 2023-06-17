@@ -6,6 +6,7 @@ import {
   PurchasedStock,
   PurchasedStocksCount,
   Stock,
+  StockLogo,
   StockPrice,
   StockQuantity,
   StocksData,
@@ -79,6 +80,11 @@ export class GetService {
     return this.http.get<StocksData>('http://localhost:8080/api/stocks', {
       params: qp,
     });
+  }
+
+  getStockLogo(symbol: string): Observable<StockLogo> {
+    let qp = new HttpParams().set('symbol', symbol);
+    return this.http.get<StockLogo>(`http://localhost:8080/api/${symbol}/logo`);
   }
 
   getStockPrice(symbol: string): Promise<Stock> {

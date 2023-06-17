@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -50,6 +51,35 @@ public class StockController {
             @RequestParam(defaultValue = "10") int outputsize) {
         return stockSvc.getStockPrice(symbol, outputsize);
 
+    }
+
+    @GetMapping(path = "/{symbol}/logo")
+    public ResponseEntity<String> getStockLogo(@PathVariable String symbol) throws IOException {
+
+        String logoUrl = userSvc.retrieveUserStockLogo(symbol);
+        if (logoUrl.isEmpty()) {
+            ResponseEntity<String> res = stockSvc.getStockLogo(symbol);
+            if (!res.getStatusCode().isError()) {
+                String body = res.getBody();
+                if (body != null && !body.isEmpty()) {
+                    try (InputStream is = new ByteArrayInputStream(body.getBytes())) {
+                        JsonReader reader = Json.createReader(is);
+                        JsonObject jsObj = reader.readObject();
+                        String url = jsObj.getString("url");
+                        if (url.isEmpty() || url.isBlank()) {
+                            logoUrl = "/assets/images/na.png";
+                        } else {
+                            logoUrl = url;
+                        }
+                    }
+                }
+            }
+            userSvc.upsertUserStockLogo(symbol, logoUrl);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("url", logoUrl).build().toString());
     }
 
     @GetMapping(path = "/{symbol}/stonkprice")

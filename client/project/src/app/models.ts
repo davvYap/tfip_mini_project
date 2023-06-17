@@ -11,6 +11,10 @@ export interface Stock {
   price: string;
 }
 
+export interface StockLogo {
+  url: string;
+}
+
 export interface StocksData {
   data: Stock[];
 }
@@ -31,6 +35,7 @@ export interface PurchasedStock {
   name: string;
   marketPrice: number;
   percentage: number;
+  logo: string;
 }
 
 export interface PurchasedStocksCount {
@@ -40,6 +45,7 @@ export interface PurchasedStocksCount {
   cost: number;
   marketPrice: number;
   performance: number;
+  logo: string;
 }
 export interface UserSettings {
   theme: string;

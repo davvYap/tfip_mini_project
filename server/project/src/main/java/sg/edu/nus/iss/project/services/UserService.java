@@ -48,6 +48,14 @@ public class UserService {
         return userRepo.retrieveUserStocks(userId, limit, skip);
     }
 
+    public boolean upsertUserStockLogo(String symbol, String url) {
+        return userRepo.upsertUserStockLogo(symbol, url);
+    }
+
+    public String retrieveUserStockLogo(String symbol) {
+        return userRepo.retrieveUserStockLogo(symbol);
+    }
+
     public List<StockCount> retrieveUserStocksCount(String userId, int limit, int skip) {
         List<Stock> stocks = userRepo.retrieveUserStocks(userId, limit, skip);
 
@@ -99,7 +107,7 @@ public class UserService {
         return userRepo.insertStockMonthlyPerformanceMongo(symbol, prices);
     }
 
-    // @Scheduled(fixedDelay = 1 * 60 * 1000) // 5mins in milliseconds
+    // @Scheduled(fixedDelay = 1 * 60 * 1000) // 1mins in milliseconds
     // Scheduled method to delete documents at the end of the day
     @Scheduled(cron = "0 0 0 * * ?")
     public void deleteStockMonthlyPerformanceMongo() {
