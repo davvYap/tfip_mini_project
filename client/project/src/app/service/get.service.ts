@@ -5,6 +5,7 @@ import {
   MessageResponse,
   PurchasedStock,
   PurchasedStocksCount,
+  SoldStock,
   Stock,
   StockLogo,
   StockPrice,
@@ -115,6 +116,12 @@ export class GetService {
     );
   }
 
+  getUserSoldStocks(userId: string): Observable<SoldStock[]> {
+    return this.http.get<SoldStock[]>(
+      `http://localhost:8080/api/${userId}/sold_stocks`
+    );
+  }
+
   getUserStocksCount(userId: string): Observable<PurchasedStocksCount[]> {
     return this.http.get<PurchasedStocksCount[]>(
       `http://localhost:8080/api/${userId}/stocksCount`
@@ -183,6 +190,17 @@ export class GetService {
     let qp = new HttpParams().set('month', month).append('symbol', symbol);
     return this.http.get<StockQuantity>(
       `http://localhost:8080/api/${userId}/stock_qty_month`,
+      { params: qp }
+    );
+  }
+
+  getUserMonthlyPerformance(
+    userId: string,
+    year: number
+  ): Observable<number[]> {
+    let qp = new HttpParams().set('year', year);
+    return this.http.get<number[]>(
+      `http://localhost:8080/api/${userId}/monthly_performance`,
       { params: qp }
     );
   }

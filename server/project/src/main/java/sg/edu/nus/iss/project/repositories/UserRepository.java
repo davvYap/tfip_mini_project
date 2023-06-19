@@ -119,6 +119,7 @@ public class UserRepository {
         return logoUrl;
     }
 
+    // for deleting and updating user stock
     public Stock findUserStock(String userId, String purchaseId) {
         Query query = Query.query(Criteria.where("user_id").is(userId));
         Document d = mongo.findOne(query, Document.class, "stocks");
@@ -178,8 +179,21 @@ public class UserRepository {
         return false;
     }
 
+    public List<Stock> retrieveUserSoldStockMongo(String userId) {
+        Query query = Query.query(Criteria.where("user_id").is(userId));
+        Document d = mongo.findOne(query, Document.class, "sold_stocks");
+        if (d != null) {
+            List<Stock> stocks = d.getList("sold_stocks", Document.class).stream()
+                    .map(Stock::convertSoldStockFromDocument)
+                    .toList();
+            return stocks;
+        }
+        return null;
+    }
+
     public void saveUserStockMarketValueRedis(String userId, String symbol, double value) {
         redis.opsForHash().put(userId, symbol, String.valueOf(value));
+        redis.expireAt(userId, expirationDayInInstance());
         System.out.println("Redis saved stock market value for %s".formatted(symbol));
     }
 

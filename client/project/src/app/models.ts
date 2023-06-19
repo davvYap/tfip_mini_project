@@ -38,6 +38,19 @@ export interface PurchasedStock {
   logo: string;
 }
 
+export interface SoldStock {
+  soldId: string;
+  symbol: string;
+  price: number;
+  quantity: number;
+  fees: number;
+  date: number;
+  name: string;
+  netProfit: number;
+  percentage: number;
+  logo: string;
+}
+
 export interface PurchasedStocksCount {
   symbol: string;
   name: string;

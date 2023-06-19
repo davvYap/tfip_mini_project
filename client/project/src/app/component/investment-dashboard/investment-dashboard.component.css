@@ -2,6 +2,10 @@ h1 {
   font-family: "Press Start 2P", cursive;
 }
 
+.h3-font {
+  font-family: "Righteous", cursive;
+}
+
 .h1card {
   /* background: var(--surface-card); */
   padding: 2rem;

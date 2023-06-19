@@ -1,13 +1,18 @@
 package sg.edu.nus.iss.project.services;
 
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.swing.text.html.Option;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -97,6 +102,10 @@ public class UserService {
 
     public boolean updateUserStockMongo(String userId, Stock stock) {
         return userRepo.updateUserStockMongo(userId, stock);
+    }
+
+    public List<Stock> retrieveUserSoldStockMongo(String userId) {
+        return userRepo.retrieveUserSoldStockMongo(userId);
     }
 
     public boolean upsertUserYesterdayTotalValueMongo(String userId, double value) {
@@ -243,6 +252,120 @@ public class UserService {
         }
         return Optional.of(totalQuantity);
 
+    }
+
+    public List<String> getEndOfMonthForYear(int year) {
+        List<String> endOfMonthDates = new LinkedList<>();
+        LocalDate currentDate = LocalDate.now();
+        LocalDate yesterdayDate = currentDate.minusDays(1);
+
+        while (yesterdayDate.getDayOfWeek() == DayOfWeek.SUNDAY || yesterdayDate.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            yesterdayDate = yesterdayDate.minusDays(1);
+        }
+        int currMonth = yesterdayDate.getMonthValue();
+
+        // get end of month until curr month
+        for (int month = 1; month <= currMonth; month++) {
+            YearMonth yearMonth = YearMonth.of(year, month);
+            LocalDate endOfMonth = yearMonth.atEndOfMonth();
+
+            if (endOfMonth.isAfter(yesterdayDate)) {
+                endOfMonth = yesterdayDate;
+            }
+
+            while (endOfMonth.getDayOfWeek() == DayOfWeek.SATURDAY || endOfMonth.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                endOfMonth = endOfMonth.minusDays(1);
+            }
+
+            String formattedDate = endOfMonth.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            endOfMonthDates.add(formattedDate);
+        }
+        return endOfMonthDates;
+    }
+
+    public List<Double> getUserMonthlyPerformanceForYear(int year, String userId, int limit, int skip) {
+        List<String> endOfMonthDates = getEndOfMonthForYear(year); // [2023-01-31, 2023-02-28, 2023-03-31, 2023-04-28,
+                                                                   // 2023-05-31, 2023-06-19]
+        String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+        Map<String, List<Stock>> allStockMap = new HashMap<>();
+        Map<String, List<Stock>> stockWithMarketPriceMap = new HashMap<>();
+        List<Double> monthlyPerformance = new LinkedList<>();
+
+        // put stocks into map based on month
+        for (int i = 0; i < months.length; i++) {
+            String month = months[i];
+            Optional<List<Stock>> stocksByMonthOpt = retrieveUserStockByMonth(userId, limit, skip, month);
+            if (stocksByMonthOpt.isPresent()) {
+                List<Stock> stocksByMonth = stocksByMonthOpt.get();
+                allStockMap.put(month, stocksByMonth);
+            }
+        }
+
+        // set stocks market price based on months
+        for (int i = 0; i <= endOfMonthDates.size(); i++) {
+            String month = months[i];
+            List<Stock> stocksByMonth = allStockMap.get(month);
+            for (Stock stock : stocksByMonth) {
+                Optional<List<StockPrice>> stockPriceOpt = retrieveStockMonthlyPerformanceMongo(stock.getSymbol());
+                if (stockPriceOpt.isPresent()) {
+                    List<StockPrice> stockMarketPrices = stockPriceOpt.get();
+                    for (StockPrice stockPrice : stockMarketPrices) {
+                        if (stockPrice.getDate().equalsIgnoreCase(endOfMonthDates.get(i))) {
+                            double stockMarketPrice = stockPrice.getClosePrice();
+                            stock.setMarketPrice(stockMarketPrice);
+                        }
+                    }
+                }
+            }
+            stockWithMarketPriceMap.put(month, stocksByMonth);
+        }
+
+        double totalCapital = 0.0;
+        // get list of performance per month
+        for (int i = 0; i < endOfMonthDates.size(); i++) {
+            String month = months[i];
+            // System.out.println("Month of >>>" + month);
+            List<Stock> stocksByMonth = stockWithMarketPriceMap.get(month);
+
+            // get capital
+            for (Stock stock : stocksByMonth) {
+                // System.out.println("Stock >>> " + stock.getSymbol());
+                totalCapital += (stock.getStrikePrice() * stock.getQuantity()) + stock.getFees();
+                // System.out.println("total capital >>> " + totalCapital);
+            }
+
+            // stock market price for curr month & multiply by accumulate qty from previous
+            // month till curr month
+            double totalStockMarketPrice = 0.0;
+            // for each stock
+            for (int j = 0; j <= i; j++) {
+                String startMonth = months[j];
+                // System.out.println("Start Month >>> " + startMonth);
+                String currEndOfMonthDate = endOfMonthDates.get(i);
+                // System.out.println("Curr end of Month >>> " + currEndOfMonthDate);
+                List<Stock> stocksForCurrMonth = stockWithMarketPriceMap.get(startMonth);
+                for (Stock stock : stocksForCurrMonth) {
+                    // System.out.println("Stock symobl >>> " + stock.getSymbol());
+                    Optional<List<StockPrice>> stockPriceOpt = retrieveStockMonthlyPerformanceMongo(stock.getSymbol());
+                    if (stockPriceOpt.isPresent()) {
+                        List<StockPrice> stockMarketPrices = stockPriceOpt.get();
+                        StockPrice sp = stockMarketPrices.stream()
+                                .filter(smp -> smp.getDate().equalsIgnoreCase(currEndOfMonthDate)).findFirst().get();
+                        double currMonthMarketPrice = sp.getClosePrice();
+                        // System.out.println("Curr month close price >>> " + currMonthMarketPrice);
+                        totalStockMarketPrice += stock.getQuantity() * currMonthMarketPrice;
+                        // System.out.println("total market price >>> " + totalStockMarketPrice);
+                    }
+                }
+            }
+            // System.out.println("Accumulated total market price >>> " +
+            // totalStockMarketPrice);
+            double performance = (totalStockMarketPrice - totalCapital) / totalCapital;
+            monthlyPerformance.add(performance * 100);
+            // System.out.println("--- End of month ---");
+        }
+
+        return monthlyPerformance;
     }
 
     // ***** UNUSED *****

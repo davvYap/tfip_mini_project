@@ -77,6 +77,10 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<String> getUserGoal(@RequestParam String userId) {
         double goal = userSvc.retrieveUserGoal(userId);
+        List<String> endofMonths = userSvc.getEndOfMonthForYear(2023);
+        System.out.println(endofMonths);
+        List<Double> performance = userSvc.getUserMonthlyPerformanceForYear(2023, userId, 100, 0);
+        System.out.println(performance);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("goal", goal).build().toString());
@@ -194,6 +198,25 @@ public class UserController {
 
     }
 
+    @GetMapping(path = "/{userId}/sold_stocks")
+    @ResponseBody
+    public ResponseEntity<String> getUserSoldStocks(@PathVariable String userId) {
+        JsonArrayBuilder jsArr = Json.createArrayBuilder();
+        List<Stock> soldStocks = userSvc.retrieveUserSoldStockMongo(userId);
+
+        if (soldStocks == null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(jsArr.build().toString());
+        }
+        for (Stock stock : soldStocks) {
+            jsArr.add(stock.toJsonObjectSoldStock());
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsArr.build().toString());
+    }
+
     @GetMapping(path = "/{userId}/stocksCount")
     public ResponseEntity<String> getUserStocksCount(@PathVariable String userId,
             @RequestParam(defaultValue = "100") int limit, @RequestParam(defaultValue = "0") int skip) {
@@ -247,6 +270,21 @@ public class UserController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("value", totalStockValue).build()
                         .toString());
+    }
+
+    @GetMapping(path = "/{userId}/monthly_performance")
+    @ResponseBody
+    public ResponseEntity<String> getUserMonthlyPerformance(@PathVariable String userId,
+            @RequestParam(defaultValue = "1000") int limit,
+            @RequestParam(defaultValue = "0") int skip, @RequestParam int year) {
+        List<Double> userPerformance = userSvc.getUserMonthlyPerformanceForYear(year, userId, limit, skip);
+
+        JsonArrayBuilder jsArr = Json.createArrayBuilder();
+        userPerformance.forEach(value -> jsArr.add(value));
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsArr.build().toString());
     }
 
     @GetMapping(path = "/{userId}/stocks_by_month")

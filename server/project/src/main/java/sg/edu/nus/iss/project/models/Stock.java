@@ -20,6 +20,8 @@ public class Stock {
     private long purchasedDate;
     private double fees;
     private LocalDate date;
+    private double netProfit;
+    private double marketPrice;
 
     public String getPurchaseId() {
         return purchaseId;
@@ -85,6 +87,22 @@ public class Stock {
         this.date = date;
     }
 
+    public double getNetProfit() {
+        return netProfit;
+    }
+
+    public void setNetProfit(double netProfit) {
+        this.netProfit = netProfit;
+    }
+
+    public double getMarketPrice() {
+        return marketPrice;
+    }
+
+    public void setMarketPrice(double marketPrice) {
+        this.marketPrice = marketPrice;
+    }
+
     public Document toDocument() {
         Document doc = new Document();
         doc.append("purchase_id", purchaseId);
@@ -122,6 +140,19 @@ public class Stock {
                 .build();
     }
 
+    public JsonObject toJsonObjectSoldStock() {
+        return Json.createObjectBuilder()
+                .add("soldId", purchaseId)
+                .add("name", stockName)
+                .add("quantity", quantity)
+                .add("price", strikePrice)
+                .add("fees", fees)
+                .add("symbol", symbol)
+                .add("date", purchasedDate)
+                .add("netProfit", netProfit)
+                .build();
+    }
+
     public static Stock convertFromJsonObject(String js) throws IOException {
         Stock s = null;
         if (js != null) {
@@ -152,6 +183,22 @@ public class Stock {
             s.setQuantity(d.getDouble("quantity"));
             s.setStrikePrice(d.getDouble("price"));
             s.setFees(d.getDouble("fees"));
+        }
+        return s;
+    }
+
+    public static Stock convertSoldStockFromDocument(Document d) {
+        Stock s = null;
+        if (d != null) {
+            s = new Stock();
+            s.setPurchaseId(d.getString("sold_id"));
+            s.setSymbol(d.getString("symbol"));
+            s.setStockName(d.getString("name"));
+            s.setPurchasedDate(d.getLong("date"));
+            s.setQuantity(d.getDouble("quantity"));
+            s.setStrikePrice(d.getDouble("price"));
+            s.setFees(d.getDouble("fees"));
+            s.setNetProfit(d.getDouble("net_profit"));
         }
         return s;
     }
