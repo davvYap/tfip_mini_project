@@ -51,3 +51,22 @@ th {
   border-radius: 10px;
   margin-bottom: 1rem;
 }
+
+#dummy-unrealized-profit {
+  display: none;
+}
+
+#show-icon {
+  display: none;
+}
+
+#unrealized-profit-row {
+  border: 1px solid whitesmoke;
+  border-radius: 15px;
+  padding: 1rem;
+  margin: 1rem;
+}
+
+.export-buttons {
+  margin-right: 1rem;
+}

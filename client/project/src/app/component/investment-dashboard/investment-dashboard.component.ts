@@ -1,7 +1,10 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, Input } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Table } from 'primeng/table';
+import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 import {
   Observable,
   Subject,
@@ -16,6 +19,8 @@ import {
   concatMap,
 } from 'rxjs';
 import {
+  Column,
+  ExportColumn,
   PurchasedStock,
   PurchasedStocksCount,
   SoldStock,
@@ -33,6 +38,11 @@ import { ThemeService } from 'src/app/service/theme.service';
 import { InvestmentComponent } from '../investment/investment.component';
 import { SellStockComponent } from '../sell-stock/sell-stock.component';
 import { UpdateService } from 'src/app/service/update.service';
+
+// define an interface for jsPDF autotable
+// interface jsPDFWithPlugin extends JSPDF.jsPDF {
+//   autotable: (options: UserOptions) => JSPDF.jsPDF;
+// }
 
 @Component({
   selector: 'app-investment-dashboard',
@@ -67,8 +77,12 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   soldStocks!: SoldStock[];
 
   unrealizedProfit: number = 0.0;
+  realizedProfit: number = -100;
 
   dialogRef!: DynamicDialogRef;
+
+  cols!: Column[];
+  exportColumns!: ExportColumn[];
 
   constructor(
     private getSvc: GetService,
@@ -169,6 +183,44 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.initiateLineChart();
       });
+
+    // NOTE EXPORT FUNCTION
+    this.cols = [
+      {
+        header: 'Symbol',
+        field: 'symbol',
+      },
+      {
+        header: 'Name',
+        field: 'name',
+      },
+      {
+        header: 'Date',
+        field: 'date',
+        customExportHeader: 'Transaction Date',
+      },
+      {
+        header: 'Quantity',
+        field: 'quantity',
+      },
+      {
+        header: 'Sold Price',
+        field: 'price',
+      },
+      {
+        header: 'Realized Profit',
+        field: 'netProfit',
+      },
+      {
+        header: '% ROI',
+        field: 'percentage',
+      },
+    ];
+
+    this.exportColumns = this.cols.map((col) => ({
+      title: col.header,
+      dataKey: col.field,
+    }));
   }
 
   ngOnDestroy(): void {
@@ -240,7 +292,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe((stockCounts) => {
         this.stocksCount = this.sortStockByMarketPrice(stockCounts);
-        this.calculateUnrealizedProfit(stockCounts);
+        this.unrealizedProfit = this.calculateUnrealizedProfit(stockCounts);
       });
   }
 
@@ -330,11 +382,12 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     };
   }
 
-  calculateUnrealizedProfit(stockCounts: PurchasedStocksCount[]) {
-    this.stocksCount.map(
-      (stockCount) =>
-        (this.unrealizedProfit += stockCount.marketPrice - stockCount.cost)
-    );
+  calculateUnrealizedProfit(stockCounts: PurchasedStocksCount[]): number {
+    let total: number = 0.0;
+    this.stocksCount.map((stockCount) => {
+      total += stockCount.marketPrice - stockCount.cost;
+    });
+    return total;
   }
 
   getStartDateOfYear(): string {
@@ -465,6 +518,10 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
 
   clear(table: Table) {
     table.clear();
+    const input1 = document.getElementById('input1') as HTMLInputElement;
+    const input2 = document.getElementById('input2') as HTMLInputElement;
+    input1.value = '';
+    input2.value = '';
   }
 
   deleteStock(purchaseId: string) {
@@ -522,9 +579,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         summary: 'Successful',
         detail: message,
       });
-      this.refreshTable();
-      this.refreshSoldStockTable();
-      this.refreshStockCountTable();
+      this.ngOnInit();
     });
   }
 
@@ -567,7 +622,16 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       .subscribe((soldStocks: SoldStock[]) => {
         this.soldStocks = soldStocks;
         this.loading = false;
+        this.realizedProfit = this.calculateRealizedProfit(soldStocks);
       });
+  }
+
+  calculateRealizedProfit(soldStocks: SoldStock[]): number {
+    let total: number = 0;
+    soldStocks.map((stock) => {
+      total += stock.netProfit;
+    });
+    return total;
   }
 
   refreshSoldStockTable() {
@@ -583,8 +647,39 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     }, 500);
   }
 
-  hideProfit(event: any) {
-    console.log(event);
+  hideProfit() {
+    const unrealizedProfit = document.getElementById('unrealized-profit');
+    const dummyUnrealizedProfit = document.getElementById(
+      'dummy-unrealized-profit'
+    );
+    const showIcon = document.getElementById('show-icon');
+    const hideIcon = document.getElementById('hide-icon');
+    if (unrealizedProfit!.style.display !== 'none') {
+      unrealizedProfit!.style.display = 'none';
+      dummyUnrealizedProfit!.style.display = 'inline';
+      hideIcon!.style.display = 'none';
+      showIcon!.style.display = 'inline';
+    } else {
+      unrealizedProfit!.style.display = 'inline';
+      dummyUnrealizedProfit!.style.display = 'none';
+      hideIcon!.style.display = 'inline';
+      showIcon!.style.display = 'none';
+    }
+  }
+
+  exportExcel(): void {
+    let tableData = document.getElementById('dt2');
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(tableData);
+    const workbook: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    XLSX.writeFile(workbook, 'document.xlsx');
+  }
+
+  exportPdf(): void {
+    // new instance of jsPDF
+    const doc = new jsPDF('landscape', 'px', 'a4');
+    (doc as any).autoTable(this.exportColumns, this.soldStocks);
+    doc.save('sold-stocks.pdf');
   }
 
   // UNUSED

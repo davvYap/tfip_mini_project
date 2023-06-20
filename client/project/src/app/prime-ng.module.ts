@@ -22,6 +22,7 @@ import { TableModule } from 'primeng/table';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { DividerModule } from 'primeng/divider';
+import { CardModule } from 'primeng/card';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -47,6 +48,7 @@ const primeModules: any[] = [
   ConfirmPopupModule,
   DynamicDialogModule,
   DividerModule,
+  CardModule,
 ];
 
 @NgModule({

@@ -77,10 +77,6 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<String> getUserGoal(@RequestParam String userId) {
         double goal = userSvc.retrieveUserGoal(userId);
-        List<String> endofMonths = userSvc.getEndOfMonthForYear(2023);
-        System.out.println(endofMonths);
-        List<Double> performance = userSvc.getUserMonthlyPerformanceForYear(2023, userId, 100, 0);
-        System.out.println(performance);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("goal", goal).build().toString());
@@ -276,7 +272,7 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<String> getUserMonthlyPerformance(@PathVariable String userId,
             @RequestParam(defaultValue = "1000") int limit,
-            @RequestParam(defaultValue = "0") int skip, @RequestParam int year) {
+            @RequestParam(defaultValue = "0") int skip, @RequestParam int year) throws IOException {
         List<Double> userPerformance = userSvc.getUserMonthlyPerformanceForYear(year, userId, limit, skip);
 
         JsonArrayBuilder jsArr = Json.createArrayBuilder();

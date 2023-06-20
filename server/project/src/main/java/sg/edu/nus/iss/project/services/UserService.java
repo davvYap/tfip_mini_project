@@ -1,5 +1,8 @@
 package sg.edu.nus.iss.project.services;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -12,12 +15,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.swing.text.html.Option;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.aggregation.StringOperators.Split;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonValue;
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockCount;
 import sg.edu.nus.iss.project.models.StockPrice;
@@ -28,6 +36,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepo;
+
+    @Autowired
+    private StockService stockSvc;
 
     public Boolean upsertUserTheme(String userId, String themeName) {
         return userRepo.upsertUserTheme(userId, themeName);
@@ -283,9 +294,24 @@ public class UserService {
         return endOfMonthDates;
     }
 
-    public List<Double> getUserMonthlyPerformanceForYear(int year, String userId, int limit, int skip) {
+    public String getStartDateOfTheYear(int year) {
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+
+        while (startDate.getDayOfWeek() == DayOfWeek.SATURDAY || startDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            startDate = startDate.plusDays(1);
+        }
+        String formattedDate = startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return formattedDate;
+    }
+
+    public List<Double> getUserMonthlyPerformanceForYear(int year, String userId, int limit, int skip)
+            throws IOException {
         List<String> endOfMonthDates = getEndOfMonthForYear(year); // [2023-01-31, 2023-02-28, 2023-03-31, 2023-04-28,
                                                                    // 2023-05-31, 2023-06-19]
+        // System.out.println("End of months >>> " + endOfMonthDates);
+        String startDateOfTheYear = getStartDateOfTheYear(year);
+        String currDate = endOfMonthDates.get(endOfMonthDates.size() - 1);
+
         String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
         Map<String, List<Stock>> allStockMap = new HashMap<>();
         Map<String, List<Stock>> stockWithMarketPriceMap = new HashMap<>();
@@ -345,13 +371,53 @@ public class UserService {
                 // System.out.println("Curr end of Month >>> " + currEndOfMonthDate);
                 List<Stock> stocksForCurrMonth = stockWithMarketPriceMap.get(startMonth);
                 for (Stock stock : stocksForCurrMonth) {
-                    // System.out.println("Stock symobl >>> " + stock.getSymbol());
+                    // System.out.println("Stock symbol >>> " + stock.getSymbol());
                     Optional<List<StockPrice>> stockPriceOpt = retrieveStockMonthlyPerformanceMongo(stock.getSymbol());
+
                     if (stockPriceOpt.isPresent()) {
+                        // if stock monthly performance is present in mongo
+                        // System.out.println("Stock Market Price is present");
                         List<StockPrice> stockMarketPrices = stockPriceOpt.get();
-                        StockPrice sp = stockMarketPrices.stream()
-                                .filter(smp -> smp.getDate().equalsIgnoreCase(currEndOfMonthDate)).findFirst().get();
-                        double currMonthMarketPrice = sp.getClosePrice();
+                        Optional<StockPrice> sp = stockMarketPrices.stream()
+                                .filter(smp -> smp.getDate().equalsIgnoreCase(currEndOfMonthDate)).findFirst();
+                        double currMonthMarketPrice = 0.0;
+                        if (sp.isPresent()) {
+                            currMonthMarketPrice = sp.get().getClosePrice();
+                        }
+                        // System.out.println("Curr month close price >>> " + currMonthMarketPrice);
+                        totalStockMarketPrice += stock.getQuantity() * currMonthMarketPrice;
+                        // System.out.println("total market price >>> " + totalStockMarketPrice);
+                    } else {
+                        // else call api to save stock performance into mongo and return the result
+                        System.out.println("Calling YH FINANCE API for %s monthly price".formatted(stock.getSymbol()));
+                        ResponseEntity<String> res = stockSvc.getStockMonthlyPrice(stock.getSymbol(),
+                                startDateOfTheYear, currDate);
+                        if (res.getStatusCode().isError()) {
+                            System.err.println("YH FINANCE API ERROR " + res.getBody());
+                            break;
+                        }
+                        String body = res.getBody();
+                        List<StockPrice> spList = new LinkedList<>();
+
+                        if (body != null && !body.isEmpty()) {
+                            try (InputStream is = new ByteArrayInputStream(body.getBytes())) {
+                                JsonReader reader = Json.createReader(is);
+                                JsonArray jrArr = reader.readArray();
+                                for (JsonValue jsonValue : jrArr) {
+                                    JsonObject jsObj = (JsonObject) jsonValue;
+                                    spList.add(StockPrice.convertFromJsonObject(jsObj));
+                                }
+                            }
+                        }
+                        // SAVE TO MONGO
+                        insertStockMonthlyPerformanceMongo(stock.getSymbol(), spList);
+
+                        Optional<StockPrice> sp = spList.stream()
+                                .filter(smp -> smp.getDate().equalsIgnoreCase(currEndOfMonthDate)).findFirst();
+                        double currMonthMarketPrice = 0.0;
+                        if (sp.isPresent()) {
+                            currMonthMarketPrice = sp.get().getClosePrice();
+                        }
                         // System.out.println("Curr month close price >>> " + currMonthMarketPrice);
                         totalStockMarketPrice += stock.getQuantity() * currMonthMarketPrice;
                         // System.out.println("total market price >>> " + totalStockMarketPrice);
@@ -360,8 +426,11 @@ public class UserService {
             }
             // System.out.println("Accumulated total market price >>> " +
             // totalStockMarketPrice);
-            double performance = (totalStockMarketPrice - totalCapital) / totalCapital;
-            monthlyPerformance.add(performance * 100);
+            double performance = 0.0;
+            if (totalStockMarketPrice > 0.0) {
+                performance = (totalStockMarketPrice - totalCapital) / totalCapital;
+                monthlyPerformance.add(performance * 100);
+            }
             // System.out.println("--- End of month ---");
         }
 

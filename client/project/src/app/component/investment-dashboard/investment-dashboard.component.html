@@ -13,16 +13,29 @@
         </ng-template>
 
         <div class="row justify-content-evenly align-items-center">
-          <div class="col-10 d-flex justify-content-center h3-font">
+          <div
+            class="col-10 d-flex justify-content-center h3-font"
+            id="unrealized-profit-row"
+          >
             <h2>
-              Unrealized Profit :
-              {{ unrealizedProfit | currency : "USD" : "code" }}
+              Unrealized P&L :
+              <span id="unrealized-profit">
+                {{ unrealizedProfit | currency : "USD" : "code" }}
+              </span>
+              <span id="dummy-unrealized-profit"> ----</span>
             </h2>
             <span class="d-flex align-items-center ms-2">
               <p-button
+                id="show-icon"
                 icon="pi pi-eye"
                 styleClass="p-button-rounded p-button-secondary p-button-text p-button-lg"
-                (onClick)="hideProfit($event)"
+                (onClick)="hideProfit()"
+              ></p-button>
+              <p-button
+                id="hide-icon"
+                icon="pi pi-eye-slash"
+                styleClass="p-button-rounded p-button-secondary p-button-text p-button-lg"
+                (onClick)="hideProfit()"
               ></p-button>
             </span>
           </div>
@@ -122,6 +135,7 @@
                 <span class="p-input-icon-left ml-auto">
                   <i class="pi pi-search"></i>
                   <input
+                    id="input1"
                     #input1
                     pInputText
                     type="text"
@@ -223,49 +237,114 @@
         </div>
       </p-tabPanel>
 
-      <!-- CRYPTO -->
+      <!-- SELL HISTORY -->
       <p-tabPanel>
         <ng-template pTemplate="header">
-          <!-- <i class="pi pi-bitcoin"></i> -->
           <span class="mx-2">History</span>
         </ng-template>
+        <div class="row justify-content-evenly align-items-center">
+          <div
+            class="col-10 d-flex justify-content-center h3-font"
+            id="unrealized-profit-row"
+          >
+            <h2>
+              Realized P&L :
+              <span id="unrealized-profit">
+                {{ realizedProfit | currency : "USD" : "code" }}
+              </span>
+              <span id="dummy-unrealized-profit"> ----</span>
+            </h2>
+            <span class="d-flex align-items-center ms-2">
+              <p-button
+                id="show-icon"
+                icon="pi pi-eye"
+                styleClass="p-button-rounded p-button-secondary p-button-text p-button-lg"
+                (onClick)="hideProfit()"
+              ></p-button>
+              <p-button
+                id="hide-icon"
+                icon="pi pi-eye-slash"
+                styleClass="p-button-rounded p-button-secondary p-button-text p-button-lg"
+                (onClick)="hideProfit()"
+              ></p-button>
+            </span>
+          </div>
+        </div>
         <div
-          class="row justify-content-center align-items-center m-5 stock-card"
+          class="row justify-content-center align-items-center m-2 stock-card"
         >
           <div class="col-10 d-flex justify-content-center h3-font">
             <h3>Stock Transactions</h3>
           </div>
           <p-table
+            id="dt2"
             #dt2
+            [columns]="cols"
             [value]="soldStocks"
             [paginator]="true"
             [loading]="loading"
-            [rows]="5"
+            [rows]="10"
             [showCurrentPageReport]="true"
             [tableStyle]="{ 'min-width': '50rem' }"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-            [rowsPerPageOptions]="[5, 10, 15]"
+            [rowsPerPageOptions]="[10, 15, 20]"
             [globalFilterFields]="['symbol', 'name', 'quantity', 'date']"
+            [exportHeader]="'customExportHeader'"
           >
             <ng-template pTemplate="caption">
               <div class="d-flex justify-content-between">
-                <button
-                  pButton
-                  label="Clear"
-                  class="p-button-outlined"
-                  icon="pi pi-filter-slash"
-                  (click)="clear(dt2)"
-                ></button>
-                <span class="p-input-icon-left ml-auto">
-                  <i class="pi pi-search"></i>
-                  <input
-                    #input2
-                    pInputText
-                    type="text"
-                    (input)="dt2.filterGlobal(input2.value, 'contains')"
-                    placeholder="Search keyword"
-                  />
-                </span>
+                <div>
+                  <button
+                    type="button"
+                    pButton
+                    pRipple
+                    icon="pi pi-file"
+                    (click)="dt2.exportCSV()"
+                    class="export-buttons"
+                    pTooltip="CSV"
+                    tooltipPosition="bottom"
+                  ></button>
+                  <button
+                    type="button"
+                    pButton
+                    pRipple
+                    icon="pi pi-file-excel"
+                    (click)="exportExcel()"
+                    class="p-button-success export-buttons"
+                    pTooltip="XLS"
+                    tooltipPosition="bottom"
+                  ></button>
+                  <button
+                    type="button"
+                    pButton
+                    pRipple
+                    icon="pi pi-file-pdf"
+                    (click)="exportPdf()"
+                    class="p-button-danger export-buttons"
+                    pTooltip="PDF"
+                    tooltipPosition="bottom"
+                  ></button>
+                </div>
+                <div>
+                  <button
+                    pButton
+                    label="Clear"
+                    class="p-button-outlined"
+                    icon="pi pi-filter-slash"
+                    (click)="clear(dt2)"
+                  ></button>
+                  <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input
+                      id="input2"
+                      #input2
+                      pInputText
+                      type="text"
+                      (input)="dt2.filterGlobal(input2.value, 'contains')"
+                      placeholder="Search keyword"
+                    />
+                  </span>
+                </div>
               </div>
             </ng-template>
             <ng-template pTemplate="header">
