@@ -283,6 +283,21 @@ public class UserController {
                 .body(jsArr.build().toString());
     }
 
+    @GetMapping(path = "/{userId}/stock_monthly_value")
+    @ResponseBody
+    public ResponseEntity<String> getUserStockMonthlyValue(@PathVariable String userId,
+            @RequestParam(defaultValue = "1000") int limit,
+            @RequestParam(defaultValue = "0") int skip, @RequestParam int year) throws IOException {
+        List<Double> userStockValue = userSvc.getUserMonthlyStockValueForYear(year, userId, limit, skip);
+
+        JsonArrayBuilder jsArr = Json.createArrayBuilder();
+        userStockValue.forEach(value -> jsArr.add(value));
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsArr.build().toString());
+    }
+
     @GetMapping(path = "/{userId}/stocks_by_month")
     @ResponseBody
     public ResponseEntity<String> getUserStocksByMonth(@PathVariable String userId,

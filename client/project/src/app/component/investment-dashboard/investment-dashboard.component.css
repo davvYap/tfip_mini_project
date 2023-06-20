@@ -52,7 +52,9 @@ th {
   margin-bottom: 1rem;
 }
 
-#dummy-unrealized-profit {
+#dummy-unrealized-profit,
+#dummy-realized-profit,
+#dummy-unrealized-value {
   display: none;
 }
 

@@ -67,13 +67,20 @@ export class GetService {
     );
   }
 
-  getUserGoal(userId: string): Promise<UserSettings> {
+  getUserGoalPromise(userId: string): Promise<UserSettings> {
     let qp = new HttpParams().set('userId', userId);
     return lastValueFrom(
       this.http.get<UserSettings>('http://localhost:8080/api/goal', {
         params: qp,
       })
     );
+  }
+
+  getUserGoal(userId: string): Observable<UserSettings> {
+    let qp = new HttpParams().set('userId', userId);
+    return this.http.get<UserSettings>('http://localhost:8080/api/goal', {
+      params: qp,
+    });
   }
 
   getStocks(symbol: string): Observable<StocksData> {
@@ -201,6 +208,14 @@ export class GetService {
     let qp = new HttpParams().set('year', year);
     return this.http.get<number[]>(
       `http://localhost:8080/api/${userId}/monthly_performance`,
+      { params: qp }
+    );
+  }
+
+  getUserStockMonthlyValue(userId: string, year: number): Observable<number[]> {
+    let qp = new HttpParams().set('year', year);
+    return this.http.get<number[]>(
+      `http://localhost:8080/api/${userId}/stock_monthly_value`,
       { params: qp }
     );
   }

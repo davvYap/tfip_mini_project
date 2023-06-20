@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Chart } from 'chart.js';
+import { forkJoin, map, switchMap } from 'rxjs';
 import { LoginStatus, UserSettings } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
@@ -76,14 +77,39 @@ export class DashboardComponent implements OnInit {
     // this.investmentsValue +
     // this.propertiesValue +
     // this.miscValue;
-    this.portfolioPerformanceData = [28, 48, 40, 19, 86, 27, 30];
+
+    // LINE CHART
+    this.getSvc
+      .getUserStockMonthlyValue(this.getSvc.userId, new Date().getFullYear())
+      .pipe(
+        switchMap((res) => {
+          let observables = [];
+          const observable = this.getSvc.getUserGoal(this.getSvc.userId);
+          observables.push(observable);
+          return forkJoin(observables).pipe(
+            map((goal) => {
+              this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(
+                goal[0].goal
+              );
+              return res;
+            })
+          );
+        }),
+        map((res) => {
+          this.portfolioPerformanceData = res;
+        })
+      )
+      .subscribe(() => {
+        console.log('line chart');
+        this.initiateLineChart();
+      });
 
     this.initiateDonutChart();
 
-    this.getSvc.getUserGoal(this.getSvc.userId).then((res) => {
-      this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
-      this.initiateLineChart();
-    });
+    // this.getSvc.getUserGoal(this.getSvc.userId).then((res) => {
+    //   this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
+    //   this.initiateLineChart();
+    // });
   }
 
   createGoalForm(): FormGroup {
@@ -100,7 +126,7 @@ export class DashboardComponent implements OnInit {
       this.postSvc.updateUserGoal(this.getSvc.userId, goal).then((res) => {
         console.log(res);
       });
-      this.getSvc.getUserGoal(this.getSvc.userId).then((res) => {
+      this.getSvc.getUserGoalPromise(this.getSvc.userId).then((res) => {
         this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
         this.initiateLineChart();
       });

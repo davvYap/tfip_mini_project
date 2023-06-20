@@ -2,9 +2,6 @@ import { Component, OnInit, OnDestroy, ViewChild, Input } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Table } from 'primeng/table';
-import * as XLSX from 'xlsx';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
 import {
   Observable,
   Subject,
@@ -38,11 +35,7 @@ import { ThemeService } from 'src/app/service/theme.service';
 import { InvestmentComponent } from '../investment/investment.component';
 import { SellStockComponent } from '../sell-stock/sell-stock.component';
 import { UpdateService } from 'src/app/service/update.service';
-
-// define an interface for jsPDF autotable
-// interface jsPDFWithPlugin extends JSPDF.jsPDF {
-//   autotable: (options: UserOptions) => JSPDF.jsPDF;
-// }
+import { ExportService } from 'src/app/service/export.service';
 
 @Component({
   selector: 'app-investment-dashboard',
@@ -76,13 +69,16 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   soldStocks$!: Subscription;
   soldStocks!: SoldStock[];
 
+  totalStockMarketValue: number = 0.0;
   unrealizedProfit: number = 0.0;
-  realizedProfit: number = -100;
+  realizedProfit: number = 0.0;
 
   dialogRef!: DynamicDialogRef;
 
-  cols!: Column[];
-  exportColumns!: ExportColumn[];
+  portfolioTableCols!: Column[];
+  portfolioTableExportColumns!: ExportColumn[];
+  soldTableCols!: Column[];
+  soldTableExportColumns!: ExportColumn[];
 
   constructor(
     private getSvc: GetService,
@@ -91,7 +87,8 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     private confirmationSvc: ConfirmationService,
     private messageSvc: MessageService,
     private dialogSvc: DialogService,
-    private updateSvc: UpdateService
+    private updateSvc: UpdateService,
+    private exportSvc: ExportService
   ) {}
 
   ngOnInit() {
@@ -184,8 +181,45 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         this.initiateLineChart();
       });
 
-    // NOTE EXPORT FUNCTION
-    this.cols = [
+    // NOTE EXPORT FUNCTION FOR BOTH TABLES
+
+    this.portfolioTableCols = [
+      {
+        header: 'Symbol',
+        field: 'symbol',
+      },
+      {
+        header: 'Name',
+        field: 'name',
+      },
+      {
+        header: 'Date',
+        field: 'date',
+        customExportHeader: 'Transaction Date',
+      },
+      {
+        header: 'Quantity',
+        field: 'quantity',
+      },
+      {
+        header: 'Bought Price',
+        field: 'price',
+      },
+      {
+        header: 'Market Price',
+        field: 'marketPrice',
+      },
+      {
+        header: '% Change',
+        field: 'percentage',
+      },
+    ];
+    this.portfolioTableExportColumns = this.portfolioTableCols.map((col) => ({
+      title: col.header,
+      dataKey: col.field,
+    }));
+
+    this.soldTableCols = [
       {
         header: 'Symbol',
         field: 'symbol',
@@ -217,7 +251,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       },
     ];
 
-    this.exportColumns = this.cols.map((col) => ({
+    this.soldTableExportColumns = this.soldTableCols.map((col) => ({
       title: col.header,
       dataKey: col.field,
     }));
@@ -292,6 +326,8 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe((stockCounts) => {
         this.stocksCount = this.sortStockByMarketPrice(stockCounts);
+        this.totalStockMarketValue =
+          this.calculateUserTotalStockMarketValue(stockCounts);
         this.unrealizedProfit = this.calculateUnrealizedProfit(stockCounts);
       });
   }
@@ -384,10 +420,20 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
 
   calculateUnrealizedProfit(stockCounts: PurchasedStocksCount[]): number {
     let total: number = 0.0;
-    this.stocksCount.map((stockCount) => {
+    stockCounts.map((stockCount) => {
       total += stockCount.marketPrice - stockCount.cost;
     });
     return total;
+  }
+
+  calculateUserTotalStockMarketValue(
+    stockCounts: PurchasedStocksCount[]
+  ): number {
+    let totalMarketValue = 0.0;
+    stockCounts.map((stockCount) => {
+      totalMarketValue += stockCount.marketPrice;
+    });
+    return totalMarketValue;
   }
 
   getStartDateOfYear(): string {
@@ -647,247 +693,85 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     }, 500);
   }
 
+  getProfitColorClass(unrealizedProfit: number): string {
+    return unrealizedProfit > 0 ? 'positive' : 'negative';
+  }
+
   hideProfit() {
+    const unrealizedMarketValue = document.getElementById(
+      'unrealized-market-value'
+    );
+    const dummyUnrealizedValue = document.getElementById(
+      'dummy-unrealized-value'
+    );
     const unrealizedProfit = document.getElementById('unrealized-profit');
     const dummyUnrealizedProfit = document.getElementById(
       'dummy-unrealized-profit'
     );
+    const realizedProfit = document.getElementById('realized-profit');
+    const dummyRealizedProfit = document.getElementById(
+      'dummy-realized-profit'
+    );
     const showIcon = document.getElementById('show-icon');
     const hideIcon = document.getElementById('hide-icon');
-    if (unrealizedProfit!.style.display !== 'none') {
+    if (
+      unrealizedMarketValue!.style.display !== 'none' ||
+      unrealizedProfit!.style.display !== 'none'
+    ) {
       unrealizedProfit!.style.display = 'none';
+      unrealizedMarketValue!.style.display = 'none';
       dummyUnrealizedProfit!.style.display = 'inline';
+      dummyUnrealizedValue!.style.display = 'inline';
       hideIcon!.style.display = 'none';
       showIcon!.style.display = 'inline';
     } else {
       unrealizedProfit!.style.display = 'inline';
+      unrealizedMarketValue!.style.display = 'inline';
       dummyUnrealizedProfit!.style.display = 'none';
+      dummyUnrealizedValue!.style.display = 'none';
+      hideIcon!.style.display = 'inline';
+      showIcon!.style.display = 'none';
+    }
+
+    if (realizedProfit!.style.display !== 'none') {
+      realizedProfit!.style.display = 'none';
+      dummyRealizedProfit!.style.display = 'inline';
+      hideIcon!.style.display = 'none';
+      showIcon!.style.display = 'inline';
+    } else {
+      realizedProfit!.style.display = 'inline';
+      dummyRealizedProfit!.style.display = 'none';
       hideIcon!.style.display = 'inline';
       showIcon!.style.display = 'none';
     }
   }
 
-  exportExcel(): void {
-    let tableData = document.getElementById('dt2');
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(tableData);
-    const workbook: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    XLSX.writeFile(workbook, 'document.xlsx');
+  exportExcelPortfolio(): void {
+    this.exportSvc.exportExcel('dt1', 'portfolio');
   }
 
-  exportPdf(): void {
-    // new instance of jsPDF
-    const doc = new jsPDF('landscape', 'px', 'a4');
-    (doc as any).autoTable(this.exportColumns, this.soldStocks);
-    doc.save('sold-stocks.pdf');
+  exportExcelSoldStocks(): void {
+    this.exportSvc.exportExcel('dt2', 'stock-history');
   }
 
-  // UNUSED
-  // this.getSvc
-  //   .getUserStocksCount(this.getSvc.userId)
-  //   .pipe(
-  //     tap((sc) => {
-  //       // GET USER EACH MONTH CAPTIAL SPENT ON STOCKS
-  //       const observables$: Observable<PurchasedStock[]>[] = [];
-  //       for (let i = 0; i < this.months.length; i++) {
-  //         const month = this.months[i];
-  //         const observable = this.getSvc.getUserStockByMonth(
-  //           this.getSvc.userId,
-  //           month
-  //         );
-  //         observables$.push(observable);
-  //       }
+  exportPdfPortfolio(): void {
+    this.exportSvc.exportPdf(
+      this.portfolioTableExportColumns,
+      this.stocks,
+      'portfolio'
+    );
+  }
 
-  //       forkJoin(observables$).subscribe((results) => {
-  //         for (let i = 0; i < results.length; i++) {
-  //           let totalCost = 0;
-  //           const month = this.months[i];
-  //           const stocks: PurchasedStock[] = results[i];
+  exportPdfSoldStocks(): void {
+    // method 1
+    // const doc = new jsPDF('landscape', 'px', 'a4');
+    // (doc as any).autoTable(this.exportColumns, this.soldStocks);
 
-  //           for (let j = 0; j < stocks.length; j++) {
-  //             totalCost +=
-  //               stocks[j].price * stocks[j].quantity + stocks[j].fees;
-  //           }
-
-  //           // console.log(`${month}`, totalCost);
-  //           this.userMonthlyCapital.push({
-  //             month: month,
-  //             capital: totalCost,
-  //           });
-  //         }
-  //         // console.log('userTotalCapitalPerMonth', this.userMonthlyCapital);
-  //       });
-  //     }),
-  //     switchMap((sc) => {
-  //       // GET EACH STOCK MONTHLY QUANTITY
-  //       sc.forEach((stock) => {
-  //         let stkQty: number[] = [];
-  //         for (let i = 0; i < this.months.length; i++) {
-  //           const month = this.months[i];
-  //           this.getSvc
-  //             .getStockQtyByMonth(this.getSvc.userId, month, stock.symbol)
-  //             .subscribe((qty) => {
-  //               stkQty.push(qty.quantity);
-  //             });
-  //         }
-  //         this.stockMonthlyQuantiy.push({
-  //           symbol: stock.symbol,
-  //           quantity: stkQty,
-  //         });
-  //       });
-  //       // console.log('stockMonthlyQuantity', this.stockMonthlyQuantiy);
-  //       const smq = [...this.stockMonthlyQuantiy];
-  //       //   console.log('smq1', smq);
-  //       const observables = forkJoin({
-  //         sc: of(sc),
-  //         sq: of(smq),
-  //       });
-  //       return observables;
-  //     }),
-  //     switchMap((observables) => {
-  //       // GET EACH STOCK MONTHLY PRICE
-  //       const stockPricesObservables$: Observable<StocksMonthlyPrice>[] =
-  //         observables.sc.map((stockCount) => {
-  //           // map() => stream() in java
-  //           const symbol: string = stockCount.symbol;
-  //           return this.getSvc
-  //             .getStockMonthlyPrice(symbol, this.startDate, this.currDate)
-  //             .pipe(
-  //               map((stockPrice: StockPrice[]) => {
-  //                 for (let i = 0; i < stockPrice.length; i++) {
-  //                   const stock = stockPrice[i];
-  //                   const date = stock.date.substring(0, 10);
-  //                   stock.date = date;
-  //                 }
-  //                 const marketPrice: number[] = this.getStockMonthlyPrice(
-  //                   stockPrice,
-  //                   this.endOfMonth
-  //                 );
-  //                 return {
-  //                   symbol: symbol,
-  //                   marketPrice: marketPrice,
-  //                 };
-  //               })
-  //             );
-  //         });
-
-  //       // to check the results
-  //       forkJoin(stockPricesObservables$).subscribe((results) => {
-  //         this.stocksMonthlyPrice = results;
-  //         // console.log('stockMonthlyPrice', this.stocksMonthlyPrice);
-  //       });
-
-  //       // combine all results to calculate user performance
-  //       const finalObs = forkJoin(stockPricesObservables$)
-  //         .pipe(
-  //           concatMap((res) => {
-  //             const mergeResult = {
-  //               sp: res,
-  //               sq: observables.sq,
-  //             };
-  //             return of(mergeResult);
-  //           })
-  //         )
-  //         .subscribe((finalResults) => {
-  //           this.userStockData = this.calculateUserPerformance(
-  //             finalResults.sq,
-  //             finalResults.sp,
-  //             this.userMonthlyCapital,
-  //             this.months
-  //           );
-  //           console.log('userStockData', this.userStockData);
-  //           this.initiateLineChart();
-  //         });
-  //       return of(finalObs);
-  //     })
-  //   )
-  //   .subscribe();
-
-  // calculateUserPerformance(
-  //   smq: StocksMonthlyQuantity[],
-  //   smp: StocksMonthlyPrice[],
-  //   uc: UserMonthlyCapital[],
-  //   months: string[]
-  // ): number[] {
-  //   // console.log('function smq', smq);
-  //   // console.log('function smp', smp);
-  //   // console.log('function uc', uc);
-  //   let totalCap = 0;
-  //   uc.map((cap) => {
-  //     totalCap += cap.capital;
-  //   });
-  //   // console.log('total capital', totalCap);
-  //   let userPerformance: number[] = [];
-  //   let previousMonthAccCapital = 0;
-  //   for (let i = 0; i < months.length; i++) {
-  //     //   console.log(`${this.months[i]}`);
-  //     const month = months[i];
-
-  //     let totalMonthlyMarketPrice = this.calculateAccumulateStockMarketPrice(
-  //       month,
-  //       months,
-  //       smq,
-  //       smp
-  //     );
-
-  //     if (uc[i].month === month && totalMonthlyMarketPrice != 0) {
-  //       // console.log(`cap for ${month}`, uc[i].capital);
-  //       const cap = uc[i].capital + previousMonthAccCapital;
-  //       // console.log('cap', cap);
-  //       const price = totalMonthlyMarketPrice;
-  //       // console.log('price', price);
-  //       const performance: number = ((price - cap) / cap) * 100;
-  //       userPerformance.push(performance);
-  //       // console.log('performance', performance);
-  //       previousMonthAccCapital += uc[i].capital;
-  //       // console.log('prev cap', previousMonthAccCapital);
-  //     }
-  //   }
-  //   return userPerformance;
-  // }
-
-  // calculateAccumulateStockMarketPrice(
-  //   month: string,
-  //   months: string[],
-  //   smq: StocksMonthlyQuantity[],
-  //   smp: StocksMonthlyPrice[]
-  // ): number {
-  //   const index: number = months.indexOf(month);
-  //   let totalMonthlyMarketPrice = 0;
-  //   for (let i = 0; i < index + 1; i++) {
-  //     //   console.log('i', i);
-  //     // get user stocks month performance
-  //     for (let j = 0; j < smq.length; j++) {
-  //       for (let k = 0; k < smp.length; k++) {
-  //         const sqRep = smq[j];
-  //         const spRep = smp[k];
-  //         if (sqRep.symbol === spRep.symbol) {
-  //           // console.log(`sqRep: ${sqRep.symbol} --- spRep: ${spRep.symbol}`);
-  //           if (!isNaN(sqRep.quantity[i]) && !isNaN(spRep.marketPrice[index])) {
-  //             totalMonthlyMarketPrice +=
-  //               sqRep.quantity[i] * spRep.marketPrice[index];
-  //           }
-  //           // console.log('total mp', totalMonthlyMarketPrice);
-  //         }
-  //       }
-  //     }
-  //   }
-  //   return totalMonthlyMarketPrice;
-  // }
-
-  // getStockMonthlyPrice(
-  //   stockPrices: StockPrice[],
-  //   endOfMonth: string[]
-  // ): number[] {
-  //   let sp: number[] = [];
-  //   for (let i = 0; i < stockPrices.length; i++) {
-  //     const stockPrice = stockPrices[i];
-  //     for (let j = 0; j < endOfMonth.length; j++) {
-  //       if (stockPrice.date === endOfMonth[j]) {
-  //         sp.push(stockPrice.close);
-  //       }
-  //     }
-  //   }
-  //   return sp.reverse();
-  // }
+    // method 2
+    this.exportSvc.exportPdf(
+      this.soldTableExportColumns,
+      this.soldStocks,
+      'stock-history'
+    );
+  }
 }
