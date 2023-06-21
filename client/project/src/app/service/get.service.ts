@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import {
+  Categories,
   LoginStatus,
   MessageResponse,
   PurchasedStock,
@@ -220,6 +221,13 @@ export class GetService {
     );
   }
 
+  getUserCategories(userId: string): Observable<Categories[]> {
+    return this.http.get<Categories[]>(
+      `http://localhost:8080/api/${userId}/categories`
+    );
+  }
+
+  // EXTRA
   getEndOfMonth(months: string[], month: string): string {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();

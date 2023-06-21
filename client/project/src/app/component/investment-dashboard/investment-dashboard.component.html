@@ -45,9 +45,22 @@
                 Unrealized P&L :
                 <span
                   id="unrealized-profit"
+                  class="fw-lighter"
                   [className]="getProfitColorClass(unrealizedProfit)"
                 >
-                  {{ unrealizedProfit | currency : "USD" : "code" }}
+                  <i
+                    [class]="getProfitIcon(unrealizedProfit)"
+                    style="font-size: 1.5rem"
+                  ></i>
+                  {{ unrealizedProfit | currency : "USD" : "code" }} (
+                  <span class="fw-lighter">
+                    {{
+                      unrealizedProfit /
+                        (totalStockMarketValue - unrealizedProfit)
+                        | percent : "1.2-2"
+                    }}
+                  </span>
+                  )
                 </span>
                 <span id="dummy-unrealized-profit"> ----</span>
               </h3>
@@ -230,11 +243,19 @@
                   >
                     <p-avatar
                       [image]="stock.logo"
-                      styleClass="mr-2"
+                      class="me-2"
                       shape="circle"
                     ></p-avatar>
                     <span>
-                      {{ stock.symbol }}
+                      <p-button
+                        [label]="stock.symbol"
+                        styleClass="p-button-text p-button-primary"
+                        (onClick)="goToYahoo(stock.symbol)"
+                        [pTooltip]="showUrl(stock.symbol)"
+                        tooltipPosition="right"
+                      >
+                      </p-button>
+                      <!-- {{ stock.symbol }} -->
                     </span>
                   </span>
                 </td>

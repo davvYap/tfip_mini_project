@@ -106,3 +106,10 @@ export interface ExportColumn {
   title: string;
   dataKey: string;
 }
+
+export interface Categories {
+  categoryId: number;
+  categoryName: string;
+  type: string;
+  total: number;
+}

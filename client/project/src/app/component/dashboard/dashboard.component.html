@@ -16,34 +16,28 @@
     </p-fieldset>
   </div>
 
-  <div class="custom">
-    <div class="row justify-content-evenly align-items-center">
-      <!-- DONUT CHART -->
-      <div class="col-4 card g-2">
-        <p-chart
-          type="doughnut"
-          [data]="donutData"
-          [options]="donutOptions"
-        ></p-chart>
-      </div>
+  <div class="row justify-content-evenly align-items-center g-2">
+    <!-- DONUT CHART -->
+    <div class="col-4 card custom">
+      <p-chart
+        type="doughnut"
+        [data]="donutData"
+        [options]="donutOptions"
+      ></p-chart>
+    </div>
 
-      <!-- LINE CHART -->
-      <div class="col-7 card g-2">
-        <div class="d-flex flex-row-reverse">
-          <p-button
-            (click)="op.toggle($event)"
-            icon="pi pi-chart-line"
-            label="Set Goal"
-            styleClass="p-button-rounded"
-            pTooltip="Set your goal here"
-          ></p-button>
-        </div>
-        <p-chart
-          type="line"
-          [data]="lineData"
-          [options]="lineOptions"
-        ></p-chart>
+    <!-- LINE CHART -->
+    <div class="col-7 card custom">
+      <div class="d-flex flex-row-reverse">
+        <p-button
+          (click)="op.toggle($event)"
+          icon="pi pi-chart-line"
+          label="Set Goal"
+          styleClass="p-button-rounded"
+          pTooltip="Set your goal here"
+        ></p-button>
       </div>
+      <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
     </div>
   </div>
 
@@ -55,7 +49,7 @@
           pInputText
           pKeyFilter="money"
           class="p-inputtext-sm"
-          placeholder="Your goal $$$"
+          placeholder="Press 'Enter' to submit"
           formControlName="goal"
           (keypress)="submitGoal($event)"
         />

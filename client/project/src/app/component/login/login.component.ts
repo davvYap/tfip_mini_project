@@ -9,6 +9,7 @@ import { MessageService, PrimeNGConfig } from 'primeng/api';
 import { Router } from '@angular/router';
 import { GetService } from 'src/app/service/get.service';
 import { ThemeService } from 'src/app/service/theme.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-login',
@@ -27,10 +28,12 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private router: Router,
     private getSvc: GetService,
     private messageService: MessageService,
-    private themeSvc: ThemeService
+    private themeSvc: ThemeService,
+    private title: Title
   ) {}
 
   ngOnInit(): void {
+    this.title.setTitle('Assets Management | Login');
     this.primengConfig.ripple = true;
     this.getSvc.isLogin = false;
     this.loginTitle = 'Login';

@@ -268,20 +268,20 @@ public class UserService {
     public List<String> getEndOfMonthForYear(int year) {
         List<String> endOfMonthDates = new LinkedList<>();
         LocalDate currentDate = LocalDate.now();
-        LocalDate yesterdayDate = currentDate.minusDays(1);
+        // LocalDate yesterdayDate = currentDate.minusDays(1);
 
-        while (yesterdayDate.getDayOfWeek() == DayOfWeek.SUNDAY || yesterdayDate.getDayOfWeek() == DayOfWeek.SATURDAY) {
-            yesterdayDate = yesterdayDate.minusDays(1);
+        while (currentDate.getDayOfWeek() == DayOfWeek.SUNDAY || currentDate.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            currentDate = currentDate.minusDays(1);
         }
-        int currMonth = yesterdayDate.getMonthValue();
+        int currMonth = currentDate.getMonthValue();
 
         // get end of month until curr month
         for (int month = 1; month <= currMonth; month++) {
             YearMonth yearMonth = YearMonth.of(year, month);
             LocalDate endOfMonth = yearMonth.atEndOfMonth();
 
-            if (endOfMonth.isAfter(yesterdayDate)) {
-                endOfMonth = yesterdayDate;
+            if (endOfMonth.isAfter(currentDate)) {
+                endOfMonth = currentDate;
             }
 
             while (endOfMonth.getDayOfWeek() == DayOfWeek.SATURDAY || endOfMonth.getDayOfWeek() == DayOfWeek.SUNDAY) {
@@ -304,11 +304,24 @@ public class UserService {
         return formattedDate;
     }
 
+    public String getYesterdayDate() {
+        LocalDate currentDate = LocalDate.now();
+        LocalDate yesterdayDate = currentDate.minusDays(1);
+
+        while (yesterdayDate.getDayOfWeek() == DayOfWeek.SUNDAY || yesterdayDate.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            yesterdayDate = currentDate.minusDays(1);
+        }
+
+        String formattedDate = yesterdayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return formattedDate;
+    }
+
     public List<Double> getUserMonthlyPerformanceForYear(int year, String userId, int limit, int skip)
             throws IOException {
         List<String> endOfMonthDates = getEndOfMonthForYear(year); // [2023-01-31, 2023-02-28, 2023-03-31, 2023-04-28,
-                                                                   // 2023-05-31, 2023-06-19]
-        // System.out.println("End of months >>> " + endOfMonthDates);
+                                                                   // 2023-05-31, TODAYS DATE]
+        endOfMonthDates.add(getYesterdayDate());
+        System.out.println("End of months >>> " + endOfMonthDates);
         String startDateOfTheYear = getStartDateOfTheYear(year);
         String currDate = endOfMonthDates.get(endOfMonthDates.size() - 1);
 
@@ -440,7 +453,8 @@ public class UserService {
     public List<Double> getUserMonthlyStockValueForYear(int year, String userId, int limit, int skip)
             throws IOException {
         List<String> endOfMonthDates = getEndOfMonthForYear(year); // [2023-01-31, 2023-02-28, 2023-03-31, 2023-04-28,
-                                                                   // 2023-05-31, 2023-06-19]
+                                                                   // 2023-05-31, TODAYS DATE]
+        endOfMonthDates.add(getYesterdayDate());
         // System.out.println("End of months >>> " + endOfMonthDates);
         String startDateOfTheYear = getStartDateOfTheYear(year);
         String currDate = endOfMonthDates.get(endOfMonthDates.size() - 1);

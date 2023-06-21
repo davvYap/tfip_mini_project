@@ -7,6 +7,7 @@ import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
 import { v4 as uuidv4 } from 'uuid';
+import { Title } from '@angular/platform-browser';
 @Component({
   selector: 'app-investment',
   templateUrl: './investment.component.html',
@@ -26,10 +27,12 @@ export class InvestmentComponent implements OnInit, OnDestroy {
     private getSvc: GetService,
     private postSvc: PostService,
     private messageSvc: MessageService,
-    private themeSvc: ThemeService
+    private themeSvc: ThemeService,
+    private title: Title
   ) {}
 
   ngOnInit() {
+    this.title.setTitle('Assets Management | Add Stock');
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.investmentForm = this.createForm();
     let today = new Date();

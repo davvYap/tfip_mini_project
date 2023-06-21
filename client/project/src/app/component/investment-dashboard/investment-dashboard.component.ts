@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChild, Input } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Table } from 'primeng/table';
+import { Title } from '@angular/platform-browser';
 import {
   Observable,
   Subject,
@@ -88,12 +89,14 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     private messageSvc: MessageService,
     private dialogSvc: DialogService,
     private updateSvc: UpdateService,
-    private exportSvc: ExportService
+    private exportSvc: ExportService,
+    private title: Title
   ) {}
 
   ngOnInit() {
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.themeSvc.initiateChartSetting();
+    this.title.setTitle('Assets Management | Investment');
 
     // HERE FOR STOCK COUNT
     this.stocksCount = [];
@@ -451,20 +454,15 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
 
   getCurrentDate(): string {
     const currDate = new Date();
-    const yesterdayDate = new Date(currDate);
-    yesterdayDate.setDate(currDate.getDate() - 1);
+    // const yesterdayDate = new Date(currDate);
+    // yesterdayDate.setDate(currDate.getDate() - 1);
 
-    while (yesterdayDate.getDay() === 0 || yesterdayDate.getDay() === 6) {
-      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    while (currDate.getDay() === 0 || currDate.getDay() === 6) {
+      currDate.setDate(currDate.getDate() - 1);
     }
-    const formattedDate = `${yesterdayDate.getFullYear()}-${(
-      yesterdayDate.getMonth() + 1
-    )
+    const formattedDate = `${currDate.getFullYear()}-${(currDate.getMonth() + 1)
       .toString()
-      .padStart(2, '0')}-${yesterdayDate
-      .getDate()
-      .toString()
-      .padStart(2, '0')}`;
+      .padStart(2, '0')}-${currDate.getDate().toString().padStart(2, '0')}`;
     return formattedDate;
   }
 
@@ -773,5 +771,21 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       this.soldStocks,
       'stock-history'
     );
+  }
+
+  goToYahoo(symbol: string) {
+    const url = new URL(`https://finance.yahoo.com/quote/${symbol}`);
+    url.searchParams.append('p', symbol);
+    window.open(url.href, '_blank');
+  }
+
+  showUrl(symbol: string): string {
+    const url = new URL(`https://finance.yahoo.com/quote/${symbol}`);
+    url.searchParams.append('p', symbol);
+    return url.href;
+  }
+
+  getProfitIcon(profit: number): string {
+    return profit > 0 ? 'pi pi-fw pi-arrow-up' : 'pi pi-fw pi-arrow-down';
   }
 }

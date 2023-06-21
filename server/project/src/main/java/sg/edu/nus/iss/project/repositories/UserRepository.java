@@ -257,10 +257,10 @@ public class UserRepository {
     // EXTRA
     public Instant expirationDayInInstance() {
         LocalDate currDate = LocalDate.now();
-        System.out.println("currDate >>> " + currDate);
+        // System.out.println("currDate >>> " + currDate);
 
         LocalDateTime endOfDay = LocalDateTime.of(currDate, LocalTime.MAX);
-        System.out.println("endofDay >>> " + endOfDay);
+        // System.out.println("endofDay >>> " + endOfDay);
 
         Instant endOfDayInstant = endOfDay.atZone(ZoneId.systemDefault()).toInstant();
 

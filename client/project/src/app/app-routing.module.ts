@@ -6,6 +6,7 @@ import { loginGuard } from './service/route-guard';
 import { LogoutComponent } from './component/logout/logout.component';
 import { InvestmentComponent } from './component/investment/investment.component';
 import { InvestmentDashboardComponent } from './component/investment-dashboard/investment-dashboard.component';
+import { SavingsComponent } from './component/savings/savings.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [loginGuard] },
@@ -23,6 +24,11 @@ const routes: Routes = [
   {
     path: 'investment',
     component: InvestmentComponent,
+    canActivate: [loginGuard],
+  },
+  {
+    path: 'savings',
+    component: SavingsComponent,
     canActivate: [loginGuard],
   },
   { path: 'logout', component: LogoutComponent },

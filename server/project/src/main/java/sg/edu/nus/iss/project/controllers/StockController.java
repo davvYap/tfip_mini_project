@@ -120,7 +120,7 @@ public class StockController {
 
         ResponseEntity<String> response = stockSvc.getStockMonthlyPrice(symbol, sdate, edate);
         if (!response.getStatusCode().isError()) {
-
+            System.out.println("Calling YH FINANCE from CLIENT SIDE for %s".formatted(symbol));
             String res = response.getBody();
 
             List<StockPrice> spList = new LinkedList<>();

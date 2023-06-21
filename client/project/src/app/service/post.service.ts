@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { LoginStatus, MessageResponse, PurchasedStock } from '../models';
-import { lastValueFrom } from 'rxjs';
+import { Observable, lastValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -57,6 +57,23 @@ export class PostService {
         `http://localhost:8080/api/${userId}/addStock`,
         stock
       )
+    );
+  }
+
+  addCategory(
+    userId: string,
+    category: string,
+    type: string
+  ): Observable<MessageResponse> {
+    let data = new HttpParams().set('category', category).append('type', type);
+    const httpHearders = new HttpHeaders().set(
+      'Content-Type',
+      'application/x-www-form-urlencoded'
+    );
+    return this.http.post<MessageResponse>(
+      `http://localhost:8080/api/${userId}/add_category`,
+      data.toString(),
+      { headers: httpHearders }
     );
   }
 }

@@ -1,0 +1,113 @@
+<div class="container">
+  <div class="row justify-content-center align-items-center g-2">
+    <div class="col-4 my-4">
+      <p-fieldset
+        inputId="ac1"
+        legend="Income"
+        [toggleable]="true"
+        class="text-center"
+      >
+        <ng-template pTemplate="header">
+          <div class="ms-2">
+            <i class="pi pi-money-bill" style="font-size: 1.2rem"></i>
+          </div>
+        </ng-template>
+        <h3>
+          <span *ngIf="totalIncome; else loading">
+            {{ totalIncome | currency }}
+          </span>
+        </h3>
+      </p-fieldset>
+    </div>
+
+    <div class="col-4 my-4">
+      <p-fieldset
+        inputId="ac2"
+        legend="Expense"
+        [toggleable]="true"
+        class="text-center"
+      >
+        <ng-template pTemplate="header">
+          <div class="ms-2">
+            <i class="pi pi-dollar" style="font-size: 1.2rem"></i>
+          </div>
+        </ng-template>
+        <h3>
+          <span *ngIf="totalExpense; else loading">
+            {{ totalExpense | currency }}
+          </span>
+        </h3>
+      </p-fieldset>
+    </div>
+
+    <div class="col-4 my-4">
+      <p-fieldset
+        inputId="ac3"
+        legend="Balance"
+        [toggleable]="true"
+        class="text-center"
+      >
+        <ng-template pTemplate="header">
+          <div class="ms-2">
+            <i class="pi pi-wallet" style="font-size: 1.2rem"></i>
+          </div>
+        </ng-template>
+        <h3>
+          <span *ngIf="totalBalance; else loading">
+            {{ totalBalance | currency }}
+          </span>
+        </h3>
+      </p-fieldset>
+    </div>
+  </div>
+
+  <div class="row justify-content-evenly align-items-center g-2">
+    <div class="col-4 card custom">
+      <div class="d-flex flex-row-reverse"></div>
+      <p-chart
+        type="doughnut"
+        [data]="donutData"
+        [options]="donutOptions"
+      ></p-chart>
+      <p-button
+        (click)="op.toggle($event)"
+        icon="pi pi-cart-plus"
+        label="Add Category"
+        styleClass="p-button-rounded "
+      ></p-button>
+      <p-overlayPanel #op>
+        <ng-template pTemplate="content">
+          <h6>Category:</h6>
+          <form [formGroup]="categoryForm">
+            <input
+              pInputText
+              class="p-inputtext-sm"
+              placeholder="Press 'Enter' to submit"
+              formControlName="category"
+              (keypress)="addCategory($event)"
+            />
+            <p-selectButton
+              [options]="stateOptions"
+              formControlName="type"
+              optionLabel="label"
+              optionValue="value"
+            ></p-selectButton>
+          </form>
+        </ng-template>
+      </p-overlayPanel>
+    </div>
+
+    <div class="col-7 card custom">
+      <p-chart
+        type="bar"
+        [data]="barChartData"
+        [options]="barChartOptions"
+      ></p-chart>
+    </div>
+  </div>
+  <p-toast></p-toast>
+</div>
+
+<ng-template #loading>
+  <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+</ng-template>

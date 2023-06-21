@@ -7,6 +7,7 @@ import { LoginStatus, UserSettings } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-dashboard',
@@ -46,10 +47,12 @@ export class DashboardComponent implements OnInit {
     private postSvc: PostService,
     private themeSvc: ThemeService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private title: Title
   ) {}
 
   ngOnInit(): void {
+    this.title.setTitle('Assets Management | Dashboard');
     this.themeSvc.initiateChartSetting();
 
     this.goalForm = this.createGoalForm();
@@ -146,7 +149,7 @@ export class DashboardComponent implements OnInit {
 
   initiateDonutChart() {
     const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
+    const textColor = documentStyle.getPropertyValue('--primary-color-text');
 
     this.donutData = {
       labels: this.categories,
@@ -174,6 +177,7 @@ export class DashboardComponent implements OnInit {
           ],
         },
       ],
+      doughnutlabel: [],
     };
 
     this.donutOptions = {
@@ -195,6 +199,7 @@ export class DashboardComponent implements OnInit {
             top: 20,
             bottom: 0,
           },
+          color: '#fff',
         },
       },
       onClick: (event: any, activeElements: any) => {
@@ -209,7 +214,7 @@ export class DashboardComponent implements OnInit {
 
   initiateLineChart() {
     const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
+    const textColor = documentStyle.getPropertyValue('--primary-color-text');
     const textColorSecondary = documentStyle.getPropertyValue(
       '--text-color-secondary'
     );
@@ -257,8 +262,8 @@ export class DashboardComponent implements OnInit {
       plugins: {
         legend: {
           labels: {
-            // color: textColor,
-            color: '#fff',
+            color: textColorSecondary,
+            // color: '#000000 ',
           },
         },
       },
