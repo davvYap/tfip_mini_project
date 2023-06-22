@@ -13,6 +13,7 @@ import {
   StockQuantity,
   StocksData,
   StonkStockPrice,
+  Transaction,
   UserSettings,
 } from '../models';
 import { Observable, Subject, last, lastValueFrom } from 'rxjs';
@@ -143,11 +144,29 @@ export class GetService {
     );
   }
 
-  getUserTotalStockValue(userId: string): Promise<MessageResponse> {
+  getUserTotalStockValuePromise(userId: string): Promise<MessageResponse> {
     return lastValueFrom(
       this.http.get<MessageResponse>(
         `http://localhost:8080/api/${userId}/stocksValue`
       )
+    );
+  }
+
+  getUserTotalStockValue(userId: string): Observable<MessageResponse> {
+    return this.http.get<MessageResponse>(
+      `http://localhost:8080/api/${userId}/stocksValue`
+    );
+  }
+
+  getUserYesterdayTotalStockValue(userId: string): Observable<MessageResponse> {
+    return this.http.get<MessageResponse>(
+      `http://localhost:8080/api/${userId}/yesterday_stock_value`
+    );
+  }
+
+  triggerUpdateUsersStockValue(): Observable<MessageResponse> {
+    return this.http.get<MessageResponse>(
+      'http://localhost:8080/api/update_all_yesterday_stock_value'
     );
   }
 
@@ -224,6 +243,12 @@ export class GetService {
   getUserCategories(userId: string): Observable<Categories[]> {
     return this.http.get<Categories[]>(
       `http://localhost:8080/api/${userId}/categories`
+    );
+  }
+
+  getUserTransaction(userId: string): Observable<Transaction[]> {
+    return this.http.get<Transaction[]>(
+      `http://localhost:8080/api/${userId}/transactions`
     );
   }
 

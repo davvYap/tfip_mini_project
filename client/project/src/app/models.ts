@@ -113,3 +113,14 @@ export interface Categories {
   type: string;
   total: number;
 }
+
+export interface Transaction {
+  transactionId: string;
+  transactionName: string;
+  type: string;
+  date: string;
+  amount: number;
+  remarks: string;
+  categoryName: string;
+  categoryId: string;
+}

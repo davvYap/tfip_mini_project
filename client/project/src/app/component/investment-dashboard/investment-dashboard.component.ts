@@ -49,6 +49,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   stocks$!: Subscription;
   stockPrice$!: Subscription;
 
+  skeletonLoading: boolean = true;
   lineData!: any;
   lineOptions!: any;
   sp500data!: number[];
@@ -132,60 +133,83 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     // console.log(this.currDate);
     // console.log(this.endOfMonth);
 
-    //NOTE GET VOO MONTHLY PERFORMANCE
-    this.getSvc
-      .getStockMonthlyPricePromise('VOO', this.startDate, this.getCurrentDate())
-      .then((stockPrice: StockPrice[]) => {
-        for (let i = 0; i < stockPrice.length; i++) {
-          const stock = stockPrice[i];
-          const date = stock.date.substring(0, 10);
-          stock.date = date;
-        }
-        let endOfMonth: string[] = [...this.endOfMonth];
-        endOfMonth.push(this.getCurrentDate());
-        const performance: number[] = this.getStockMonthlyPerformance(
-          stockPrice,
-          endOfMonth
-        );
-        // console.log('sp500', performance);
-        this.sp500data = performance;
-        // this.initiateLineChart();
-      });
-
-    //NOTE GET QQQ MONTHLY PERFORMANCE
-    this.getSvc
-      .getStockMonthlyPricePromise('QQQ', this.startDate, this.getCurrentDate())
-      .then((stockPrice: StockPrice[]) => {
-        for (let i = 0; i < stockPrice.length; i++) {
-          const stock = stockPrice[i];
-          const date = stock.date.substring(0, 10);
-          stock.date = date;
-        }
-        let endOfMonth: string[] = [...this.endOfMonth];
-        endOfMonth.push(this.getCurrentDate());
-        const performance: number[] = this.getStockMonthlyPerformance(
-          stockPrice,
-          endOfMonth
-        );
-        // console.log('nasdaq100', performance);
-        this.nasdaq100data = performance;
-        // this.initiateLineChart();
-      });
-
-    //NOTE GET USER STOCK PERFORMANCE
+    //NOTE Initiate Line Chart
     this.getSvc
       .getUserMonthlyPerformance(this.getSvc.userId, new Date().getFullYear())
       .pipe(
-        map((performance) => {
+        switchMap((performance) => {
           this.userStockData = performance;
+          return of(performance);
+        }),
+        switchMap((performance) => {
+          //NOTE GET VOO MONTHLY PERFORMANCE
+          let observables: Observable<StockPrice[]>[] = [];
+          const observable = this.getSvc.getStockMonthlyPrice(
+            'VOO',
+            this.startDate,
+            this.getCurrentDate()
+          );
+          observables.push(observable);
+
+          return forkJoin(observables).pipe(
+            map((stockPrices: StockPrice[][]) => {
+              const stockPrice: StockPrice[] = stockPrices[0];
+              for (let i = 0; i < stockPrice.length; i++) {
+                const stock = stockPrice[i];
+                const date = stock.date.substring(0, 10);
+                stock.date = date;
+              }
+              let endOfMonth: string[] = [...this.endOfMonth];
+              endOfMonth.push(this.getCurrentDate());
+              const performance: number[] = this.getStockMonthlyPerformance(
+                stockPrice,
+                endOfMonth
+              );
+              // console.log('sp500', performance);
+              this.sp500data = performance;
+              return performance;
+            })
+          );
+        }),
+        switchMap((performance) => {
+          //NOTE GET QQQ MONTHLY PERFORMANCE
+          let observables: Observable<StockPrice[]>[] = [];
+          const observable = this.getSvc.getStockMonthlyPrice(
+            'QQQ',
+            this.startDate,
+            this.getCurrentDate()
+          );
+          observables.push(observable);
+
+          return forkJoin(observables).pipe(
+            map((stockPrices: StockPrice[][]) => {
+              const stockPrice: StockPrice[] = stockPrices[0];
+              for (let i = 0; i < stockPrice.length; i++) {
+                const stock = stockPrice[i];
+                const date = stock.date.substring(0, 10);
+                stock.date = date;
+              }
+              let endOfMonth: string[] = [...this.endOfMonth];
+              endOfMonth.push(this.getCurrentDate());
+              const performance: number[] = this.getStockMonthlyPerformance(
+                stockPrice,
+                endOfMonth
+              );
+              // console.log('nasdaq100', performance);
+              this.nasdaq100data = performance;
+              return performance;
+            })
+          );
         })
       )
       .subscribe(() => {
+        console.log(this.nasdaq100data, this.sp500data);
+        this.skeletonLoading = false;
+        console.log('initiate line chart');
         this.initiateLineChart();
       });
 
     // NOTE EXPORT FUNCTION FOR BOTH TABLES
-
     this.portfolioTableCols = [
       {
         header: 'Symbol',

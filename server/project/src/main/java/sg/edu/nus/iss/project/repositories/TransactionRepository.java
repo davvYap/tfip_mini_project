@@ -6,10 +6,12 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import sg.edu.nus.iss.project.models.Category;
+import sg.edu.nus.iss.project.models.Transaction;
 
 import static sg.edu.nus.iss.project.repositories.DBQueries.*;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Repository
@@ -29,5 +31,14 @@ public class TransactionRepository {
             categories.add(Category.convertFromResult(rs));
         }
         return categories;
+    }
+
+    public List<Transaction> getUserTransactionsJdbc(String userId) {
+        List<Transaction> transactions = new LinkedList<>();
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_USER_TRANSACTIONS, userId);
+        while (rs.next()) {
+            transactions.add(Transaction.convertFromResult(rs));
+        }
+        return transactions;
     }
 }

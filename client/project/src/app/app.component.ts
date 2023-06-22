@@ -6,6 +6,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { LoginStatus } from './models';
 import { PostService } from './service/post.service';
 import { RoutePersistenceService } from './service/route-persistence.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,7 @@ import { RoutePersistenceService } from './service/route-persistence.service';
 })
 export class AppComponent implements OnInit {
   items!: MenuItem[];
+  updateUsersStockValue$!: Subscription;
 
   themes: string[] = [
     'mira',
@@ -29,7 +31,8 @@ export class AppComponent implements OnInit {
     private getSvc: GetService,
     private postSvc: PostService,
     private router: Router,
-    private routerPerSvc: RoutePersistenceService
+    private routerPerSvc: RoutePersistenceService,
+    private messageSvc: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -54,44 +57,58 @@ export class AppComponent implements OnInit {
       if (isLogin) {
         this.items = [
           {
-            label: 'File',
-            icon: 'pi pi-fw pi-file',
+            label: 'Investment',
+            icon: 'pi pi-fw pi-dollar',
             items: [
               {
                 label: 'New',
                 icon: 'pi pi-fw pi-plus',
                 items: [
                   {
-                    label: 'Investment',
-                    icon: 'pi pi-fw pi-bitcoin',
+                    label: 'Stock',
+                    icon: 'pi pi-fw pi-apple',
                     routerLink: '/investment',
                   },
                   {
-                    label: 'Video',
-                    icon: 'pi pi-fw pi-video',
+                    label: 'Crypto',
+                    icon: 'pi pi-fw pi-bitcoin',
+                    routerLink: '/investment',
                   },
                 ],
               },
               {
-                label: 'Delete',
-                icon: 'pi pi-fw pi-trash',
+                label: 'Portfolio',
+                icon: 'pi pi-fw pi-chart-line',
+                routerLink: '/investment-dashboard',
               },
               {
                 separator: true,
               },
               {
-                label: 'Export',
+                label: 'Update',
                 icon: 'pi pi-fw pi-external-link',
+                command: () => this.triggerUpdateUsersStockValue(),
               },
             ],
           },
           {
-            label: 'Edit',
-            icon: 'pi pi-fw pi-pencil',
+            label: 'Savings',
+            icon: 'pi pi-fw pi-wallet',
+            items: [
+              {
+                label: 'Dashboard',
+                icon: 'pi pi-fw pi-chart-bar',
+                routerLink: '/savings',
+              },
+            ],
+          },
+          {
+            label: 'Users',
+            icon: 'pi pi-fw pi-user',
             items: [
               {
                 label: 'Themes',
-                icon: 'pi pi-fw pi-th-large',
+                icon: 'pi pi-fw pi-palette',
                 items: [
                   {
                     label: 'Mira',
@@ -121,27 +138,13 @@ export class AppComponent implements OnInit {
                 ],
               },
               {
-                label: 'Justify',
-                icon: 'pi pi-fw pi-align-justify',
-              },
-            ],
-          },
-          {
-            label: 'Users',
-            icon: 'pi pi-fw pi-user',
-            items: [
-              {
-                label: 'New',
+                label: 'Check Login',
                 icon: 'pi pi-fw pi-user-plus',
                 command: () => this.checkLoginStatus(),
               },
               {
-                label: 'Delete',
-                icon: 'pi pi-fw pi-user-minus',
-              },
-              {
-                label: 'Search',
-                icon: 'pi pi-fw pi-users',
+                label: 'Setting',
+                icon: 'pi pi pi-spin pi-cog',
                 items: [
                   {
                     label: 'Filter',
@@ -243,6 +246,30 @@ export class AppComponent implements OnInit {
       })
       .catch((err) => {
         console.log('user login >>> ', err.isLogin);
+      });
+  }
+
+  triggerUpdateUsersStockValue() {
+    this.updateUsersStockValue$ = this.getSvc
+      .triggerUpdateUsersStockValue()
+      .subscribe({
+        next: (message) => {
+          this.messageSvc.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: message.message,
+          });
+        },
+        error: (error) => {
+          this.messageSvc.add({
+            severity: 'error',
+            summary: 'Failed',
+            detail: 'Failed to update users total stock value',
+          });
+        },
+        complete: () => {
+          this.updateUsersStockValue$.unsubscribe();
+        },
       });
   }
 }

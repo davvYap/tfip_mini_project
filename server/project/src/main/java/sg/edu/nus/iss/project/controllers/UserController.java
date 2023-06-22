@@ -1,8 +1,6 @@
 package sg.edu.nus.iss.project.controllers;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,9 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
-import jakarta.json.JsonNumber;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockCount;
 import sg.edu.nus.iss.project.services.StockService;
@@ -118,7 +113,7 @@ public class UserController {
 
         // SAVE THE MARKET PRICE OF THE STOCKS TO REDIS
         String stockMarketValueString = stockSvc.getRealStonksPrice(stock.getSymbol()).getBody();
-        double stockMarketValue = getStonkStockPrice(stockMarketValueString);
+        double stockMarketValue = userSvc.getStonkStockPrice(stockMarketValueString);
         userSvc.saveUserStockMarketValueRedis(userId, stock.getSymbol(), stockMarketValue);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -132,7 +127,7 @@ public class UserController {
     @GetMapping(path = "/{userId}/stocks")
     @ResponseBody
     public ResponseEntity<String> getUserStocks(@PathVariable String userId,
-            @RequestParam(defaultValue = "100") int limit, @RequestParam(defaultValue = "0") int skip) {
+            @RequestParam(defaultValue = "1000") int limit, @RequestParam(defaultValue = "0") int skip) {
         List<Stock> stocks = userSvc.retrieveUserStocks(userId, limit, skip);
         if (stocks == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -160,6 +155,8 @@ public class UserController {
                             .add("message", "Delete stock with purchaseId %s failed".formatted(purchaseId))
                             .build().toString());
         }
+        // retrieve deleted stock
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder()
@@ -215,7 +212,7 @@ public class UserController {
 
     @GetMapping(path = "/{userId}/stocksCount")
     public ResponseEntity<String> getUserStocksCount(@PathVariable String userId,
-            @RequestParam(defaultValue = "100") int limit, @RequestParam(defaultValue = "0") int skip) {
+            @RequestParam(defaultValue = "1000") int limit, @RequestParam(defaultValue = "0") int skip) {
         List<StockCount> sc = userSvc.retrieveUserStocksCount(userId, limit, skip);
 
         if (sc == null) {
@@ -235,7 +232,7 @@ public class UserController {
 
     @GetMapping(path = "/{userId}/stocksValue")
     public ResponseEntity<String> getUserStocksValue(@PathVariable String userId,
-            @RequestParam(defaultValue = "100") int limit, @RequestParam(defaultValue = "0") int skip)
+            @RequestParam(defaultValue = "1000") int limit, @RequestParam(defaultValue = "0") int skip)
             throws IOException {
 
         List<StockCount> sc = userSvc.retrieveUserStocksCount(userId, limit, skip);
@@ -253,19 +250,43 @@ public class UserController {
             Optional<Double> optPrice = userSvc.retrieveUserStockMarketValueRedis(userId, stkSymbol);
             if (optPrice.isEmpty()) {
                 ResponseEntity<String> realStonkPrice = stockSvc.getRealStonksPrice(stkSymbol);
-                marketPrice = getStonkStockPrice(realStonkPrice.getBody());
+                marketPrice = userSvc.getStonkStockPrice(realStonkPrice.getBody());
                 userSvc.saveUserStockMarketValueRedis(userId, stkSymbol, marketPrice);
             } else {
                 marketPrice = optPrice.get();
             }
             totalStockValue += stockCount.getQuantity() * marketPrice;
         }
-        userSvc.upsertUserYesterdayTotalValueMongo(userId, totalStockValue); // HERE NOTE
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("value", totalStockValue).build()
                         .toString());
+    }
+
+    @GetMapping(path = "/update_all_yesterday_stock_value")
+    public ResponseEntity<String> updateAllUserStockValue() throws IOException {
+        boolean updated = userSvc.upsertUserYesterdayTotalStockValueMongo();
+        if (!updated) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "Users total stock value failed to update in mongo")
+                            .build()
+                            .toString());
+        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("message", "Users total stock value updated successfully in mongo")
+                        .build()
+                        .toString());
+    }
+
+    @GetMapping(path = "/{userId}/yesterday_stock_value")
+    public ResponseEntity<String> getUserYesterdayTotalValueMongo(@PathVariable String userId) {
+        double totalStockValue = userSvc.retrieveUserYesterdayTotalValueMongo(userId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("value", totalStockValue).build().toString());
     }
 
     @GetMapping(path = "/{userId}/monthly_performance")
@@ -301,7 +322,7 @@ public class UserController {
     @GetMapping(path = "/{userId}/stocks_by_month")
     @ResponseBody
     public ResponseEntity<String> getUserStocksByMonth(@PathVariable String userId,
-            @RequestParam(defaultValue = "100") int limit,
+            @RequestParam(defaultValue = "1000") int limit,
             @RequestParam(defaultValue = "0") int skip, @RequestParam String month) {
 
         Optional<List<Stock>> stocksOpt = userSvc.retrieveUserStockByMonth(userId, limit, skip, month);
@@ -325,27 +346,13 @@ public class UserController {
     @GetMapping(path = "/{userId}/stock_qty_month")
     @ResponseBody
     public ResponseEntity<String> getUserStocksQtyByMonth(@PathVariable String userId,
-            @RequestParam(defaultValue = "100") int limit,
+            @RequestParam(defaultValue = "1000") int limit,
             @RequestParam(defaultValue = "0") int skip, @RequestParam String month, @RequestParam String symbol) {
         Optional<Double> opt = userSvc.retrieveUserStockQuantityByMonth(userId, limit, skip, month, symbol);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("quantity", opt.get()).build().toString());
-    }
-
-    // EXTRA
-    public double getStonkStockPrice(String json) throws IOException {
-        double stockPrice = 0.0;
-        if (json != null) {
-            try (InputStream is = new ByteArrayInputStream(json.getBytes())) {
-                JsonReader jr = Json.createReader(is);
-                JsonObject jsObj = jr.readObject();
-                JsonNumber value = jsObj.getJsonNumber("price");
-                stockPrice = value.doubleValue();
-            }
-        }
-        return stockPrice;
     }
 
 }

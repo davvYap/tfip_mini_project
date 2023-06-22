@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,12 +18,15 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import com.mongodb.client.result.UpdateResult;
 
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockPrice;
+import static sg.edu.nus.iss.project.repositories.DBQueries.*;
 
 @Repository
 public class UserRepository {
@@ -31,8 +35,20 @@ public class UserRepository {
     private MongoTemplate mongo;
 
     @Autowired
+    private JdbcTemplate jdbc;
+
+    @Autowired
     @Qualifier("user_portfolio")
     private RedisTemplate<String, String> redis;
+
+    public List<String> retrieveAllUserId() {
+        SqlRowSet rs = jdbc.queryForRowSet(SQL_GET_ALL_USERS);
+        List<String> userId = new ArrayList<>();
+        while (rs.next()) {
+            userId.add(rs.getString("user_id"));
+        }
+        return userId;
+    }
 
     public Boolean upsertUserTheme(String userId, String themeName) {
         Query query = Query.query(Criteria.where("user_id").is(userId));
@@ -210,8 +226,16 @@ public class UserRepository {
         Query q = Query.query(Criteria.where("userId").is(userId));
         Update updateOps = new Update().set("total_value", value);
         UpdateResult upsertDoc = mongo.upsert(q, updateOps, "user_total_value");
-        System.out.println("Mongo saved user total value $s".formatted(value));
+        System.out.println("Mongo saved users total value : " + value);
         return upsertDoc.getModifiedCount() > 0;
+    }
+
+    public double retrieveUserYesterdayTotalValueMongo(String userId) {
+        Query query = Query.query(Criteria.where("userId").is(userId));
+        Document d = mongo.findOne(query, Document.class, "user_total_value");
+        if (d == null)
+            return 0.0;
+        return d.getDouble("total_value");
     }
 
     public Boolean insertStockMonthlyPerformanceMongo(String symbol, List<StockPrice> prices) {

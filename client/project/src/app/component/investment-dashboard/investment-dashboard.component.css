@@ -19,14 +19,6 @@ h1 {
     border-radius: 16px; */
 }
 
-.positive {
-  color: lightgreen;
-}
-
-.negative {
-  color: lightcoral;
-}
-
 .chartcard {
   /* background: var(--surface-card); */
   padding: 1rem;

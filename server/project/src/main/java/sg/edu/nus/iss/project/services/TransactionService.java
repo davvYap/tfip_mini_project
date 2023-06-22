@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import sg.edu.nus.iss.project.models.Category;
+import sg.edu.nus.iss.project.models.Transaction;
 import sg.edu.nus.iss.project.repositories.TransactionRepository;
 
 @Service
@@ -22,5 +23,9 @@ public class TransactionService {
 
     public List<Category> getUserCategoryJdbc(String userId) {
         return transRepo.getUserCategoryJdbc(userId);
+    }
+
+    public List<Transaction> getUserTransactionsJdbc(String userId) {
+        return transRepo.getUserTransactionsJdbc(userId);
     }
 }

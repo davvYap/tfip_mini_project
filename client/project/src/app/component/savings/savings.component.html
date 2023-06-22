@@ -87,7 +87,7 @@
               (keypress)="addCategory($event)"
             />
             <p-selectButton
-              [options]="stateOptions"
+              [options]="typeOptions"
               formControlName="type"
               optionLabel="label"
               optionValue="value"
@@ -103,6 +103,240 @@
         [data]="barChartData"
         [options]="barChartOptions"
       ></p-chart>
+    </div>
+  </div>
+
+  <div class="row justify-content-center align-items-center g-2 mt-3">
+    <div class="col-12 card custom">
+      <p-toolbar styleClass="mb-4 gap-2">
+        <ng-template pTemplate="left">
+          <button
+            pButton
+            pRipple
+            label="New"
+            icon="pi pi-plus"
+            class="p-button-rounded p-button-info mr-2 me-3"
+            (click)="newTransaction()"
+          ></button>
+          <div>
+            <button
+              type="button"
+              pButton
+              pRipple
+              icon="pi pi-file"
+              (click)="dt1.exportCSV()"
+              class="export-buttons"
+              pTooltip="CSV"
+              tooltipPosition="bottom"
+            ></button>
+            <button
+              type="button"
+              pButton
+              pRipple
+              icon="pi pi-file-excel"
+              (click)="exportExcelPortfolio()"
+              class="p-button-success export-buttons"
+              pTooltip="XLS"
+              tooltipPosition="bottom"
+            ></button>
+            <button
+              type="button"
+              pButton
+              pRipple
+              icon="pi pi-file-pdf"
+              (click)="exportPdfPortfolio()"
+              class="p-button-danger export-buttons"
+              pTooltip="PDF"
+              tooltipPosition="bottom"
+            ></button>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+          <div>
+            <button
+              pButton
+              label="Clear"
+              class="p-button-outlined"
+              icon="pi pi-filter-slash"
+              (click)="clear(dt1)"
+            ></button>
+            <span class="p-input-icon-left ml-auto">
+              <i class="pi pi-search"></i>
+              <input
+                id="input1"
+                #input1
+                pInputText
+                type="text"
+                (input)="dt1.filterGlobal(input1.value, 'contains')"
+                placeholder="Search keyword"
+              />
+            </span>
+          </div>
+        </ng-template>
+      </p-toolbar>
+
+      <p-table
+        id="transTable"
+        #dt1
+        [columns]="transactionCol"
+        [value]="transactions"
+        dataKey="transactionId"
+        editMode="row"
+        [tableStyle]="{ 'min-width': '50rem' }"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 14.3%">Date</th>
+            <th style="width: 14.3%">Name</th>
+            <th style="width: 14.3%">Amount</th>
+            <th style="width: 14.3%">Remarks</th>
+            <th style="width: 14.3%">Category</th>
+            <th style="width: 14.3%">Type</th>
+            <th style="width: 14.3%">Action</th>
+          </tr>
+        </ng-template>
+        <ng-template
+          pTemplate="body"
+          let-transaction
+          let-editing="editing"
+          let-ri="rowIndex"
+        >
+          <tr [pEditableRow]="transaction">
+            <td>
+              <p-cellEditor>
+                <ng-template pTemplate="input">
+                  <p-inputMask
+                    mask="9999-99-99"
+                    [(ngModel)]="transaction.date"
+                    placeholder="yyyy-MM-dd"
+                  ></p-inputMask>
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ transaction.date | date }}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td>
+              <p-cellEditor>
+                <ng-template pTemplate="input">
+                  <input
+                    pInputText
+                    type="text"
+                    [(ngModel)]="transaction.transactionName"
+                  />
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ transaction.transactionName }}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td>
+              <p-cellEditor>
+                <ng-template pTemplate="input">
+                  <input
+                    pInputText
+                    type="number"
+                    [(ngModel)]="transaction.amount"
+                    required
+                  />
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ transaction.amount | currency }}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td>
+              <p-cellEditor>
+                <ng-template pTemplate="input">
+                  <input
+                    pInputText
+                    type="text"
+                    [(ngModel)]="transaction.remarks"
+                  />
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ transaction.remarks }}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td>
+              <p-cellEditor>
+                <ng-template pTemplate="input">
+                  <p-dropdown
+                    [options]="categoriesItems"
+                    appendTo="body"
+                    [(ngModel)]="transaction.categoryName"
+                    [style]="{ width: '100%' }"
+                  ></p-dropdown>
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ transaction.categoryName }}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td>
+              <p-cellEditor>
+                <ng-template pTemplate="input">
+                  <p-dropdown
+                    [options]="typesItems"
+                    appendTo="body"
+                    [(ngModel)]="transaction.type"
+                    [style]="{ width: '100%' }"
+                  ></p-dropdown>
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ transaction.type | uppercase }}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+
+            <td>
+              <div class="flex align-items-center justify-content-center gap-2">
+                <button
+                  *ngIf="!editing"
+                  pButton
+                  pRipple
+                  type="button"
+                  pInitEditableRow
+                  icon="pi pi-pencil"
+                  (click)="onRowEditInit(transaction)"
+                  class="p-button-rounded p-button-text"
+                ></button>
+                <p-confirmPopup></p-confirmPopup>
+                <button
+                  *ngIf="!editing"
+                  pButton
+                  pRipple
+                  icon="pi pi-trash"
+                  class="p-button-danger p-button-rounded p-button-text"
+                  (click)="deleteSelectedTransaction($event, transaction)"
+                ></button>
+                <button
+                  *ngIf="editing"
+                  pButton
+                  pRipple
+                  type="button"
+                  pSaveEditableRow
+                  icon="pi pi-check"
+                  (click)="onRowEditSave(transaction)"
+                  class="p-button-rounded p-button-text p-button-success mr-2"
+                ></button>
+                <button
+                  *ngIf="editing"
+                  pButton
+                  pRipple
+                  type="button"
+                  pCancelEditableRow
+                  icon="pi pi-times"
+                  (click)="onRowEditCancel(transaction, ri)"
+                  class="p-button-rounded p-button-text p-button-danger"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
     </div>
   </div>
   <p-toast></p-toast>

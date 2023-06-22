@@ -25,6 +25,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.positive {
+  color: lightgreen;
+}
+
+.negative {
+  color: lightcoral;
+}
+
 .card {
   /* background: var(--surface-card); */
   padding: 2rem;

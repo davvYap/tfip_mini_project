@@ -123,11 +123,13 @@
 
           <!-- LINE CHART -->
           <div class="col-7 chartcard g-2">
-            <p-chart
-              type="line"
-              [data]="lineData"
-              [options]="lineOptions"
-            ></p-chart>
+            <div *ngIf="!skeletonLoading; else skeleton">
+              <p-chart
+                type="line"
+                [data]="lineData"
+                [options]="lineOptions"
+              ></p-chart>
+            </div>
           </div>
         </div>
 
@@ -518,3 +520,5 @@
   </div>
   <p-toast></p-toast>
 </div>
+
+<ng-template #skeleton> <p-skeleton height="20rem"></p-skeleton></ng-template>

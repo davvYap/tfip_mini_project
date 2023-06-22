@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
+import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import jakarta.json.JsonValue;
@@ -119,20 +120,74 @@ public class UserService {
         return userRepo.retrieveUserSoldStockMongo(userId);
     }
 
-    public boolean upsertUserYesterdayTotalValueMongo(String userId, double value) {
-        return userRepo.upsertUserYesterdayTotalValueMongo(userId, value);
-    }
+    // public boolean upsertUserYesterdayTotalValueMongo(String userId, double
+    // value) {
+    // return userRepo.upsertUserYesterdayTotalValueMongo(userId, value);
+    // }
 
     public Boolean insertStockMonthlyPerformanceMongo(String symbol, List<StockPrice> prices) {
         return userRepo.insertStockMonthlyPerformanceMongo(symbol, prices);
     }
 
     // @Scheduled(fixedDelay = 1 * 60 * 1000) // 1mins in milliseconds
-    // Scheduled method to delete documents at the end of the day
+    // Scheduled method to delete documents at the end of the day 12.00am
     @Scheduled(cron = "0 0 0 * * ?")
     public void deleteStockMonthlyPerformanceMongo() {
-        System.out.println("deleting mongo stock monthly performance...");
+        System.out.println("deleting mongo stock monthly performance in mongo...");
         userRepo.deleteStockMonthlyPerformanceMongo();
+    }
+
+    // Scheduled method to upsert user total value at the end of the day 11.55pm
+    @Scheduled(cron = "0 55 23 * * ?")
+    public boolean upsertUserYesterdayTotalStockValueMongo() throws IOException {
+        System.out.println("updating user total stock value in mongo...");
+        int updatedUser = 0;
+        List<String> userIdList = userRepo.retrieveAllUserId();
+        for (String userId : userIdList) {
+            List<StockCount> sc = retrieveUserStocksCount(userId, 1000, 0);
+            if (sc == null)
+                continue;
+            double totalStockValue = 0.0;
+            for (StockCount stockCount : sc) {
+                String stkSymbol = stockCount.getSymbol();
+                double marketPrice = 0.0;
+                // check redis whether the latest market price is there
+                Optional<Double> optPrice = retrieveUserStockMarketValueRedis(userId, stkSymbol);
+                if (optPrice.isEmpty()) {
+                    ResponseEntity<String> realStonkPrice = stockSvc.getRealStonksPrice(stkSymbol);
+                    marketPrice = getStonkStockPrice(realStonkPrice.getBody());
+                    saveUserStockMarketValueRedis(userId, stkSymbol, marketPrice);
+                } else {
+                    marketPrice = optPrice.get();
+                    System.out.println("Market price >>> " + marketPrice);
+                }
+                totalStockValue += stockCount.getQuantity() * marketPrice;
+            }
+            boolean updated = userRepo.upsertUserYesterdayTotalValueMongo(userId, totalStockValue);
+            System.out.println("updated > " + updated);
+            if (updated)
+                updatedUser++;
+            System.out.println(updated ? "UserId (%s) total stock value was updated...".formatted(userId)
+                    : "UserId (%s) total stock value failed to update...".formatted(userId));
+        }
+        return updatedUser > 0;
+    }
+
+    public double retrieveUserYesterdayTotalValueMongo(String userId) {
+        return userRepo.retrieveUserYesterdayTotalValueMongo(userId);
+    }
+
+    public double getStonkStockPrice(String json) throws IOException {
+        double stockPrice = 0.0;
+        if (json != null) {
+            try (InputStream is = new ByteArrayInputStream(json.getBytes())) {
+                JsonReader jr = Json.createReader(is);
+                JsonObject jsObj = jr.readObject();
+                JsonNumber value = jsObj.getJsonNumber("price");
+                stockPrice = value.doubleValue();
+            }
+        }
+        return stockPrice;
     }
 
     public Optional<List<StockPrice>> retrieveStockMonthlyPerformanceMongo(String symbol) {
@@ -323,7 +378,7 @@ public class UserService {
         endOfMonthDates.add(getYesterdayDate());
         System.out.println("End of months >>> " + endOfMonthDates);
         String startDateOfTheYear = getStartDateOfTheYear(year);
-        String currDate = endOfMonthDates.get(endOfMonthDates.size() - 1);
+        String currDate = endOfMonthDates.get(endOfMonthDates.size() - 2);
 
         String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
         Map<String, List<Stock>> allStockMap = new HashMap<>();

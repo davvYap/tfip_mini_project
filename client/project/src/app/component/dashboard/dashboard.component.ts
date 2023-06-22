@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Chart } from 'chart.js';
-import { forkJoin, map, switchMap } from 'rxjs';
-import { LoginStatus, UserSettings } from 'src/app/models';
+import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
+import { LoginStatus, MessageResponse, UserSettings } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
@@ -25,6 +25,7 @@ export class DashboardComponent implements OnInit {
 
   savingsValue!: number;
   stocksValue!: number;
+  stockChangePercentage!: number;
   cryptoValue!: number;
   investmentsValue!: number;
   propertiesValue!: number;
@@ -64,10 +65,38 @@ export class DashboardComponent implements OnInit {
     });
 
     // GET USER STOCK VALUE
-    this.getSvc.getUserTotalStockValue(this.getSvc.userId).then((res) => {
-      this.stocksValue = res.value;
-      this.totalValue = this.stocksValue; // NOTE temporarily
-    });
+    // this.getSvc.getUserTotalStockValuePromise(this.getSvc.userId).then((res) => {
+    //   this.stocksValue = res.value;
+    //   this.totalValue = this.stocksValue; // NOTE temporarily
+    // });
+    this.totalValue = 0.0;
+    this.stockChangePercentage = 0.0;
+    this.getSvc
+      .getUserTotalStockValue(this.getSvc.userId)
+      .pipe(
+        switchMap((res) => {
+          this.stocksValue = res.value;
+          this.totalValue += this.stocksValue;
+          return of(res);
+        }),
+        switchMap((res) => {
+          let observables: Observable<MessageResponse>[] = [];
+          const observable = this.getSvc.getUserYesterdayTotalStockValue(
+            this.getSvc.userId
+          );
+          observables.push(observable);
+          return forkJoin(observables).pipe(
+            map((res2: MessageResponse[]) => {
+              const msgRes: MessageResponse = res2[0];
+              const yesterdayValue = msgRes.value;
+              this.stockChangePercentage =
+                (this.stocksValue - yesterdayValue) / yesterdayValue;
+              return res;
+            })
+          );
+        })
+      )
+      .subscribe();
 
     // this.stocksValue = 8000;
     // this.cryptoValue = 1200;
@@ -145,6 +174,10 @@ export class DashboardComponent implements OnInit {
       yearlyGoal.push(monthlyGoal);
     }
     return yearlyGoal;
+  }
+
+  getColor(percent: number): string {
+    return percent > 0 ? 'positive' : 'negative';
   }
 
   initiateDonutChart() {

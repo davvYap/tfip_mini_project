@@ -11,6 +11,9 @@
         <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
         <span *ngIf="totalValue; else loading">
           {{ totalValue | currency }}
+          <span class="ms-2" [className]="getColor(stockChangePercentage)">
+            ({{ stockChangePercentage | percent : "1.2-2" }})
+          </span>
         </span>
       </h3>
     </p-fieldset>
@@ -56,6 +59,7 @@
       </form>
     </ng-template>
   </p-overlayPanel>
+  <p-toast></p-toast>
 </div>
 
 <ng-template #loading>

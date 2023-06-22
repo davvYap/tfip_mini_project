@@ -24,6 +24,10 @@ import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { DividerModule } from 'primeng/divider';
 import { CardModule } from 'primeng/card';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { SkeletonModule } from 'primeng/skeleton';
+import { DropdownModule } from 'primeng/dropdown';
+import { InputMaskModule } from 'primeng/inputmask';
+import { ToolbarModule } from 'primeng/toolbar';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -51,6 +55,10 @@ const primeModules: any[] = [
   DividerModule,
   CardModule,
   SelectButtonModule,
+  SkeletonModule,
+  DropdownModule,
+  InputMaskModule,
+  ToolbarModule,
 ];
 
 @NgModule({
