@@ -1,13 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Signal, computed, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ConfirmationService, MessageService, SelectItem } from 'primeng/api';
-import { DialogService } from 'primeng/dynamicdialog';
+import {
+  ConfirmationService,
+  MessageService,
+  SelectItem,
+  SelectItemGroup,
+} from 'primeng/api';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Table } from 'primeng/table';
 import { Subscription, map } from 'rxjs';
 import { Categories, Column, ExportColumn, Transaction } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
+import { ThemeService } from 'src/app/service/theme.service';
+import { AddTransactionComponent } from '../add-transaction/add-transaction.component';
+import { DeleteService } from 'src/app/service/delete.service';
 
 @Component({
   selector: 'app-savings',
@@ -15,17 +23,15 @@ import { PostService } from 'src/app/service/post.service';
   styleUrls: ['./savings.component.css'],
 })
 export class SavingsComponent implements OnInit {
-  totalIncome!: number;
-  totalExpense!: number;
-  totalBalance!: number;
+  totalIncome = signal(0);
+  totalExpense = signal(0);
+  totalBalance = computed(() => {
+    return this.totalIncome() - this.totalExpense();
+  });
 
   donutData!: any;
   donutOptions!: any;
   categoryForm!: FormGroup;
-  typeOptions: any[] = [
-    { label: 'Expense', value: 'Expense' },
-    { label: 'Income', value: 'income' },
-  ];
   postCategory$!: Subscription;
 
   barChartData!: any;
@@ -44,6 +50,9 @@ export class SavingsComponent implements OnInit {
     '/misc',
   ];
   categoriesItems!: SelectItem[];
+  // categoriesItems!: SelectItemGroup[];
+  incomeCategory!: SelectItem[];
+  expenseCategory!: SelectItem[];
   typesItems!: SelectItem[];
   clonedTransactions: { [s: string]: Transaction } = {};
 
@@ -52,6 +61,8 @@ export class SavingsComponent implements OnInit {
   transactionCol!: Column[];
   transactionExportColumns!: ExportColumn[];
 
+  dialogRef!: DynamicDialogRef;
+
   constructor(
     private router: Router,
     private getSvc: GetService,
@@ -59,18 +70,23 @@ export class SavingsComponent implements OnInit {
     private postSvc: PostService,
     private messageSvc: MessageService,
     private dialogSvc: DialogService,
-    private confirmationSvc: ConfirmationService
+    private confirmationSvc: ConfirmationService,
+    private themeSvc: ThemeService,
+    private deleteSvc: DeleteService
   ) {}
 
   ngOnInit(): void {
+    this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.categories = [];
     this.categoriesData = [];
     this.categoriesColor = [];
     this.categoryForm = this.createCategoryForm();
     this.categoriesItems = [];
+    this.incomeCategory = [];
+    this.expenseCategory = [];
     this.typesItems = [
-      { label: 'Income', value: 'Income' },
-      { label: 'Expense', value: 'Expense' },
+      { label: 'Income', value: 'income' },
+      { label: 'Expense', value: 'expense' },
     ];
     this.categories$ = this.getSvc
       .getUserCategories(this.getSvc.userId)
@@ -84,15 +100,33 @@ export class SavingsComponent implements OnInit {
             );
             this.categoriesColor.push('#' + randomColor);
           });
+          return cats;
+        }),
+        map((cats: Categories[]) => {
+          cats.map((cat) => {
+            // if (cat.type === 'income') {
+            //   this.incomeCategory.push({
+            //     label: cat.categoryName,
+            //     value: cat.categoryName,
+            //   });
+            // } else {
+            //   this.expenseCategory.push({
+            //     label: cat.categoryName,
+            //     value: cat.categoryName,
+            //   });
+            // }
+            this.categoriesItems.push({
+              label: cat.categoryName,
+              value: cat,
+            });
+          });
         })
       )
       .subscribe((res) => {
-        this.categories.map((cat) => {
-          this.categoriesItems.push({
-            label: cat,
-            value: cat,
-          });
-        });
+        // this.categoriesItems = [
+        //   { label: 'Income', value: 'income', items: this.incomeCategory },
+        //   { label: 'Expense', value: 'expense', items: this.expenseCategory },
+        // ];
         console.log('initiate donut');
         this.initiateDonutChart();
       });
@@ -136,7 +170,7 @@ export class SavingsComponent implements OnInit {
       .pipe(
         map((trans) => {
           trans.map((tran) => {
-            console.log(tran);
+            // console.log(tran);
             this.transactions.push(tran);
           });
         })
@@ -144,10 +178,9 @@ export class SavingsComponent implements OnInit {
       .subscribe();
 
     setTimeout(() => {
-      this.totalIncome = 10000;
-      this.totalExpense = 5893.5;
-      this.totalBalance = this.totalIncome - this.totalExpense;
-    }, 500);
+      this.totalIncome.set(10000);
+      this.totalExpense.set(5893.5);
+    }, 1000);
 
     setTimeout(() => {
       // this.categoriesData = [
@@ -171,7 +204,10 @@ export class SavingsComponent implements OnInit {
   addCategory(event: any) {
     if (event.key === 'Enter') {
       let category: string = this.categoryForm.get('category')?.value;
-      let type: string = this.categoryForm.get('type')?.value;
+      let type: string =
+        this.categoryForm.get('type')?.value === 'expense'
+          ? 'expense'
+          : 'income';
       console.log(category, type);
       this.postCategory$ = this.postSvc
         .addCategory(this.getSvc.userId, category, type)
@@ -241,27 +277,55 @@ export class SavingsComponent implements OnInit {
     input1.value = '';
   }
 
-  exportExcelPortfolio() {}
+  getSeverity(type: string) {
+    return type === 'income' ? 'success' : 'danger';
+  }
 
-  newTransaction() {}
+  newTransaction() {
+    this.dialogRef = this.dialogSvc.open(AddTransactionComponent, {
+      header: 'New Transaction',
+      width: '30%',
+      // height: '90%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      dismissableMask: true,
+    });
+
+    this.dialogRef.onClose.subscribe((msg) => {
+      if (msg !== undefined) {
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Successful',
+          detail: msg,
+        });
+        this.ngOnInit();
+      }
+    });
+  }
+
+  exportExcelPortfolio() {}
 
   exportPdfPortfolio() {}
 
-  deleteSelectedTransaction(event: any, transaction: Transaction) {
+  deleteSelectedTransaction(event: any, tran: Transaction) {
     this.confirmationSvc.confirm({
       target: event.target,
-      message: `Are you sure you want to delete ${transaction.transactionName} ?`,
+      message: `Are you sure you want to delete ${tran.transactionName} ?`,
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        // this.deleteStock(purchaseId);
-        this.messageSvc.add({
-          severity: 'success',
-          summary: 'Confirmed',
-          detail: `You have deleted ${transaction.transactionName} on ${transaction.date}`,
-        });
-        setTimeout(() => {
-          this.ngOnInit();
-        }, 1000);
+        this.deleteSvc
+          .deleteTransaction(this.getSvc.userId, tran)
+          .then((res) => {
+            this.messageSvc.add({
+              severity: 'success',
+              summary: 'Confirmed',
+              detail: `You have deleted ${tran.transactionName} on ${tran.date}`,
+            });
+            setTimeout(() => {
+              this.ngOnInit();
+            }, 500);
+          });
       },
       reject: () => {
         this.messageSvc.add({

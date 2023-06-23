@@ -1,13 +1,18 @@
 package sg.edu.nus.iss.project.models;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonReader;
 
 public class Transaction {
     private String transactionId;
@@ -110,6 +115,25 @@ public class Transaction {
                 .add("amount", amount)
                 .add("date", date.toString())
                 .add("remarks", remarks);
+    }
+
+    public static Transaction convertFromJson(String jsonStr) throws IOException {
+        Transaction t = new Transaction();
+        try (InputStream is = new ByteArrayInputStream(jsonStr.getBytes())) {
+            JsonReader reader = Json.createReader(is);
+            JsonObject jsObj = reader.readObject();
+            t.setTransactionId(jsObj.getString("transactionId"));
+            t.setTransactionName(jsObj.getString("transactionName"));
+            t.setAmount(jsObj.getJsonNumber("amount").doubleValue());
+            t.setCategoryName(jsObj.getString("categoryName"));
+            t.setType(jsObj.getString("type"));
+            t.setRemarks(jsObj.getString("remarks"));
+
+            String dateStr = jsObj.getString("date");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            t.setDate(LocalDate.parse(dateStr, formatter));
+        }
+        return t;
     }
 
 }

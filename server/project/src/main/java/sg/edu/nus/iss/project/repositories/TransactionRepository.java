@@ -41,4 +41,27 @@ public class TransactionRepository {
         }
         return transactions;
     }
+
+    public int getCategoryIdByCategoryNameJdbc(String userId, String categoryName) {
+        String catName = categoryName + "%";
+        System.out.println(catName);
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_CATEGORY_ID_BY_CATEGORY_NAME, userId, catName);
+        while (rs.next()) {
+            return rs.getInt("cat_id");
+        }
+        return 0;
+    }
+
+    public int insertTransactionJdbc(String userId, Transaction tran) {
+
+        int catId = getCategoryIdByCategoryNameJdbc(userId, tran.getCategoryName());
+
+        return jdbcTemplate.update(SQL_INSERT_USER_TRANSACTION, tran.getTransactionId(), tran.getTransactionName(),
+                tran.getDate().toString(), tran.getAmount(), tran.getRemarks(), userId, catId);
+    }
+
+    public int deleteTransactionJdbc(String userId, String tranId, String catName) {
+        int catId = getCategoryIdByCategoryNameJdbc(userId, catName);
+        return jdbcTemplate.update(SQL_DELETE_USER_TRANSACATION, tranId, userId, catId);
+    }
 }

@@ -379,6 +379,7 @@ public class UserService {
         System.out.println("End of months >>> " + endOfMonthDates);
         String startDateOfTheYear = getStartDateOfTheYear(year);
         String currDate = endOfMonthDates.get(endOfMonthDates.size() - 2);
+        System.out.println("CurrDate >>> " + currDate);
 
         String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
         Map<String, List<Stock>> allStockMap = new HashMap<>();
@@ -457,7 +458,8 @@ public class UserService {
                         // System.out.println("total market price >>> " + totalStockMarketPrice);
                     } else {
                         // else call api to save stock performance into mongo and return the result
-                        System.out.println("Calling YH FINANCE API for %s monthly price".formatted(stock.getSymbol()));
+                        System.out.println("Calling YH FINANCE API for %s monthly price from %s to %s"
+                                .formatted(stock.getSymbol(), startDateOfTheYear, currDate));
                         ResponseEntity<String> res = stockSvc.getStockMonthlyPrice(stock.getSymbol(),
                                 startDateOfTheYear, currDate);
                         if (res.getStatusCode().isError()) {
@@ -512,7 +514,7 @@ public class UserService {
         endOfMonthDates.add(getYesterdayDate());
         // System.out.println("End of months >>> " + endOfMonthDates);
         String startDateOfTheYear = getStartDateOfTheYear(year);
-        String currDate = endOfMonthDates.get(endOfMonthDates.size() - 1);
+        String currDate = endOfMonthDates.get(endOfMonthDates.size() - 2);
 
         String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
         Map<String, List<Stock>> allStockMap = new HashMap<>();
@@ -580,7 +582,8 @@ public class UserService {
                         // System.out.println("total market price >>> " + totalStockMarketPrice);
                     } else {
                         // else call api to save stock performance into mongo and return the result
-                        System.out.println("Calling YH FINANCE API for %s monthly price".formatted(stock.getSymbol()));
+                        System.out.println("Calling YH FINANCE API for %s monthly price from %s to %s"
+                                .formatted(stock.getSymbol(), startDateOfTheYear, currDate));
                         ResponseEntity<String> res = stockSvc.getStockMonthlyPrice(stock.getSymbol(),
                                 startDateOfTheYear, currDate);
                         if (res.getStatusCode().isError()) {

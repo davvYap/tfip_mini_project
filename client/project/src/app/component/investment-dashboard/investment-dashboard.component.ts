@@ -642,12 +642,14 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     });
 
     this.dialogRef.onClose.subscribe((message: string) => {
-      this.messageSvc.add({
-        severity: 'success',
-        summary: 'Successful',
-        detail: message,
-      });
-      this.ngOnInit();
+      if (message !== undefined) {
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Successful',
+          detail: message,
+        });
+        this.ngOnInit();
+      }
     });
   }
 

@@ -34,6 +34,8 @@ export class DashboardComponent implements OnInit {
 
   goalForm!: FormGroup;
 
+  skeletonLoading: boolean = true;
+
   // CATEGORIES
   categories: string[] = ['Savings', 'Investments', 'Property', 'Misc.'];
   categoriesRoutes: string[] = [
@@ -132,7 +134,8 @@ export class DashboardComponent implements OnInit {
         })
       )
       .subscribe(() => {
-        console.log('line chart');
+        // console.log('line chart');
+        this.skeletonLoading = false;
         this.initiateLineChart();
       });
 

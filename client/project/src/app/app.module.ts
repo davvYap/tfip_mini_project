@@ -16,6 +16,7 @@ import { InvestmentDashboardComponent } from './component/investment-dashboard/i
 import { DialogService } from 'primeng/dynamicdialog';
 import { SellStockComponent } from './component/sell-stock/sell-stock.component';
 import { SavingsComponent } from './component/savings/savings.component';
+import { AddTransactionComponent } from './component/add-transaction/add-transaction.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { SavingsComponent } from './component/savings/savings.component';
     InvestmentDashboardComponent,
     SellStockComponent,
     SavingsComponent,
+    AddTransactionComponent,
   ],
   imports: [
     BrowserModule,

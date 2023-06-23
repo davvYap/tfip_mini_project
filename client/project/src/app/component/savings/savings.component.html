@@ -13,8 +13,8 @@
           </div>
         </ng-template>
         <h3>
-          <span *ngIf="totalIncome; else loading">
-            {{ totalIncome | currency }}
+          <span *ngIf="totalIncome(); else loading">
+            {{ totalIncome() | currency }}
           </span>
         </h3>
       </p-fieldset>
@@ -33,8 +33,8 @@
           </div>
         </ng-template>
         <h3>
-          <span *ngIf="totalExpense; else loading">
-            {{ totalExpense | currency }}
+          <span *ngIf="totalExpense(); else loading">
+            {{ totalExpense() | currency }}
           </span>
         </h3>
       </p-fieldset>
@@ -53,8 +53,8 @@
           </div>
         </ng-template>
         <h3>
-          <span *ngIf="totalBalance; else loading">
-            {{ totalBalance | currency }}
+          <span *ngIf="totalBalance(); else loading">
+            {{ totalBalance() | currency }}
           </span>
         </h3>
       </p-fieldset>
@@ -86,12 +86,11 @@
               formControlName="category"
               (keypress)="addCategory($event)"
             />
-            <p-selectButton
-              [options]="typeOptions"
+            <p-toggleButton
               formControlName="type"
-              optionLabel="label"
-              optionValue="value"
-            ></p-selectButton>
+              onLabel="Expense"
+              offLabel="Income"
+            ></p-toggleButton>
           </form>
         </ng-template>
       </p-overlayPanel>
@@ -190,9 +189,9 @@
             <th style="width: 14.3%">Date</th>
             <th style="width: 14.3%">Name</th>
             <th style="width: 14.3%">Amount</th>
-            <th style="width: 14.3%">Remarks</th>
             <th style="width: 14.3%">Category</th>
             <th style="width: 14.3%">Type</th>
+            <th style="width: 14.3%">Remarks</th>
             <th style="width: 14.3%">Action</th>
           </tr>
         </ng-template>
@@ -246,6 +245,73 @@
                 </ng-template>
               </p-cellEditor>
             </td>
+
+            <td>
+              <p-cellEditor>
+                <ng-template pTemplate="input">
+                  <p-dropdown
+                    [options]="categoriesItems"
+                    [filter]="true"
+                    filterBy="label"
+                    [showClear]="true"
+                    appendTo="body"
+                    [(ngModel)]="transaction.categoryName"
+                    [style]="{ width: '100%' }"
+                  >
+                    <!-- NOTE output value for catergory at dropdown button above -->
+                    <ng-template let-category pTemplate="item">
+                      <div class="d-flex align-items-center gap-2">
+                        <p-tag
+                          [value]="category.value.type"
+                          [severity]="getSeverity(category.value.type)"
+                        ></p-tag>
+                        <div>{{ category.value.categoryName }}</div>
+                      </div>
+                    </ng-template>
+                  </p-dropdown>
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ transaction.categoryName }}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td>
+              <p-tag
+                [severity]="getSeverity(transaction.type)"
+                [value]="transaction.type"
+                [rounded]="true"
+              ></p-tag>
+              <!-- <p-cellEditor>
+                <ng-template pTemplate="input">
+                  <p-dropdown
+                    [options]="typesItems"
+                    appendTo="body"
+                    [(ngModel)]="transaction.type"
+                    [style]="{ width: '100%' }"
+                  >
+                    <ng-template let-option pTemplate="selectedItem">
+                      <p-tag
+                        [value]="option.label"
+                        [severity]="getSeverity(option.value)"
+                      ></p-tag>
+                    </ng-template>
+                    <ng-template let-option pTemplate="item">
+                      <p-tag
+                        [value]="option.label"
+                        [severity]="getSeverity(option.value)"
+                      ></p-tag>
+                    </ng-template>
+                  </p-dropdown>
+                </ng-template>
+                <ng-template pTemplate="output">
+                  <p-tag
+                    [value]="transaction.type | uppercase"
+                    [rounded]="true"
+                    [severity]="getSeverity(transaction.type)"
+                  ></p-tag>
+                </ng-template>
+              </p-cellEditor> -->
+            </td>
             <td>
               <p-cellEditor>
                 <ng-template pTemplate="input">
@@ -257,36 +323,6 @@
                 </ng-template>
                 <ng-template pTemplate="output">
                   {{ transaction.remarks }}
-                </ng-template>
-              </p-cellEditor>
-            </td>
-            <td>
-              <p-cellEditor>
-                <ng-template pTemplate="input">
-                  <p-dropdown
-                    [options]="categoriesItems"
-                    appendTo="body"
-                    [(ngModel)]="transaction.categoryName"
-                    [style]="{ width: '100%' }"
-                  ></p-dropdown>
-                </ng-template>
-                <ng-template pTemplate="output">
-                  {{ transaction.categoryName }}
-                </ng-template>
-              </p-cellEditor>
-            </td>
-            <td>
-              <p-cellEditor>
-                <ng-template pTemplate="input">
-                  <p-dropdown
-                    [options]="typesItems"
-                    appendTo="body"
-                    [(ngModel)]="transaction.type"
-                    [style]="{ width: '100%' }"
-                  ></p-dropdown>
-                </ng-template>
-                <ng-template pTemplate="output">
-                  {{ transaction.type | uppercase }}
                 </ng-template>
               </p-cellEditor>
             </td>

@@ -1,0 +1,101 @@
+<div class="container">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-12">
+      <form [formGroup]="form">
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="date">Date</label>
+          <p-calendar
+            id="date"
+            [showIcon]="true"
+            [style]="{ width: '100%' }"
+            [inputStyle]="{ width: '100%' }"
+            formControlName="date"
+          ></p-calendar>
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="transactionName">Transaction Name</label>
+          <input
+            pInputText
+            id="transactionName"
+            formControlName="transactionName"
+            autofocus
+          />
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="amount">Amount</label>
+          <p-inputNumber
+            id="amount"
+            mode="decimal"
+            [minFractionDigits]="2"
+            [maxFractionDigits]="2"
+            [style]="{ width: '100%' }"
+            [inputStyle]="{ width: '100%' }"
+            formControlName="amount"
+          >
+          </p-inputNumber>
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="categoryName">Category</label>
+          <p-dropdown
+            [options]="categoriesItems"
+            optionLabel="label"
+            optionValue="value"
+            [filter]="true"
+            filterBy="label"
+            [showClear]="true"
+            placeholder="Select a Category"
+            [style]="{ width: '100%' }"
+            formControlName="categoryName"
+          ></p-dropdown>
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="categoryName">Type of Transaction</label>
+          <p-dropdown
+            inputId="type"
+            [options]="typesItems"
+            formControlName="type"
+            [style]="{ width: '100%' }"
+          >
+            <ng-template let-option pTemplate="selectedItem">
+              <p-tag
+                [value]="option.label"
+                [severity]="getSeverity(option.value)"
+              ></p-tag>
+            </ng-template>
+            <ng-template let-option pTemplate="item">
+              <p-tag
+                [value]="option.label"
+                [severity]="getSeverity(option.value)"
+              ></p-tag>
+            </ng-template>
+          </p-dropdown>
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label for="remarks">Remarks</label>
+          <textarea
+            id="remarks"
+            pInputTextarea
+            required
+            [autoResize]="true"
+            rows="3"
+            formControlName="remarks"
+            [style]="{ width: '100%' }"
+          ></textarea>
+        </div>
+        <div class="d-flex flex-row-reverse m-4">
+          <div>
+            <button
+              pButton
+              pRipple
+              label="Save"
+              icon="pi pi-check"
+              class="p-button-text"
+              (click)="saveTransaction()"
+              [disabled]="form.invalid"
+            ></button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

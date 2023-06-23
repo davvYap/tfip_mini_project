@@ -1,0 +1,12 @@
+#trans-table {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#trans-table > tr > td {
+  width: 100%;
+}
+
+label {
+  margin-bottom: 0.5rem;
+}

@@ -96,6 +96,17 @@ export class AppComponent implements OnInit {
             icon: 'pi pi-fw pi-wallet',
             items: [
               {
+                label: 'New',
+                icon: 'pi pi-fw pi-plus',
+                items: [
+                  {
+                    label: 'Transaction',
+                    icon: 'pi pi-fw pi-ticket ',
+                    routerLink: '/new-transaction',
+                  },
+                ],
+              },
+              {
                 label: 'Dashboard',
                 icon: 'pi pi-fw pi-chart-bar',
                 routerLink: '/savings',

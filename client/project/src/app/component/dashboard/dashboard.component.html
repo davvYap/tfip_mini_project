@@ -31,16 +31,22 @@
 
     <!-- LINE CHART -->
     <div class="col-7 card custom">
-      <div class="d-flex flex-row-reverse">
-        <p-button
-          (click)="op.toggle($event)"
-          icon="pi pi-chart-line"
-          label="Set Goal"
-          styleClass="p-button-rounded"
-          pTooltip="Set your goal here"
-        ></p-button>
+      <div *ngIf="!skeletonLoading; else skeleton">
+        <div class="d-flex flex-row-reverse">
+          <p-button
+            (click)="op.toggle($event)"
+            icon="pi pi-chart-line"
+            label="Set Goal"
+            styleClass="p-button-rounded"
+            pTooltip="Set your goal here"
+          ></p-button>
+        </div>
+        <p-chart
+          type="line"
+          [data]="lineData"
+          [options]="lineOptions"
+        ></p-chart>
       </div>
-      <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
     </div>
   </div>
 
@@ -65,3 +71,5 @@
 <ng-template #loading>
   Fetching data <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i
 ></ng-template>
+
+<ng-template #skeleton> <p-skeleton height="20rem"></p-skeleton></ng-template>

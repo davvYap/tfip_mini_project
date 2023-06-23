@@ -28,6 +28,9 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputMaskModule } from 'primeng/inputmask';
 import { ToolbarModule } from 'primeng/toolbar';
+import { ToggleButtonModule } from 'primeng/togglebutton';
+import { TagModule } from 'primeng/tag';
+import { InputTextareaModule } from 'primeng/inputtextarea';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -59,6 +62,9 @@ const primeModules: any[] = [
   DropdownModule,
   InputMaskModule,
   ToolbarModule,
+  ToggleButtonModule,
+  TagModule,
+  InputTextareaModule,
 ];
 
 @NgModule({

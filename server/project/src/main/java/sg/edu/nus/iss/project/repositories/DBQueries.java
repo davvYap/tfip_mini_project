@@ -18,8 +18,21 @@ public class DBQueries {
             select * from categories where user_id = ?
             """;
 
+    public static final String SQL_GET_CATEGORY_ID_BY_CATEGORY_NAME = """
+            select cat_id from categories where user_id = ? and cat_name like ?;
+            """;
+
     public static final String SQL_GET_USER_TRANSACTIONS = """
             select trans_id, trans_name, date_of_trans, amount, remarks, t.cat_id, c.cat_name,
             c.type from transactions t join categories c on t.cat_id = c.cat_id where t.user_id  = ?;
                 """;
+
+    public static final String SQL_INSERT_USER_TRANSACTION = """
+            insert into transactions(trans_id, trans_name, date_of_trans, amount, remarks, user_id, cat_id)
+            values (?, ?, ?, ?, ?, ?, ?);
+                            """;
+
+    public static final String SQL_DELETE_USER_TRANSACATION = """
+            delete from transactions where trans_id = ? and user_id = ? and cat_id = ?;
+            """;
 }
