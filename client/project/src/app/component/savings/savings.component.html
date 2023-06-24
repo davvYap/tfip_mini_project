@@ -182,7 +182,13 @@
         [value]="transactions"
         dataKey="transactionId"
         editMode="row"
-        [tableStyle]="{ 'min-width': '50rem' }"
+        [rowHover]="true"
+        [loading]="transactionloading"
+        [paginator]="true"
+        [rows]="5"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [rowsPerPageOptions]="[10, 20, 50, 100]"
       >
         <ng-template pTemplate="header">
           <tr>
@@ -251,6 +257,8 @@
                 <ng-template pTemplate="input">
                   <p-dropdown
                     [options]="categoriesItems"
+                    optionLabel="label"
+                    optionValue="value"
                     [filter]="true"
                     filterBy="label"
                     [showClear]="true"
@@ -262,10 +270,10 @@
                     <ng-template let-category pTemplate="item">
                       <div class="d-flex align-items-center gap-2">
                         <p-tag
-                          [value]="category.value.type"
-                          [severity]="getSeverity(category.value.type)"
+                          [value]="category.object.type | uppercase"
+                          [severity]="getSeverity(category.object.type)"
                         ></p-tag>
-                        <div>{{ category.value.categoryName }}</div>
+                        <div>{{ category.object.categoryName }}</div>
                       </div>
                     </ng-template>
                   </p-dropdown>
@@ -278,7 +286,7 @@
             <td>
               <p-tag
                 [severity]="getSeverity(transaction.type)"
-                [value]="transaction.type"
+                [value]="transaction.type | uppercase"
                 [rounded]="true"
               ></p-tag>
               <!-- <p-cellEditor>

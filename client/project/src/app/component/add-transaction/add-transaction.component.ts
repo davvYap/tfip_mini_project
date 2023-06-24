@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MessageService, SelectItem } from 'primeng/api';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { switchMap, forkJoin, Observable, map, tap } from 'rxjs';
-import { Categories, Transaction } from 'src/app/models';
+import { Categories, Transaction, categoryOptionItem } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
@@ -16,11 +16,13 @@ import { v4 as uuidv4 } from 'uuid';
 })
 export class AddTransactionComponent implements OnInit {
   form!: FormGroup;
-  categoriesItems!: SelectItem[];
+  categoriesItems!: categoryOptionItem[];
   typesItems = [
     { label: 'Income', value: 'income' },
     { label: 'Expense', value: 'expense' },
   ];
+  selectedCategory = signal('');
+  selectedCategoryType = signal;
 
   constructor(
     private themeSvc: ThemeService,
@@ -45,6 +47,7 @@ export class AddTransactionComponent implements OnInit {
             this.categoriesItems.push({
               label: catName,
               value: catName,
+              object: cat,
             });
           });
         })
@@ -98,5 +101,25 @@ export class AddTransactionComponent implements OnInit {
     const day = newDate.getDate().toString().padStart(2, '0');
     const formattedDate = year + '-' + month + '-' + day;
     return formattedDate;
+  }
+
+  getSelectedCategoryType(): string {
+    let type = '';
+    this.categoriesItems.map((cat) => {
+      if (cat.object.categoryName === this.selectedCategory) {
+        type = cat.object.type;
+      }
+    });
+    return type;
+  }
+
+  getSeverityType(): string {
+    let type = '';
+    this.categoriesItems.map((cat) => {
+      if (cat.object.categoryName === this.selectedCategory) {
+        type = cat.object.type;
+      }
+    });
+    return type === 'income' ? 'success' : 'danger';
   }
 }

@@ -45,4 +45,9 @@ public class TransactionService {
     public int deleteTransactionJdbc(String userId, String tranId, String catName) {
         return transRepo.deleteTransactionJdbc(userId, tranId, catName);
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    public int updateTransactionJdbc(String userId, Transaction tran) {
+        return transRepo.updateTransactionJdbc(userId, tran);
+    }
 }

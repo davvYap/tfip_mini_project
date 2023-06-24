@@ -10,12 +10,19 @@ import {
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Table } from 'primeng/table';
 import { Subscription, map } from 'rxjs';
-import { Categories, Column, ExportColumn, Transaction } from 'src/app/models';
+import {
+  Categories,
+  Column,
+  ExportColumn,
+  Transaction,
+  categoryOptionItem,
+} from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
 import { AddTransactionComponent } from '../add-transaction/add-transaction.component';
 import { DeleteService } from 'src/app/service/delete.service';
+import { UpdateService } from 'src/app/service/update.service';
 
 @Component({
   selector: 'app-savings',
@@ -49,8 +56,7 @@ export class SavingsComponent implements OnInit {
     '/properties',
     '/misc',
   ];
-  categoriesItems!: SelectItem[];
-  // categoriesItems!: SelectItemGroup[];
+  categoriesItems!: categoryOptionItem[];
   incomeCategory!: SelectItem[];
   expenseCategory!: SelectItem[];
   typesItems!: SelectItem[];
@@ -60,6 +66,8 @@ export class SavingsComponent implements OnInit {
   transactions$!: Subscription;
   transactionCol!: Column[];
   transactionExportColumns!: ExportColumn[];
+
+  transactionloading: boolean = true;
 
   dialogRef!: DynamicDialogRef;
 
@@ -72,7 +80,8 @@ export class SavingsComponent implements OnInit {
     private dialogSvc: DialogService,
     private confirmationSvc: ConfirmationService,
     private themeSvc: ThemeService,
-    private deleteSvc: DeleteService
+    private deleteSvc: DeleteService,
+    private updateSvc: UpdateService
   ) {}
 
   ngOnInit(): void {
@@ -104,29 +113,15 @@ export class SavingsComponent implements OnInit {
         }),
         map((cats: Categories[]) => {
           cats.map((cat) => {
-            // if (cat.type === 'income') {
-            //   this.incomeCategory.push({
-            //     label: cat.categoryName,
-            //     value: cat.categoryName,
-            //   });
-            // } else {
-            //   this.expenseCategory.push({
-            //     label: cat.categoryName,
-            //     value: cat.categoryName,
-            //   });
-            // }
             this.categoriesItems.push({
               label: cat.categoryName,
-              value: cat,
+              value: cat.categoryName,
+              object: cat,
             });
           });
         })
       )
       .subscribe((res) => {
-        // this.categoriesItems = [
-        //   { label: 'Income', value: 'income', items: this.incomeCategory },
-        //   { label: 'Expense', value: 'expense', items: this.expenseCategory },
-        // ];
         console.log('initiate donut');
         this.initiateDonutChart();
       });
@@ -175,7 +170,12 @@ export class SavingsComponent implements OnInit {
           });
         })
       )
-      .subscribe();
+      .subscribe((res) => {
+        this.transactionloading = false;
+        this.transactions = this.sortTransactionByDate(this.transactions);
+        //  reason of doing that is because the paginator for p-table unable to track the entries if we insert the transaction one by one
+        // we have to assign the transactions one shot
+      });
 
     setTimeout(() => {
       this.totalIncome.set(10000);
@@ -242,6 +242,19 @@ export class SavingsComponent implements OnInit {
     return sorted;
   }
 
+  sortTransactionByDate(trans: Transaction[]): Transaction[] {
+    trans.map((tran) => {
+      const dateStr = tran.date;
+      const dateNum = new Date(dateStr);
+      const timestamp = dateNum.getTime();
+      tran.dateNum = timestamp;
+    });
+    const sorted = trans.sort((a, b) => {
+      return b.dateNum - a.dateNum;
+    });
+    return sorted;
+  }
+
   onRowEditInit(transaction: Transaction) {
     this.clonedTransactions[transaction.transactionId as string] = {
       ...transaction,
@@ -250,12 +263,30 @@ export class SavingsComponent implements OnInit {
 
   onRowEditSave(transaction: Transaction) {
     if (transaction.amount > 0) {
-      delete this.clonedTransactions[transaction.transactionId as string];
-      this.messageSvc.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Transaction is updated',
+      this.categoriesItems.map((catObj) => {
+        if (transaction.categoryName === catObj.value) {
+          transaction.type = catObj.object.type;
+          transaction.categoryId = catObj.object.categoryId;
+        }
       });
+      console.log('edited transaction > ', transaction);
+      this.updateSvc
+        .updateTransaction(this.getSvc.userId, transaction)
+        .then((msg) => {
+          delete this.clonedTransactions[transaction.transactionId as string];
+          this.messageSvc.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: msg.message,
+          });
+        })
+        .catch((err) => {
+          this.messageSvc.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.message,
+          });
+        });
     } else {
       this.messageSvc.add({
         severity: 'error',

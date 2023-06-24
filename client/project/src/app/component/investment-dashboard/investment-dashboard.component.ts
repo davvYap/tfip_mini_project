@@ -127,6 +127,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     ];
     this.startDate = this.getStartDateOfYear();
     this.endOfMonth = this.getEndOfMonth();
+    console.log(this.endOfMonth);
     this.userStockData = [];
 
     // console.log(this.startDate);
@@ -160,7 +161,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
                 stock.date = date;
               }
               let endOfMonth: string[] = [...this.endOfMonth];
-              endOfMonth.push(this.getCurrentDate());
+              // endOfMonth.push(this.getCurrentDate());
               const performance: number[] = this.getStockMonthlyPerformance(
                 stockPrice,
                 endOfMonth
@@ -190,7 +191,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
                 stock.date = date;
               }
               let endOfMonth: string[] = [...this.endOfMonth];
-              endOfMonth.push(this.getCurrentDate());
+              // endOfMonth.push(this.getCurrentDate());
               const performance: number[] = this.getStockMonthlyPerformance(
                 stockPrice,
                 endOfMonth

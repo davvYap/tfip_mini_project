@@ -35,4 +35,8 @@ public class DBQueries {
     public static final String SQL_DELETE_USER_TRANSACATION = """
             delete from transactions where trans_id = ? and user_id = ? and cat_id = ?;
             """;
+
+    public static final String SQL_UDPATE_USER_TRANSACTION = """
+            update transactions set trans_name = ?, date_of_trans = ?, amount = ?, remarks = ?, cat_id = ? where user_id = ? and trans_id = ?;
+            """;
 }

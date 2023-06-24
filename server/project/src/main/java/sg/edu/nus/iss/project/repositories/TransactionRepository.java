@@ -64,4 +64,9 @@ public class TransactionRepository {
         int catId = getCategoryIdByCategoryNameJdbc(userId, catName);
         return jdbcTemplate.update(SQL_DELETE_USER_TRANSACATION, tranId, userId, catId);
     }
+
+    public int updateTransactionJdbc(String userId, Transaction tran) {
+        return jdbcTemplate.update(SQL_UDPATE_USER_TRANSACTION, tran.getTransactionName(), tran.getDate().toString(),
+                tran.getAmount(), tran.getRemarks(), tran.getCategoryId(), userId, tran.getTransactionId());
+    }
 }

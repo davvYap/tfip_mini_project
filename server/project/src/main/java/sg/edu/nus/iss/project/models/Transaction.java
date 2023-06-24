@@ -117,7 +117,7 @@ public class Transaction {
                 .add("remarks", remarks);
     }
 
-    public static Transaction convertFromJson(String jsonStr) throws IOException {
+    public static Transaction convertFromJsonAdd(String jsonStr) throws IOException {
         Transaction t = new Transaction();
         try (InputStream is = new ByteArrayInputStream(jsonStr.getBytes())) {
             JsonReader reader = Json.createReader(is);
@@ -128,6 +128,26 @@ public class Transaction {
             t.setCategoryName(jsObj.getString("categoryName"));
             t.setType(jsObj.getString("type"));
             t.setRemarks(jsObj.getString("remarks"));
+
+            String dateStr = jsObj.getString("date");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            t.setDate(LocalDate.parse(dateStr, formatter));
+        }
+        return t;
+    }
+
+    public static Transaction convertFromJsonUpdate(String jsonStr) throws IOException {
+        Transaction t = new Transaction();
+        try (InputStream is = new ByteArrayInputStream(jsonStr.getBytes())) {
+            JsonReader reader = Json.createReader(is);
+            JsonObject jsObj = reader.readObject();
+            t.setTransactionId(jsObj.getString("transactionId"));
+            t.setTransactionName(jsObj.getString("transactionName"));
+            t.setAmount(jsObj.getJsonNumber("amount").doubleValue());
+            t.setCategoryName(jsObj.getString("categoryName"));
+            t.setType(jsObj.getString("type"));
+            t.setRemarks(jsObj.getString("remarks"));
+            t.setCategoryId(jsObj.getInt("categoryId"));
 
             String dateStr = jsObj.getString("date");
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

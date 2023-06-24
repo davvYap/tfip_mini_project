@@ -123,4 +123,11 @@ export interface Transaction {
   remarks: string;
   categoryName: string;
   categoryId: string;
+  dateNum: number;
+}
+
+export interface categoryOptionItem<T = any> {
+  label: string;
+  value: string;
+  object: T;
 }

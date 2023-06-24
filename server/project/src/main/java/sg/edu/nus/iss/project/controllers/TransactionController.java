@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.print.DocFlavor.STRING;
+import javax.print.attribute.standard.Media;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -90,7 +92,8 @@ public class TransactionController {
         if (catId == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Invalid category name").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "Invalid category name").build()
+                            .toString());
         }
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -102,25 +105,28 @@ public class TransactionController {
     public ResponseEntity<String> insertTransactionJdbc(@PathVariable String userId, @RequestBody String json) {
         Transaction tran = null;
         try {
-            tran = Transaction.convertFromJson(json);
+            tran = Transaction.convertFromJsonAdd(json);
             int insertedRow = transSvc.insertTransactionJdbc(userId, tran);
             if (insertedRow > 0) {
                 return ResponseEntity.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(Json.createObjectBuilder()
                                 .add("message",
-                                        "Transaction (%s) successfully added".formatted(tran.getTransactionName()))
+                                        "Transaction (%s) successfully added"
+                                                .formatted(tran.getTransactionName()))
                                 .build()
                                 .toString());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Invalid transaction format").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "Invalid transaction format")
+                            .build().toString());
 
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Invalid transaction format").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "Invalid transaction format")
+                            .build().toString());
         }
 
     }
@@ -136,13 +142,43 @@ public class TransactionController {
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Json.createObjectBuilder()
                             .add("message",
-                                    "Transaction (%s) successfully removed".formatted(tranId))
+                                    "Transaction (%s) successfully removed"
+                                            .formatted(tranId))
                             .build()
                             .toString());
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Json.createObjectBuilder().add("message", "Failed to remove transaction").build().toString());
+                .body(Json.createObjectBuilder().add("message", "Failed to remove transaction").build()
+                        .toString());
+
+    }
+
+    @PutMapping(path = "/{userId}/update_transaction")
+    @ResponseBody
+    public ResponseEntity<String> updateTransactionJdbc(@PathVariable String userId, @RequestBody String json) {
+        try {
+            Transaction updateTransaction = Transaction.convertFromJsonUpdate(json);
+            int updatedCount = transSvc.updateTransactionJdbc(userId, updateTransaction);
+            if (updatedCount > 0) {
+                return ResponseEntity.status(HttpStatus.CREATED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Json.createObjectBuilder()
+                                .add("message",
+                                        "Transaction (%s) was successfully updated."
+                                                .formatted(updateTransaction.getTransactionId()))
+                                .build().toString());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "Invalid transaction format")
+                            .build().toString());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "Invalid transaction format")
+                            .build().toString());
+        }
 
     }
 }

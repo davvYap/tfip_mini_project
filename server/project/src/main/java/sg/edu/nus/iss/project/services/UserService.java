@@ -359,6 +359,12 @@ public class UserService {
         return formattedDate;
     }
 
+    public String getTodaysDate() {
+        LocalDate currDate = LocalDate.now();
+        String formattedDate = currDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return formattedDate;
+    }
+
     public String getYesterdayDate() {
         LocalDate currentDate = LocalDate.now();
         LocalDate yesterdayDate = currentDate.minusDays(1);
@@ -375,10 +381,10 @@ public class UserService {
             throws IOException {
         List<String> endOfMonthDates = getEndOfMonthForYear(year); // [2023-01-31, 2023-02-28, 2023-03-31, 2023-04-28,
                                                                    // 2023-05-31, TODAYS DATE]
-        endOfMonthDates.add(getYesterdayDate());
+        // endOfMonthDates.add(getYesterdayDate());
         System.out.println("End of months >>> " + endOfMonthDates);
         String startDateOfTheYear = getStartDateOfTheYear(year);
-        String currDate = endOfMonthDates.get(endOfMonthDates.size() - 2);
+        String currDate = getTodaysDate();
         System.out.println("CurrDate >>> " + currDate);
 
         String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
@@ -511,10 +517,10 @@ public class UserService {
             throws IOException {
         List<String> endOfMonthDates = getEndOfMonthForYear(year); // [2023-01-31, 2023-02-28, 2023-03-31, 2023-04-28,
                                                                    // 2023-05-31, TODAYS DATE]
-        endOfMonthDates.add(getYesterdayDate());
+        // endOfMonthDates.add(getYesterdayDate());
         // System.out.println("End of months >>> " + endOfMonthDates);
         String startDateOfTheYear = getStartDateOfTheYear(year);
-        String currDate = endOfMonthDates.get(endOfMonthDates.size() - 2);
+        String currDate = getTodaysDate();
 
         String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
         Map<String, List<Stock>> allStockMap = new HashMap<>();
