@@ -33,9 +33,9 @@ public class TransactionRepository {
         return categories;
     }
 
-    public List<Transaction> getUserTransactionsJdbc(String userId) {
+    public List<Transaction> getUserTransactionsJdbc(String userId, int year) {
         List<Transaction> transactions = new LinkedList<>();
-        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_USER_TRANSACTIONS, userId);
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_USER_TRANSACTIONS_BY_YEAR, userId, year);
         while (rs.next()) {
             transactions.add(Transaction.convertFromResult(rs));
         }
@@ -68,5 +68,14 @@ public class TransactionRepository {
     public int updateTransactionJdbc(String userId, Transaction tran) {
         return jdbcTemplate.update(SQL_UDPATE_USER_TRANSACTION, tran.getTransactionName(), tran.getDate().toString(),
                 tran.getAmount(), tran.getRemarks(), tran.getCategoryId(), userId, tran.getTransactionId());
+    }
+
+    public List<Transaction> geTransactionsBasedOnMonthAndYearJdbc(String userId, int month, int year) {
+        List<Transaction> trans = new LinkedList<>();
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_USER_TRANSACTIONS_BASED_ON_DATE, userId, month, year);
+        while (rs.next()) {
+            trans.add(Transaction.convertFromResult(rs));
+        }
+        return trans;
     }
 }

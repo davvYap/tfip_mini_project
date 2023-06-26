@@ -1,4 +1,13 @@
-import { Component, OnInit, Signal, computed, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  Signal,
+  ViewChild,
+  WritableSignal,
+  computed,
+  signal,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -9,7 +18,7 @@ import {
 } from 'primeng/api';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Table } from 'primeng/table';
-import { Subscription, map } from 'rxjs';
+import { Observable, Subscription, forkJoin, map, tap } from 'rxjs';
 import {
   Categories,
   Column,
@@ -23,6 +32,8 @@ import { ThemeService } from 'src/app/service/theme.service';
 import { AddTransactionComponent } from '../add-transaction/add-transaction.component';
 import { DeleteService } from 'src/app/service/delete.service';
 import { UpdateService } from 'src/app/service/update.service';
+import { ExportService } from 'src/app/service/export.service';
+import { faFolderOpen } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-savings',
@@ -30,9 +41,10 @@ import { UpdateService } from 'src/app/service/update.service';
   styleUrls: ['./savings.component.css'],
 })
 export class SavingsComponent implements OnInit {
-  totalIncome = signal(0);
-  totalExpense = signal(0);
-  totalBalance = computed(() => {
+  thisYear: WritableSignal<number> = signal(2023);
+  totalIncome: WritableSignal<number> = signal(0);
+  totalExpense: WritableSignal<number> = signal(0);
+  totalBalance: Signal<number> = computed(() => {
     return this.totalIncome() - this.totalExpense();
   });
 
@@ -41,13 +53,29 @@ export class SavingsComponent implements OnInit {
   categoryForm!: FormGroup;
   postCategory$!: Subscription;
 
+  skeletonLoading: boolean = true;
   barChartData!: any;
   barChartOptions!: any;
+  monthsStr: string[] = [
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '10',
+    '11',
+    '12',
+  ];
+  incomeBarChartData!: number[];
+  expenseBarChartData!: number[];
+  balanceBarChartData!: number[];
 
-  // CATEGORIES
-  // categories: string[] = ['Income', 'Expense', 'Balance'];
   categories!: string[];
-  categoriesData!: number[];
+  categoriesData = signal<number[]>([]);
   categoriesColor!: string[];
   categories$!: Subscription;
   categoriesRoutes: string[] = [
@@ -57,8 +85,6 @@ export class SavingsComponent implements OnInit {
     '/misc',
   ];
   categoriesItems!: categoryOptionItem[];
-  incomeCategory!: SelectItem[];
-  expenseCategory!: SelectItem[];
   typesItems!: SelectItem[];
   clonedTransactions: { [s: string]: Transaction } = {};
 
@@ -71,6 +97,12 @@ export class SavingsComponent implements OnInit {
 
   dialogRef!: DynamicDialogRef;
 
+  @ViewChild('appDialog', { static: true })
+  appDialog!: ElementRef<HTMLDialogElement>;
+  yearForm!: FormGroup;
+
+  emptyIcon = faFolderOpen;
+
   constructor(
     private router: Router,
     private getSvc: GetService,
@@ -81,29 +113,26 @@ export class SavingsComponent implements OnInit {
     private confirmationSvc: ConfirmationService,
     private themeSvc: ThemeService,
     private deleteSvc: DeleteService,
-    private updateSvc: UpdateService
+    private updateSvc: UpdateService,
+    private exportSvc: ExportService,
+    private elementRef: ElementRef
   ) {}
 
   ngOnInit(): void {
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
-    this.categories = [];
-    this.categoriesData = [];
+    this.categories = ['Income', 'Expense'];
     this.categoriesColor = [];
-    this.categoryForm = this.createCategoryForm();
     this.categoriesItems = [];
-    this.incomeCategory = [];
-    this.expenseCategory = [];
-    this.typesItems = [
-      { label: 'Income', value: 'income' },
-      { label: 'Expense', value: 'expense' },
-    ];
+    this.categoryForm = this.createCategoryForm();
+    this.yearForm = this.createYearForm();
+
     this.categories$ = this.getSvc
       .getUserCategories(this.getSvc.userId)
       .pipe(
         map((cats) => {
           cats.map((cat) => {
-            this.categories.push(cat.categoryName);
-            this.categoriesData.push(Math.floor(Math.random() * 100));
+            // this.categories.push(cat.categoryName);
+            // this.categoriesData.push(Math.floor(Math.random() * 100));
             const randomColor = Math.floor(Math.random() * 16777215).toString(
               16
             );
@@ -161,43 +190,96 @@ export class SavingsComponent implements OnInit {
 
     this.transactions = [];
     this.transactions$ = this.getSvc
-      .getUserTransaction(this.getSvc.userId)
+      .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
       .pipe(
-        map((trans) => {
+        map((trans: Transaction[]) => {
           trans.map((tran) => {
             // console.log(tran);
             this.transactions.push(tran);
           });
+          return trans;
+        }),
+        map((trans: Transaction[]) => {
+          let totalIncome: number = 0.0;
+          let totalExpense: number = 0.0;
+
+          trans.map((tran) => {
+            if (tran.type === 'income') {
+              totalIncome += tran.amount;
+            } else {
+              totalExpense += tran.amount;
+            }
+          });
+          this.totalIncome.set(totalIncome);
+          this.totalExpense.set(totalExpense);
+          this.categoriesData.set([totalIncome, totalExpense]);
         })
       )
-      .subscribe((res) => {
+      .subscribe(() => {
         this.transactionloading = false;
-        this.transactions = this.sortTransactionByDate(this.transactions);
+        let transArr = [...this.transactions];
         //  reason of doing that is because the paginator for p-table unable to track the entries if we insert the transaction one by one
         // we have to assign the transactions one shot
+        this.transactions = this.sortTransactionByDate(transArr);
+        this.initiateDonutChart();
       });
 
-    setTimeout(() => {
-      this.totalIncome.set(10000);
-      this.totalExpense.set(5893.5);
-    }, 1000);
+    this.incomeBarChartData = [];
+    this.expenseBarChartData = [];
+    this.balanceBarChartData = [];
+    // const thisYear: number = new Date().getFullYear();
 
-    setTimeout(() => {
-      // this.categoriesData = [
-      //   this.totalIncome,
-      //   this.totalExpense,
-      //   this.totalExpense,
-      // ];
+    // Create an array of observables
+    const observables: Observable<Transaction[]>[] = this.monthsStr.map(
+      (month) => {
+        return this.getSvc.getUserTransactionBasedOnMonthYear(
+          this.getSvc.userId,
+          month,
+          this.thisYear().toString()
+        );
+      }
+    );
 
-      // this.initiateDonutChart();
+    // Wait for all observables to complete using forkJoin
+    forkJoin(observables).subscribe((results: Transaction[][]) => {
+      results.forEach((trans: Transaction[]) => {
+        let totalIncomePerMonth = 0;
+        let totalExpensePerMonth = 0;
+
+        trans.forEach((tran: Transaction) => {
+          if (tran.type === 'income') {
+            totalIncomePerMonth += tran.amount;
+          } else {
+            totalExpensePerMonth += tran.amount;
+          }
+        });
+
+        this.incomeBarChartData.push(totalIncomePerMonth);
+        this.expenseBarChartData.push(totalExpensePerMonth);
+        this.balanceBarChartData.push(
+          totalIncomePerMonth - totalExpensePerMonth
+        );
+      });
+
       this.initiateBarChart();
-    }, 1000);
+      this.skeletonLoading = false;
+    });
   }
 
   createCategoryForm(): FormGroup {
     return this.fb.group({
       category: this.fb.control('', Validators.required),
       type: this.fb.control('expense', Validators.required),
+    });
+  }
+
+  createYearForm(): FormGroup {
+    return this.fb.group({
+      year: this.fb.control(this.thisYear(), [
+        Validators.required,
+        Validators.min(1900),
+        Validators.max(9999),
+      ]),
     });
   }
 
@@ -279,6 +361,7 @@ export class SavingsComponent implements OnInit {
             summary: 'Success',
             detail: msg.message,
           });
+          this.ngOnInit();
         })
         .catch((err) => {
           this.messageSvc.add({
@@ -335,9 +418,17 @@ export class SavingsComponent implements OnInit {
     });
   }
 
-  exportExcelPortfolio() {}
+  exportExcelPortfolio(): void {
+    this.exportSvc.exportExcel('transTable', 'transactions');
+  }
 
-  exportPdfPortfolio() {}
+  exportPdfPortfolio(): void {
+    this.exportSvc.exportPdf(
+      this.transactionExportColumns,
+      this.transactions,
+      'transactions'
+    );
+  }
 
   deleteSelectedTransaction(event: any, tran: Transaction) {
     this.confirmationSvc.confirm({
@@ -368,6 +459,22 @@ export class SavingsComponent implements OnInit {
     });
   }
 
+  // Dialog
+  showDialog() {
+    this.appDialog.nativeElement.showModal();
+  }
+
+  closeDialog() {
+    this.appDialog.nativeElement.close();
+  }
+
+  getTransaction() {
+    const year: number = this.yearForm.get('year')?.value;
+    this.thisYear.set(year);
+    this.closeDialog();
+    this.ngOnInit();
+  }
+
   initiateDonutChart() {
     const documentStyle = getComputedStyle(document.documentElement);
     const textColor = documentStyle.getPropertyValue('--primary-color-text');
@@ -376,21 +483,21 @@ export class SavingsComponent implements OnInit {
       labels: this.categories,
       datasets: [
         {
-          data: this.categoriesData,
-          backgroundColor: this.categoriesColor,
-          hoverBackgroundColor: this.categoriesColor,
-          // backgroundColor: [
-          //   documentStyle.getPropertyValue('--blue-500'),
-          //   documentStyle.getPropertyValue('--green-500'),
-          //   documentStyle.getPropertyValue('--purple-500'),
-          //   documentStyle.getPropertyValue('--yellow-500'),
-          // ],
-          // hoverBackgroundColor: [
-          //   documentStyle.getPropertyValue('--blue-400'),
-          //   documentStyle.getPropertyValue('--green-400'),
-          //   documentStyle.getPropertyValue('--purple-400'),
-          //   documentStyle.getPropertyValue('--yellow-400'),
-          // ],
+          data: this.categoriesData(),
+          // backgroundColor: this.categoriesColor,
+          // hoverBackgroundColor: this.categoriesColor,
+          backgroundColor: [
+            documentStyle.getPropertyValue('--green-400'),
+            documentStyle.getPropertyValue('--red-400'),
+            // documentStyle.getPropertyValue('--purple-500'),
+            // documentStyle.getPropertyValue('--yellow-500'),
+          ],
+          hoverBackgroundColor: [
+            documentStyle.getPropertyValue('--green-300'),
+            documentStyle.getPropertyValue('--red-300'),
+            // documentStyle.getPropertyValue('--purple-400'),
+            // documentStyle.getPropertyValue('--yellow-400'),
+          ],
         },
       ],
       doughnutlabel: [],
@@ -455,20 +562,20 @@ export class SavingsComponent implements OnInit {
         {
           type: 'bar',
           label: 'Income',
-          backgroundColor: documentStyle.getPropertyValue('--green-500'),
-          data: [50, 25, 12, 48, 90, 76, 42],
+          backgroundColor: documentStyle.getPropertyValue('--green-300'),
+          data: this.incomeBarChartData,
         },
         {
           type: 'bar',
           label: 'Expense',
-          backgroundColor: documentStyle.getPropertyValue('--purple-500'),
-          data: [21, 84, 24, 75, 37, 65, 34],
+          backgroundColor: documentStyle.getPropertyValue('--red-300'),
+          data: this.expenseBarChartData,
         },
         {
           type: 'bar',
           label: 'Balance',
-          backgroundColor: documentStyle.getPropertyValue('--yellow-500'),
-          data: [41, 52, 24, 74, 23, 21, 32],
+          backgroundColor: documentStyle.getPropertyValue('--blue-300'),
+          data: this.balanceBarChartData,
         },
       ],
     };

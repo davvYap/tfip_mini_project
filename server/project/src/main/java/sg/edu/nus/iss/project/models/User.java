@@ -47,7 +47,7 @@ public class User {
                 JsonObject jsObj = jr.readObject();
                 us.setUserId(jsObj.getString("userId"));
                 us.setUsername(jsObj.getString("username"));
-
+                is.close();
             }
         }
         return us;

@@ -246,9 +246,23 @@ export class GetService {
     );
   }
 
-  getUserTransaction(userId: string): Observable<Transaction[]> {
+  getUserTransaction(userId: string, year: string): Observable<Transaction[]> {
+    let qp = new HttpParams().set('year', year);
     return this.http.get<Transaction[]>(
-      `http://localhost:8080/api/${userId}/transactions`
+      `http://localhost:8080/api/${userId}/transactions`,
+      { params: qp }
+    );
+  }
+
+  getUserTransactionBasedOnMonthYear(
+    userId: string,
+    month: string,
+    year: string
+  ): Observable<Transaction[]> {
+    const qp = new HttpParams().set('month', month).append('year', year);
+    return this.http.get<Transaction[]>(
+      `http://localhost:8080/api/${userId}/trans_month_year`,
+      { params: qp }
     );
   }
 

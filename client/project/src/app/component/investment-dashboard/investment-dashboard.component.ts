@@ -161,7 +161,14 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
                 stock.date = date;
               }
               let endOfMonth: string[] = [...this.endOfMonth];
-              // endOfMonth.push(this.getCurrentDate());
+              let count = 0;
+              endOfMonth.map((date) => {
+                if (date === this.getCurrentDate()) count++;
+              });
+              if (count === 0) {
+                endOfMonth.push(this.getCurrentDate());
+              }
+
               const performance: number[] = this.getStockMonthlyPerformance(
                 stockPrice,
                 endOfMonth
@@ -191,7 +198,13 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
                 stock.date = date;
               }
               let endOfMonth: string[] = [...this.endOfMonth];
-              // endOfMonth.push(this.getCurrentDate());
+              let count = 0;
+              endOfMonth.map((date) => {
+                if (date === this.getCurrentDate()) count++;
+              });
+              if (count === 0) {
+                endOfMonth.push(this.getCurrentDate());
+              }
               const performance: number[] = this.getStockMonthlyPerformance(
                 stockPrice,
                 endOfMonth
@@ -479,11 +492,17 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
 
   getCurrentDate(): string {
     const currDate = new Date();
+    console.log('currDate1', currDate);
     // const yesterdayDate = new Date(currDate);
     // yesterdayDate.setDate(currDate.getDate() - 1);
 
-    while (currDate.getDay() === 0 || currDate.getDay() === 6) {
+    while (
+      currDate.getDay() === 1 ||
+      currDate.getDay() === 0 ||
+      currDate.getDay() === 6
+    ) {
       currDate.setDate(currDate.getDate() - 1);
+      console.log('currDate2', currDate);
     }
     const formattedDate = `${currDate.getFullYear()}-${(currDate.getMonth() + 1)
       .toString()

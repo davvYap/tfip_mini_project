@@ -126,7 +126,6 @@ public class Transaction {
             t.setTransactionName(jsObj.getString("transactionName"));
             t.setAmount(jsObj.getJsonNumber("amount").doubleValue());
             t.setCategoryName(jsObj.getString("categoryName"));
-            t.setType(jsObj.getString("type"));
             t.setRemarks(jsObj.getString("remarks"));
 
             String dateStr = jsObj.getString("date");
@@ -145,13 +144,13 @@ public class Transaction {
             t.setTransactionName(jsObj.getString("transactionName"));
             t.setAmount(jsObj.getJsonNumber("amount").doubleValue());
             t.setCategoryName(jsObj.getString("categoryName"));
-            t.setType(jsObj.getString("type"));
             t.setRemarks(jsObj.getString("remarks"));
             t.setCategoryId(jsObj.getInt("categoryId"));
 
             String dateStr = jsObj.getString("date");
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             t.setDate(LocalDate.parse(dateStr, formatter));
+            is.close();
         }
         return t;
     }

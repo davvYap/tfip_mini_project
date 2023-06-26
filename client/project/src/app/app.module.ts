@@ -17,6 +17,7 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { SellStockComponent } from './component/sell-stock/sell-stock.component';
 import { SavingsComponent } from './component/savings/savings.component';
 import { AddTransactionComponent } from './component/add-transaction/add-transaction.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [
@@ -38,6 +39,7 @@ import { AddTransactionComponent } from './component/add-transaction/add-transac
     ReactiveFormsModule,
     FormsModule,
     HttpClientModule,
+    FontAwesomeModule,
   ],
   providers: [MessageService, ConfirmationService, DialogService],
   bootstrap: [AppComponent],

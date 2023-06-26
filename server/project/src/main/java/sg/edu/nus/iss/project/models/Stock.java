@@ -167,6 +167,7 @@ public class Stock {
                 s.setQuantity((jsObj.getJsonNumber("quantity").doubleValue()));
                 s.setPurchasedDate(jsObj.getJsonNumber("date").longValue());
                 s.setFees((jsObj.getJsonNumber("fees").doubleValue()));
+                is.close();
             }
         }
         return s;

@@ -61,7 +61,6 @@ export class AddTransactionComponent implements OnInit {
       transactionName: this.fb.control('', Validators.required),
       amount: this.fb.control('', Validators.required),
       categoryName: this.fb.control('', Validators.required),
-      type: this.fb.control('expense', Validators.required),
       remarks: this.fb.control(''),
     });
   }

@@ -22,9 +22,9 @@ public class DBQueries {
             select cat_id from categories where user_id = ? and cat_name like ?;
             """;
 
-    public static final String SQL_GET_USER_TRANSACTIONS = """
+    public static final String SQL_GET_USER_TRANSACTIONS_BY_YEAR = """
             select trans_id, trans_name, date_of_trans, amount, remarks, t.cat_id, c.cat_name,
-            c.type from transactions t join categories c on t.cat_id = c.cat_id where t.user_id  = ?;
+            c.type from transactions t join categories c on t.cat_id = c.cat_id where t.user_id  = ? and year(date_of_trans) = ?;
                 """;
 
     public static final String SQL_INSERT_USER_TRANSACTION = """
@@ -39,4 +39,9 @@ public class DBQueries {
     public static final String SQL_UDPATE_USER_TRANSACTION = """
             update transactions set trans_name = ?, date_of_trans = ?, amount = ?, remarks = ?, cat_id = ? where user_id = ? and trans_id = ?;
             """;
+
+    public static final String SQL_GET_USER_TRANSACTIONS_BASED_ON_DATE = """
+            select trans_id, trans_name, date_of_trans, amount, remarks, t.cat_id, c.cat_name, c.type from transactions t join categories c on t.cat_id = c.cat_id
+            where t.user_id  = ? and month(date_of_trans) = ? and year(date_of_trans) = ?;
+                                        """;
 }

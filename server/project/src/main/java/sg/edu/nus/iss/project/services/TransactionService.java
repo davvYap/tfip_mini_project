@@ -27,8 +27,8 @@ public class TransactionService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public List<Transaction> getUserTransactionsJdbc(String userId) {
-        return transRepo.getUserTransactionsJdbc(userId);
+    public List<Transaction> getUserTransactionsJdbc(String userId, int year) {
+        return transRepo.getUserTransactionsJdbc(userId, year);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -49,5 +49,9 @@ public class TransactionService {
     @Transactional(rollbackFor = Exception.class)
     public int updateTransactionJdbc(String userId, Transaction tran) {
         return transRepo.updateTransactionJdbc(userId, tran);
+    }
+
+    public List<Transaction> geTransactionsBasedOnMonthAndYearJdbc(String userId, int month, int year) {
+        return transRepo.geTransactionsBasedOnMonthAndYearJdbc(userId, month, year);
     }
 }

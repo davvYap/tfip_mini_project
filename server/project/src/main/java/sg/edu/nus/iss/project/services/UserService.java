@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.aggregation.StringOperators.Split;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -369,11 +368,13 @@ public class UserService {
         LocalDate currentDate = LocalDate.now();
         LocalDate yesterdayDate = currentDate.minusDays(1);
 
-        while (yesterdayDate.getDayOfWeek() == DayOfWeek.SUNDAY || yesterdayDate.getDayOfWeek() == DayOfWeek.SATURDAY) {
-            yesterdayDate = currentDate.minusDays(1);
+        while (yesterdayDate.getDayOfWeek() == DayOfWeek.SUNDAY ||
+                yesterdayDate.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            yesterdayDate = yesterdayDate.minusDays(1);
         }
 
         String formattedDate = yesterdayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        System.out.println("Getting yesterday date...");
         return formattedDate;
     }
 
@@ -381,7 +382,10 @@ public class UserService {
             throws IOException {
         List<String> endOfMonthDates = getEndOfMonthForYear(year); // [2023-01-31, 2023-02-28, 2023-03-31, 2023-04-28,
                                                                    // 2023-05-31, TODAYS DATE]
-        // endOfMonthDates.add(getYesterdayDate());
+        String yesterdayDate = getYesterdayDate();
+        if (!(endOfMonthDates.get(endOfMonthDates.size() - 1).equalsIgnoreCase(yesterdayDate))) {
+            endOfMonthDates.add(yesterdayDate);
+        }
         System.out.println("End of months >>> " + endOfMonthDates);
         String startDateOfTheYear = getStartDateOfTheYear(year);
         String currDate = getTodaysDate();
@@ -517,8 +521,10 @@ public class UserService {
             throws IOException {
         List<String> endOfMonthDates = getEndOfMonthForYear(year); // [2023-01-31, 2023-02-28, 2023-03-31, 2023-04-28,
                                                                    // 2023-05-31, TODAYS DATE]
-        // endOfMonthDates.add(getYesterdayDate());
-        // System.out.println("End of months >>> " + endOfMonthDates);
+        String yesterdayDate = getYesterdayDate();
+        if (!(endOfMonthDates.get(endOfMonthDates.size() - 1).equalsIgnoreCase(yesterdayDate))) {
+            endOfMonthDates.add(yesterdayDate);
+        }
         String startDateOfTheYear = getStartDateOfTheYear(year);
         String currDate = getTodaysDate();
 

@@ -46,6 +46,12 @@ body {
   border-radius: 16px; */
 }
 
+#applicationMenubar {
+  position: sticky;
+  top: 0;
+  z-index: 9998;
+}
+
 .p-button-label {
   font-weight: 500 !important;
 }
@@ -76,6 +82,10 @@ body {
   border-top-right-radius: 4px;
   border-top-left-radius: 4px;
 } */
+
+.p-toast {
+  margin-top: 6dvh;
+}
 
 .p-dialog .p-dialog-content {
   /* background: rgba(0, 0, 0, 1); */

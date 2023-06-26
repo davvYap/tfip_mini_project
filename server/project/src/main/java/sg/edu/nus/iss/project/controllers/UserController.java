@@ -60,12 +60,14 @@ public class UserController {
         if (!updatedTheme) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Update theme failed").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "Update theme failed").build()
+                            .toString());
         }
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Json.createObjectBuilder().add("message", "Update theme successfully").build().toString());
+                .body(Json.createObjectBuilder().add("message", "Update theme successfully").build()
+                        .toString());
     }
 
     @GetMapping(path = "/goal")
@@ -88,12 +90,14 @@ public class UserController {
         if (!updatedGoal) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Update goal failed").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "Update goal failed").build()
+                            .toString());
         }
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Json.createObjectBuilder().add("message", "Update goal successfully").build().toString());
+                .body(Json.createObjectBuilder().add("message", "Update goal successfully").build()
+                        .toString());
     }
 
     @PostMapping(path = "/{userId}/addStock")
@@ -105,7 +109,8 @@ public class UserController {
         if (stock == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Invalid JSON").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "Invalid JSON").build()
+                            .toString());
         }
 
         // SAVE TO MONGO
@@ -119,7 +124,8 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder()
-                        .add("message", "%s is added into portfolio with order ID %s".formatted(stock.getSymbol(),
+                        .add("message", "%s is added into portfolio with order ID %s".formatted(
+                                stock.getSymbol(),
                                 stock.getPurchaseId()))
                         .build().toString());
     }
@@ -132,7 +138,8 @@ public class UserController {
         if (stocks == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "No stocks found").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "No stocks found").build()
+                            .toString());
         }
         JsonArrayBuilder jsArr = Json.createArrayBuilder();
         for (Stock stock : stocks) {
@@ -152,7 +159,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Json.createObjectBuilder()
-                            .add("message", "Delete stock with purchaseId %s failed".formatted(purchaseId))
+                            .add("message", "Delete stock with purchaseId %s failed"
+                                    .formatted(purchaseId))
                             .build().toString());
         }
         // retrieve deleted stock
@@ -160,7 +168,8 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder()
-                        .add("message", "Deleted stock with purchaseId %s successfully".formatted(purchaseId))
+                        .add("message", "Deleted stock with purchaseId %s successfully"
+                                .formatted(purchaseId))
                         .build().toString());
     }
 
@@ -175,18 +184,22 @@ public class UserController {
         if (soldStock == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Invalid JSON").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "Invalid JSON").build()
+                            .toString());
         }
         boolean updated = userSvc.updateUserStockMongo(userId, soldStock);
         if (!updated) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Error update sell order.").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "Error update sell order.")
+                            .build().toString());
         }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder()
-                        .add("message", "Updated sell order %s".formatted(soldStock.getPurchaseId())).build()
+                        .add("message", "Updated sell order %s"
+                                .formatted(soldStock.getPurchaseId()))
+                        .build()
                         .toString());
 
     }
@@ -218,7 +231,8 @@ public class UserController {
         if (sc == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "No stocks found").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "No stocks found").build()
+                            .toString());
         }
         JsonArrayBuilder jsArr = Json.createArrayBuilder();
         for (StockCount stockCount : sc) {
@@ -240,7 +254,8 @@ public class UserController {
         if (sc == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "No stocks found").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "No stocks found").build()
+                            .toString());
         }
         double totalStockValue = 0.0;
         for (StockCount stockCount : sc) {
@@ -270,13 +285,15 @@ public class UserController {
         if (!updated) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Users total stock value failed to update in mongo")
+                    .body(Json.createObjectBuilder().add("message",
+                            "Users total stock value failed to update in mongo")
                             .build()
                             .toString());
         }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Json.createObjectBuilder().add("message", "Users total stock value updated successfully in mongo")
+                .body(Json.createObjectBuilder()
+                        .add("message", "Users total stock value updated successfully in mongo")
                         .build()
                         .toString());
     }
@@ -294,6 +311,7 @@ public class UserController {
     public ResponseEntity<String> getUserMonthlyPerformance(@PathVariable String userId,
             @RequestParam(defaultValue = "1000") int limit,
             @RequestParam(defaultValue = "0") int skip, @RequestParam int year) throws IOException {
+        System.out.println("Calling API for user stock monnthly performance %...");
         List<Double> userPerformance = userSvc.getUserMonthlyPerformanceForYear(year, userId, limit, skip);
 
         JsonArrayBuilder jsArr = Json.createArrayBuilder();
@@ -309,6 +327,7 @@ public class UserController {
     public ResponseEntity<String> getUserStockMonthlyValue(@PathVariable String userId,
             @RequestParam(defaultValue = "1000") int limit,
             @RequestParam(defaultValue = "0") int skip, @RequestParam int year) throws IOException {
+        System.out.println("Calling API for user stock monnthly value...");
         List<Double> userStockValue = userSvc.getUserMonthlyStockValueForYear(year, userId, limit, skip);
 
         JsonArrayBuilder jsArr = Json.createArrayBuilder();
@@ -329,7 +348,8 @@ public class UserController {
         if (stocksOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "No stocks found").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "No stocks found").build()
+                            .toString());
         }
         List<Stock> stocks = stocksOpt.get();
 
@@ -347,7 +367,8 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<String> getUserStocksQtyByMonth(@PathVariable String userId,
             @RequestParam(defaultValue = "1000") int limit,
-            @RequestParam(defaultValue = "0") int skip, @RequestParam String month, @RequestParam String symbol) {
+            @RequestParam(defaultValue = "0") int skip, @RequestParam String month,
+            @RequestParam String symbol) {
         Optional<Double> opt = userSvc.retrieveUserStockQuantityByMonth(userId, limit, skip, month, symbol);
 
         return ResponseEntity.status(HttpStatus.OK)
