@@ -1,35 +1,81 @@
 <div class="container">
   <div class="row justify-content-center align-items-center g-2">
     <div class="col-10 text-center my-5 h1card">
-      <h1>
-        Savings Dashbooard
-        <span
-          id="year"
-          class="fw-bolder"
-          pTooltip="Press to change year"
-          (click)="showDialog()"
-        >
-          {{ thisYear() }}
-        </span>
-      </h1>
+      <div class="d-flex flex-column">
+        <div>
+          <h3>Transaction Records</h3>
+        </div>
+        <div>
+          <h3>
+            <span
+              id="dates"
+              class="fw-bolder"
+              pTooltip="Press to select dates"
+              (click)="showDialog()"
+            >
+              {{ startDate() }} - {{ endDate() }}
+            </span>
+          </h3>
+        </div>
+        <div class="mt-3 record-summary">
+          <div>
+            <h4>=> Record type: {{ typeOfRecord() | titlecase }}</h4>
+          </div>
+          <div *ngIf="typeOfRecord() === 'all' || typeOfRecord() === 'income'">
+            <h4>=> Total Income: {{ totalIncome() | currency }}</h4>
+          </div>
+          <div *ngIf="typeOfRecord() === 'all' || typeOfRecord() === 'expense'">
+            <h4>=> Total Expense: {{ totalExpense() | currency }}</h4>
+          </div>
+          <div *ngIf="typeOfRecord() === 'all'">
+            <h4>=> Total Balance: {{ totalBalance() | currency }}</h4>
+          </div>
+        </div>
+      </div>
       <dialog #appDialog id="dialogModal">
         <header>
           <h2 class="header">Select records</h2>
           <button (click)="closeDialog()" id="closeDialogHeader">x</button>
         </header>
 
-        <section>
-          <form [formGroup]="yearForm">
-            <label for="yearInput" class="fs-4">Year of record:</label>
-            <input
-              id="yearInput"
-              class="ms-2 fs-4"
-              type="number"
-              formControlName="year"
-              [style]="{ width: '30%' }"
-            />
-            <div *ngIf="yearForm.invalid">
-              <p class="negative mt-1">Invalid year</p>
+        <section class="mt-2">
+          <form [formGroup]="dateForm">
+            <div
+              class="d-flex flex-column justify-content-start align-items-center"
+            >
+              <div>
+                <label for="startDateInput" class="fs-4">Start date:</label>
+                <input
+                  id="startDateInput"
+                  class="ms-2 fs-4"
+                  type="date"
+                  formControlName="startDate"
+                />
+              </div>
+              <div class="mt-2">
+                <label for="endDateInput" class="fs-4">End date:</label>
+                <input
+                  id="endDateInput"
+                  class="ms-2 fs-4"
+                  type="date"
+                  formControlName="endDate"
+                />
+              </div>
+              <div class="mt-2">
+                <label for="recordTypeInput" class="fs-4">Record type:</label>
+                <select
+                  formControlName="typeOfRecord"
+                  id="recordTypeInput"
+                  class="ms-2 fs-4"
+                >
+                  <option value="all">All</option>
+                  <option value="income">Income</option>
+                  <option value="expense">Expense</option>
+                </select>
+              </div>
+            </div>
+            <div *ngIf="dateForm.invalid">
+              <p class="negative mt-1">Invalid dates</p>
             </div>
           </form>
         </section>
@@ -49,7 +95,7 @@
               class="ms-3 dialogBtn"
               type="button"
               (click)="getTransaction()"
-              [disabled]="yearForm.invalid"
+              [disabled]="dateForm.invalid"
             >
               Get Records
             </button>
@@ -59,69 +105,7 @@
     </div>
   </div>
 
-  <div *ngIf="transactions.length > 0; else noTransactionData">
-    <div class="row justify-content-center align-items-center g-2">
-      <div class="col-4 my-4">
-        <p-fieldset
-          inputId="ac1"
-          legend="Income"
-          [toggleable]="true"
-          class="text-center"
-        >
-          <ng-template pTemplate="header">
-            <div class="ms-2">
-              <i class="pi pi-money-bill" style="font-size: 1.2rem"></i>
-            </div>
-          </ng-template>
-          <h3>
-            <span *ngIf="totalIncome(); else loading">
-              {{ totalIncome() | currency }}
-            </span>
-          </h3>
-        </p-fieldset>
-      </div>
-
-      <div class="col-4 my-4">
-        <p-fieldset
-          inputId="ac2"
-          legend="Expense"
-          [toggleable]="true"
-          class="text-center"
-        >
-          <ng-template pTemplate="header">
-            <div class="ms-2">
-              <i class="pi pi-dollar" style="font-size: 1.2rem"></i>
-            </div>
-          </ng-template>
-          <h3>
-            <span *ngIf="totalExpense(); else loading">
-              {{ totalExpense() | currency }}
-            </span>
-          </h3>
-        </p-fieldset>
-      </div>
-
-      <div class="col-4 my-4">
-        <p-fieldset
-          inputId="ac3"
-          legend="Balance"
-          [toggleable]="true"
-          class="text-center"
-        >
-          <ng-template pTemplate="header">
-            <div class="ms-2">
-              <i class="pi pi-wallet" style="font-size: 1.2rem"></i>
-            </div>
-          </ng-template>
-          <h3>
-            <span *ngIf="totalBalance(); else loading">
-              {{ totalBalance() | currency }}
-            </span>
-          </h3>
-        </p-fieldset>
-      </div>
-    </div>
-
+  <section *ngIf="transactions.length > 0; else noTransactionData">
     <div class="row justify-content-evenly align-items-center g-2">
       <div class="col-4 card custom-background">
         <div class="d-flex flex-row-reverse"></div>
@@ -130,33 +114,7 @@
           [data]="donutData"
           [options]="donutOptions"
         ></p-chart>
-        <p-button
-          (click)="op.toggle($event)"
-          icon="pi pi-cart-plus"
-          label="Add Category"
-          styleClass="p-button-rounded "
-        ></p-button>
-        <p-overlayPanel #op>
-          <ng-template pTemplate="content">
-            <h6>Category:</h6>
-            <form [formGroup]="categoryForm">
-              <input
-                pInputText
-                class="p-inputtext-sm"
-                placeholder="Press 'Enter' to submit"
-                formControlName="category"
-                (keypress)="addCategory($event)"
-              />
-              <p-toggleButton
-                formControlName="type"
-                onLabel="Expense"
-                offLabel="Income"
-              ></p-toggleButton>
-            </form>
-          </ng-template>
-        </p-overlayPanel>
       </div>
-
       <div class="col-7 card custom-background">
         <div *ngIf="!skeletonLoading; else skeleton">
           <p-chart
@@ -363,36 +321,6 @@
                   [value]="transaction.type | uppercase"
                   [rounded]="true"
                 ></p-tag>
-                <!-- <p-cellEditor>
-                <ng-template pTemplate="input">
-                  <p-dropdown
-                    [options]="typesItems"
-                    appendTo="body"
-                    [(ngModel)]="transaction.type"
-                    [style]="{ width: '100%' }"
-                  >
-                    <ng-template let-option pTemplate="selectedItem">
-                      <p-tag
-                        [value]="option.label"
-                        [severity]="getSeverity(option.value)"
-                      ></p-tag>
-                    </ng-template>
-                    <ng-template let-option pTemplate="item">
-                      <p-tag
-                        [value]="option.label"
-                        [severity]="getSeverity(option.value)"
-                      ></p-tag>
-                    </ng-template>
-                  </p-dropdown>
-                </ng-template>
-                <ng-template pTemplate="output">
-                  <p-tag
-                    [value]="transaction.type | uppercase"
-                    [rounded]="true"
-                    [severity]="getSeverity(transaction.type)"
-                  ></p-tag>
-                </ng-template>
-              </p-cellEditor> -->
               </td>
               <td>
                 <p-cellEditor>
@@ -459,7 +387,7 @@
         </p-table>
       </div>
     </div>
-  </div>
+  </section>
   <p-toast></p-toast>
 </div>
 

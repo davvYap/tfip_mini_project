@@ -72,7 +72,17 @@ public class TransactionRepository {
 
     public List<Transaction> geTransactionsBasedOnMonthAndYearJdbc(String userId, int month, int year) {
         List<Transaction> trans = new LinkedList<>();
-        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_USER_TRANSACTIONS_BASED_ON_DATE, userId, month, year);
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_USER_TRANSACTIONS_BASED_ON_YEAR, userId, month, year);
+        while (rs.next()) {
+            trans.add(Transaction.convertFromResult(rs));
+        }
+        return trans;
+    }
+
+    public List<Transaction> geTransactionsBasedOnDatesJdbc(String userId, String startDate, String endDate) {
+        List<Transaction> trans = new LinkedList<>();
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_USER_TRANSACTIONS_BASED_ON_DATES, userId, startDate,
+                endDate);
         while (rs.next()) {
             trans.add(Transaction.convertFromResult(rs));
         }

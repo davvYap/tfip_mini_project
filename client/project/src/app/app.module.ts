@@ -18,6 +18,7 @@ import { SellStockComponent } from './component/sell-stock/sell-stock.component'
 import { SavingsComponent } from './component/savings/savings.component';
 import { AddTransactionComponent } from './component/add-transaction/add-transaction.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { TransactionRecordsComponent } from './component/transaction-records/transaction-records.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     SellStockComponent,
     SavingsComponent,
     AddTransactionComponent,
+    TransactionRecordsComponent,
   ],
   imports: [
     BrowserModule,

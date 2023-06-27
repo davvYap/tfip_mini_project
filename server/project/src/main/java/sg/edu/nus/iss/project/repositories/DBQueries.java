@@ -40,8 +40,13 @@ public class DBQueries {
             update transactions set trans_name = ?, date_of_trans = ?, amount = ?, remarks = ?, cat_id = ? where user_id = ? and trans_id = ?;
             """;
 
-    public static final String SQL_GET_USER_TRANSACTIONS_BASED_ON_DATE = """
+    public static final String SQL_GET_USER_TRANSACTIONS_BASED_ON_YEAR = """
             select trans_id, trans_name, date_of_trans, amount, remarks, t.cat_id, c.cat_name, c.type from transactions t join categories c on t.cat_id = c.cat_id
             where t.user_id  = ? and month(date_of_trans) = ? and year(date_of_trans) = ?;
                                         """;
+
+    public static final String SQL_GET_USER_TRANSACTIONS_BASED_ON_DATES = """
+            select trans_id, trans_name, date_of_trans, amount, remarks, t.cat_id, c.cat_name, c.type from transactions t join categories c on t.cat_id = c.cat_id
+            where t.user_id  = ? and date_of_trans >= ? and date_of_trans<= ?;
+                                    """;
 }

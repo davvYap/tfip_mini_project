@@ -97,7 +97,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.themeSvc.initiateChartSetting();
-    this.title.setTitle('Assets Management | Investment');
+    this.title.setTitle(`${this.getSvc.applicationName} | Investment`);
 
     // HERE FOR STOCK COUNT
     this.stocksCount = [];
@@ -125,7 +125,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       'Nov',
       'Dec',
     ];
-    this.startDate = this.getStartDateOfYear();
+    this.startDate = this.getSvc.getStartDateOfYear();
     this.endOfMonth = this.getEndOfMonth();
     console.log(this.endOfMonth);
     this.userStockData = [];
@@ -475,19 +475,6 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       totalMarketValue += stockCount.marketPrice;
     });
     return totalMarketValue;
-  }
-
-  getStartDateOfYear(): string {
-    const cuurDate = new Date();
-    const currentYear = cuurDate.getFullYear();
-
-    const startOfYear = new Date(currentYear, 0, 1);
-    const formattedDate = `${startOfYear.getFullYear()}-${(
-      startOfYear.getMonth() + 1
-    )
-      .toString()
-      .padStart(2, '0')}-${startOfYear.getDate().toString().padStart(2, '0')}`;
-    return formattedDate;
   }
 
   getCurrentDate(): string {

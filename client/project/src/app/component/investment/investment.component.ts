@@ -32,7 +32,7 @@ export class InvestmentComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.title.setTitle('Assets Management | Add Stock');
+    this.title.setTitle(`${this.getSvc.applicationName} | +Stock`);
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.investmentForm = this.createForm();
     let today = new Date();

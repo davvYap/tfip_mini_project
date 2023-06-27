@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, WritableSignal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import {
   Categories,
@@ -28,6 +28,7 @@ export class GetService {
   isLogin$ = new Subject<boolean>();
   totalStockValue!: number;
   passStock!: PurchasedStock;
+  applicationName: string = 'AMG';
 
   constructor(private http: HttpClient) {}
 
@@ -266,7 +267,34 @@ export class GetService {
     );
   }
 
+  getUserTransactionBasedOnDates(
+    userId: string,
+    startDate: string,
+    endDate: string
+  ): Observable<Transaction[]> {
+    const qp = new HttpParams()
+      .set('startDate', startDate)
+      .append('endDate', endDate);
+    return this.http.get<Transaction[]>(
+      `http://localhost:8080/api/${userId}/trans_dates`,
+      { params: qp }
+    );
+  }
+
   // EXTRA
+  getStartDateOfYear(): string {
+    const cuurDate = new Date();
+    const currentYear = cuurDate.getFullYear();
+
+    const startOfYear = new Date(currentYear, 0, 1);
+    const formattedDate = `${startOfYear.getFullYear()}-${(
+      startOfYear.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}-${startOfYear.getDate().toString().padStart(2, '0')}`;
+    return formattedDate;
+  }
+
   getEndOfMonth(months: string[], month: string): string {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
@@ -291,5 +319,32 @@ export class GetService {
       }
     }
     return ''; // No suitable date found (unlikely scenario)
+  }
+
+  getColors(index: number): string {
+    const colors: string[] = [
+      '#c2f0c6',
+      '#74aff3',
+      '#eed69a',
+      '#b7b3ea',
+      '#a8c280',
+      '#e1b0dd',
+      '#95cfa2',
+      '#edaab4',
+      '#79ddcb',
+      '#e8b594',
+      '#7cccee',
+      '#bfbb81',
+      '#b0c3ec',
+      '#deeaaf',
+      '#65cfd8',
+      '#cec7a1',
+      '#a7ede8',
+      '#8bb598',
+      '#8dc3b8',
+      '#a5d1b3',
+    ];
+
+    return colors[index];
   }
 }

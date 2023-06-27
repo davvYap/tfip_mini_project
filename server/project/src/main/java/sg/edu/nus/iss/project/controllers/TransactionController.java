@@ -202,4 +202,21 @@ public class TransactionController {
 				.body(jsArr.build().toString());
 	}
 
+	@GetMapping(path = "/{userId}/trans_dates")
+	@ResponseBody
+	public ResponseEntity<String> geTransactionsBasedOnDatesJdbc(@PathVariable String userId,
+			@RequestParam String startDate, @RequestParam String endDate) {
+
+		List<Transaction> trans = transSvc.geTransactionsBasedOnDatesJdbc(userId, startDate, endDate);
+
+		JsonArrayBuilder jsArr = Json.createArrayBuilder();
+		trans.stream().forEach((tran) -> {
+			jsArr.add(tran.toJsonObjectBuilder());
+		});
+
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(jsArr.build().toString());
+	}
+
 }

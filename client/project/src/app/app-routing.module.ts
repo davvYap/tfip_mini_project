@@ -8,6 +8,7 @@ import { InvestmentComponent } from './component/investment/investment.component
 import { InvestmentDashboardComponent } from './component/investment-dashboard/investment-dashboard.component';
 import { SavingsComponent } from './component/savings/savings.component';
 import { AddTransactionComponent } from './component/add-transaction/add-transaction.component';
+import { TransactionRecordsComponent } from './component/transaction-records/transaction-records.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [loginGuard] },
@@ -35,6 +36,11 @@ const routes: Routes = [
   {
     path: 'new-transaction',
     component: AddTransactionComponent,
+    canActivate: [loginGuard],
+  },
+  {
+    path: 'transaction-records',
+    component: TransactionRecordsComponent,
     canActivate: [loginGuard],
   },
   { path: 'logout', component: LogoutComponent },

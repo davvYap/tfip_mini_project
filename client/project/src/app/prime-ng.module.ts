@@ -31,6 +31,7 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { TagModule } from 'primeng/tag';
 import { InputTextareaModule } from 'primeng/inputtextarea';
+import { PanelModule } from 'primeng/panel';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -65,6 +66,7 @@ const primeModules: any[] = [
   ToggleButtonModule,
   TagModule,
   InputTextareaModule,
+  PanelModule,
 ];
 
 @NgModule({

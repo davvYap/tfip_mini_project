@@ -55,7 +55,7 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.title.setTitle('Assets Management | Dashboard');
+    this.title.setTitle(`${this.getSvc.applicationName} | Dashboard`);
     this.themeSvc.initiateChartSetting();
 
     this.goalForm = this.createGoalForm();

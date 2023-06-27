@@ -87,15 +87,14 @@ body {
   margin-top: 6dvh;
 }
 
-.p-dialog .p-dialog-content {
-  /* background: rgba(0, 0, 0, 1); */
+/* .p-dialog .p-dialog-content {
   background: var(--surface-overlay);
   box-shadow: 0 4px 30px rgba(10, 0, 0, 0.9);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   color: rgba(255, 255, 255, 0.87);
   padding: 0 1.25rem 1.25rem 1.25rem;
-}
+} */
 
 .p-datatable .p-datatable-tbody > tr > td {
   text-align: center;

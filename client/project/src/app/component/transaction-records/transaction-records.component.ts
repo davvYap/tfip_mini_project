@@ -10,16 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import {
-  ConfirmationService,
-  MessageService,
-  SelectItem,
-  SelectItemGroup,
-} from 'primeng/api';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { Table } from 'primeng/table';
-import { Observable, Subscription, forkJoin, map, tap } from 'rxjs';
+import { Subscription, map } from 'rxjs';
 import {
   Categories,
   Column,
@@ -28,107 +19,88 @@ import {
   categoryOptionItem,
 } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
-import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
-import { AddTransactionComponent } from '../add-transaction/add-transaction.component';
-import { DeleteService } from 'src/app/service/delete.service';
-import { UpdateService } from 'src/app/service/update.service';
-import { ExportService } from 'src/app/service/export.service';
 import { faFolderOpen } from '@fortawesome/free-solid-svg-icons';
+import { AddTransactionComponent } from '../add-transaction/add-transaction.component';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { ConfirmationService, MessageService, SelectItem } from 'primeng/api';
 import { Title } from '@angular/platform-browser';
+import { ExportService } from 'src/app/service/export.service';
+import { Table } from 'primeng/table';
+import { UpdateService } from 'src/app/service/update.service';
+import { DeleteService } from 'src/app/service/delete.service';
 
 @Component({
-  selector: 'app-savings',
-  templateUrl: './savings.component.html',
-  styleUrls: ['./savings.component.css'],
+  selector: 'app-transaction-records',
+  templateUrl: './transaction-records.component.html',
+  styleUrls: ['./transaction-records.component.css'],
 })
-export class SavingsComponent implements OnInit, OnDestroy {
-  thisYear: WritableSignal<number> = signal(2023);
+export class TransactionRecordsComponent implements OnInit, OnDestroy {
+  startDate: WritableSignal<string> = signal(this.getSvc.getStartDateOfYear());
+  endDate: WritableSignal<string> = signal(
+    new Date().toISOString().split('T')[0]
+  );
+  typeOfRecord: WritableSignal<string> = signal('all');
   totalIncome: WritableSignal<number> = signal(0);
   totalExpense: WritableSignal<number> = signal(0);
   totalBalance: Signal<number> = computed(() => {
     return this.totalIncome() - this.totalExpense();
   });
 
+  dateForm!: FormGroup;
   donutData!: any;
   donutOptions!: any;
-  categoryForm!: FormGroup;
-  postCategory$!: Subscription;
-
-  skeletonLoading: boolean = true;
-  barChartData!: any;
-  barChartOptions!: any;
-  monthsStr: string[] = [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '10',
-    '11',
-    '12',
-  ];
-  incomeBarChartData!: number[];
-  expenseBarChartData!: number[];
-  balanceBarChartData!: number[];
-
-  categories!: string[];
-  categoriesData = signal<number[]>([]);
-  categoriesColor!: string[];
-  categories$!: Subscription;
-  categoriesRoutes: string[] = [
-    '/savings',
-    '/investment-dashboard',
-    '/properties',
-    '/misc',
-  ];
-  categoriesItems!: categoryOptionItem[];
-  typesItems!: SelectItem[];
-  clonedTransactions: { [s: string]: Transaction } = {};
 
   transactions!: Transaction[];
   transactions$!: Subscription;
   transactionCol!: Column[];
   transactionExportColumns!: ExportColumn[];
-
   transactionloading: boolean = true;
 
-  dialogRef!: DynamicDialogRef;
+  categories!: string[];
+  categoriesDonutData = signal<number[]>([]);
+  categoriesColor!: string[];
+  categories$!: Subscription;
+
+  categoriesItems!: categoryOptionItem[];
+  typesItems!: SelectItem[];
+  clonedTransactions: { [s: string]: Transaction } = {};
 
   @ViewChild('appDialog', { static: true })
   appDialog!: ElementRef<HTMLDialogElement>;
-  yearForm!: FormGroup;
 
   emptyIcon = faFolderOpen;
+  dialogRef!: DynamicDialogRef;
+
+  skeletonLoading: boolean = true;
+  barChartData!: any;
+  barChartOptions!: any;
+  finalBarChartLabels!: string[];
+  finalBarChartData!: number[];
 
   constructor(
-    private router: Router,
+    private themeSvc: ThemeService,
     private getSvc: GetService,
     private fb: FormBuilder,
-    private postSvc: PostService,
-    private messageSvc: MessageService,
     private dialogSvc: DialogService,
-    private confirmationSvc: ConfirmationService,
-    private themeSvc: ThemeService,
-    private deleteSvc: DeleteService,
-    private updateSvc: UpdateService,
+    private messageSvc: MessageService,
+    private title: Title,
     private exportSvc: ExportService,
-    private elementRef: ElementRef,
-    private title: Title
+    private updateSvc: UpdateService,
+    private confirmationSvc: ConfirmationService,
+    private deleteSvc: DeleteService
   ) {}
 
   ngOnInit(): void {
     this.title.setTitle(`${this.getSvc.applicationName} | Expense Tracker`);
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
-    this.categories = ['Income', 'Expense'];
-    this.categoriesColor = [];
+    const documentStyle = getComputedStyle(document.documentElement);
+    this.dateForm = this.createForm();
+    this.categories = [];
     this.categoriesItems = [];
-    this.categoryForm = this.createCategoryForm();
-    this.yearForm = this.createYearForm();
+    this.categoriesColor = [];
+    this.finalBarChartData = [];
+    this.finalBarChartLabels = [];
 
     this.categories$ = this.getSvc
       .getUserCategories(this.getSvc.userId)
@@ -146,7 +118,9 @@ export class SavingsComponent implements OnInit, OnDestroy {
           });
         })
       )
-      .subscribe();
+      .subscribe(() => {
+        console.log(this.categoriesItems);
+      });
 
     // NOTE EXPORT FUNCTION FOR TRANSACTION TABLE
     this.transactionCol = [
@@ -181,31 +155,88 @@ export class SavingsComponent implements OnInit, OnDestroy {
       dataKey: col.field,
     }));
 
+    // get user transactions
     this.transactions = [];
     this.transactions$ = this.getSvc
-      .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
+      .getUserTransactionBasedOnDates(
+        this.getSvc.userId,
+        this.startDate(),
+        this.endDate()
+      )
       .pipe(
         map((trans: Transaction[]) => {
           trans.map((tran) => {
-            // console.log(tran);
-            this.transactions.push(tran);
+            if (
+              tran.type === this.typeOfRecord() ||
+              this.typeOfRecord() === 'all'
+            )
+              this.transactions.push(tran);
           });
           return trans;
         }),
         map((trans: Transaction[]) => {
           let totalIncome: number = 0.0;
           let totalExpense: number = 0.0;
+          if (this.typeOfRecord() === 'all') {
+            trans.map((tran) => {
+              if (tran.type === 'income') {
+                totalIncome += tran.amount;
+              } else {
+                totalExpense += tran.amount;
+              }
+            });
+            this.totalIncome.set(totalIncome);
+            this.totalExpense.set(totalExpense);
+            this.categories = ['Income', 'Expense', 'Balance'];
+            this.categoriesColor = [
+              documentStyle.getPropertyValue('--green-400'),
+              documentStyle.getPropertyValue('--red-400'),
+              documentStyle.getPropertyValue('--blue-400'),
+            ];
 
-          trans.map((tran) => {
-            if (tran.type === 'income') {
-              totalIncome += tran.amount;
-            } else {
-              totalExpense += tran.amount;
-            }
-          });
-          this.totalIncome.set(totalIncome);
-          this.totalExpense.set(totalExpense);
-          this.categoriesData.set([totalIncome, totalExpense]);
+            this.categoriesDonutData.set([
+              totalIncome,
+              totalExpense,
+              this.totalBalance(),
+            ]);
+            this.finalBarChartLabels = ['Income', 'Expense', 'Balance'];
+            this.finalBarChartData.push(
+              totalIncome,
+              totalExpense,
+              this.totalBalance()
+            );
+          } else if (this.typeOfRecord() === this.typeOfRecord()) {
+            this.categoriesDonutData.set([]);
+            trans.map((tran) => {
+              if (tran.type === this.typeOfRecord()) {
+                // check if the data already include this transaction category
+                if (!this.categories.includes(tran.categoryName)) {
+                  this.categories.push(tran.categoryName);
+                  this.categoriesDonutData.mutate((categoriesArray) =>
+                    categoriesArray.push(tran.amount)
+                  );
+                  const randomColor = Math.floor(
+                    Math.random() * 16777215
+                  ).toString(16);
+
+                  const latestIndex = this.categories.length;
+                  this.categoriesColor.push(this.getSvc.getColors(latestIndex));
+                  this.finalBarChartLabels.push(tran.categoryName);
+                  this.finalBarChartData.push(tran.amount);
+                } else {
+                  const catNameIndex: number = this.categories.indexOf(
+                    tran.categoryName
+                  );
+                  this.categoriesDonutData()[catNameIndex] += tran.amount;
+                  this.finalBarChartData[catNameIndex] += tran.amount;
+                }
+                totalIncome += tran.amount;
+                totalExpense += tran.amount;
+                this.totalIncome.set(totalIncome);
+                this.totalExpense.set(totalExpense);
+              }
+            });
+          }
         })
       )
       .subscribe(() => {
@@ -215,48 +246,10 @@ export class SavingsComponent implements OnInit, OnDestroy {
         // we have to assign the transactions one shot
         this.transactions = this.sortTransactionByDate(transArr);
         this.initiateDonutChart();
+
+        this.skeletonLoading = false;
+        this.initiateBarChart();
       });
-
-    this.incomeBarChartData = [];
-    this.expenseBarChartData = [];
-    this.balanceBarChartData = [];
-    // const thisYear: number = new Date().getFullYear();
-
-    // Create an array of observables
-    const observables: Observable<Transaction[]>[] = this.monthsStr.map(
-      (month) => {
-        return this.getSvc.getUserTransactionBasedOnMonthYear(
-          this.getSvc.userId,
-          month,
-          this.thisYear().toString()
-        );
-      }
-    );
-
-    // Wait for all observables to complete using forkJoin
-    forkJoin(observables).subscribe((results: Transaction[][]) => {
-      results.forEach((trans: Transaction[]) => {
-        let totalIncomePerMonth = 0;
-        let totalExpensePerMonth = 0;
-
-        trans.forEach((tran: Transaction) => {
-          if (tran.type === 'income') {
-            totalIncomePerMonth += tran.amount;
-          } else {
-            totalExpensePerMonth += tran.amount;
-          }
-        });
-
-        this.incomeBarChartData.push(totalIncomePerMonth);
-        this.expenseBarChartData.push(totalExpensePerMonth);
-        this.balanceBarChartData.push(
-          totalIncomePerMonth - totalExpensePerMonth
-        );
-      });
-
-      this.initiateBarChart();
-      this.skeletonLoading = false;
-    });
   }
 
   ngOnDestroy(): void {
@@ -264,62 +257,38 @@ export class SavingsComponent implements OnInit, OnDestroy {
     if (this.transactions$) this.transactions$.unsubscribe();
   }
 
-  createCategoryForm(): FormGroup {
+  createForm(): FormGroup {
     return this.fb.group({
-      category: this.fb.control('', Validators.required),
-      type: this.fb.control('expense', Validators.required),
-    });
-  }
-
-  createYearForm(): FormGroup {
-    return this.fb.group({
-      year: this.fb.control(this.thisYear(), [
+      startDate: this.fb.control(this.startDate(), [
         Validators.required,
-        Validators.min(1900),
-        Validators.max(9999),
+        Validators.pattern(/^\d{4}-\d{2}-\d{2}$/),
       ]),
+      endDate: this.fb.control(this.endDate(), [
+        Validators.required,
+        Validators.pattern(/^\d{4}-\d{2}-\d{2}$/),
+      ]),
+      typeOfRecord: this.fb.control(this.typeOfRecord(), [Validators.required]),
     });
   }
 
-  addCategory(event: any) {
-    if (event.key === 'Enter') {
-      let category: string = this.categoryForm.get('category')?.value;
-      let type: string =
-        this.categoryForm.get('type')?.value === 'expense'
-          ? 'expense'
-          : 'income';
-      console.log(category, type);
-      this.postCategory$ = this.postSvc
-        .addCategory(this.getSvc.userId, category, type)
-        .subscribe({
-          next: (message) => {
-            this.messageSvc.add({
-              severity: 'success',
-              summary: 'Success',
-              detail: message.message,
-            });
-            // this.categories = [];
-            this.ngOnInit();
-          },
-          error: (error) => {
-            this.messageSvc.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: error.message,
-            });
-          },
-          complete: () => {
-            this.postCategory$.unsubscribe();
-          },
-        });
-    }
+  showDialog() {
+    this.appDialog.nativeElement.showModal();
   }
 
-  sortCategoryByDate(categories: Categories[]): Categories[] {
-    const sorted = categories.sort((a, b) => {
-      return b.total - a.total;
-    });
-    return sorted;
+  closeDialog() {
+    this.appDialog.nativeElement.close();
+  }
+
+  getTransaction() {
+    const startDate: string = this.dateForm.get('startDate')?.value;
+    const endDate: string = this.dateForm.get('endDate')?.value;
+    const typeOfRecord: string = this.dateForm.get('typeOfRecord')?.value;
+    this.startDate.set(startDate);
+    this.endDate.set(endDate);
+    this.typeOfRecord.set(typeOfRecord);
+    this.closeDialog();
+    console.log(this.typeOfRecord());
+    this.ngOnInit();
   }
 
   sortTransactionByDate(trans: Transaction[]): Transaction[] {
@@ -333,6 +302,47 @@ export class SavingsComponent implements OnInit, OnDestroy {
       return b.dateNum - a.dateNum;
     });
     return sorted;
+  }
+
+  exportExcelPortfolio(): void {
+    this.exportSvc.exportExcel('transTable', 'transactions');
+  }
+
+  exportPdfPortfolio(): void {
+    this.exportSvc.exportPdf(
+      this.transactionExportColumns,
+      this.transactions,
+      'transactions'
+    );
+  }
+
+  deleteSelectedTransaction(event: any, tran: Transaction) {
+    this.confirmationSvc.confirm({
+      target: event.target,
+      message: `Are you sure you want to delete ${tran.transactionName} ?`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.deleteSvc
+          .deleteTransaction(this.getSvc.userId, tran)
+          .then((res) => {
+            this.messageSvc.add({
+              severity: 'success',
+              summary: 'Confirmed',
+              detail: `You have deleted ${tran.transactionName} on ${tran.date}`,
+            });
+            setTimeout(() => {
+              this.ngOnInit();
+            }, 500);
+          });
+      },
+      reject: () => {
+        this.messageSvc.add({
+          severity: 'info',
+          summary: 'Cancelled',
+          detail: 'You have cancel the deletion',
+        });
+      },
+    });
   }
 
   onRowEditInit(transaction: Transaction) {
@@ -416,63 +426,6 @@ export class SavingsComponent implements OnInit, OnDestroy {
     });
   }
 
-  exportExcelPortfolio(): void {
-    this.exportSvc.exportExcel('transTable', 'transactions');
-  }
-
-  exportPdfPortfolio(): void {
-    this.exportSvc.exportPdf(
-      this.transactionExportColumns,
-      this.transactions,
-      'transactions'
-    );
-  }
-
-  deleteSelectedTransaction(event: any, tran: Transaction) {
-    this.confirmationSvc.confirm({
-      target: event.target,
-      message: `Are you sure you want to delete ${tran.transactionName} ?`,
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.deleteSvc
-          .deleteTransaction(this.getSvc.userId, tran)
-          .then((res) => {
-            this.messageSvc.add({
-              severity: 'success',
-              summary: 'Confirmed',
-              detail: `You have deleted ${tran.transactionName} on ${tran.date}`,
-            });
-            setTimeout(() => {
-              this.ngOnInit();
-            }, 500);
-          });
-      },
-      reject: () => {
-        this.messageSvc.add({
-          severity: 'info',
-          summary: 'Cancelled',
-          detail: 'You have cancel the deletion',
-        });
-      },
-    });
-  }
-
-  // Dialog
-  showDialog() {
-    this.appDialog.nativeElement.showModal();
-  }
-
-  closeDialog() {
-    this.appDialog.nativeElement.close();
-  }
-
-  getTransaction() {
-    const year: number = this.yearForm.get('year')?.value;
-    this.thisYear.set(year);
-    this.closeDialog();
-    this.ngOnInit();
-  }
-
   initiateDonutChart() {
     const documentStyle = getComputedStyle(document.documentElement);
     const textColor = documentStyle.getPropertyValue('--primary-color-text');
@@ -481,21 +434,21 @@ export class SavingsComponent implements OnInit, OnDestroy {
       labels: this.categories,
       datasets: [
         {
-          data: this.categoriesData(),
-          // backgroundColor: this.categoriesColor,
-          // hoverBackgroundColor: this.categoriesColor,
-          backgroundColor: [
-            documentStyle.getPropertyValue('--green-400'),
-            documentStyle.getPropertyValue('--red-400'),
-            // documentStyle.getPropertyValue('--purple-500'),
-            // documentStyle.getPropertyValue('--yellow-500'),
-          ],
-          hoverBackgroundColor: [
-            documentStyle.getPropertyValue('--green-300'),
-            documentStyle.getPropertyValue('--red-300'),
-            // documentStyle.getPropertyValue('--purple-400'),
-            // documentStyle.getPropertyValue('--yellow-400'),
-          ],
+          data: this.categoriesDonutData(),
+          backgroundColor: this.categoriesColor,
+          hoverBackgroundColor: this.categoriesColor,
+          // backgroundColor: [
+          //   documentStyle.getPropertyValue('--green-400'),
+          //   documentStyle.getPropertyValue('--red-400'),
+          //   // documentStyle.getPropertyValue('--purple-500'),
+          //   // documentStyle.getPropertyValue('--yellow-500'),
+          // ],
+          // hoverBackgroundColor: [
+          //   documentStyle.getPropertyValue('--green-300'),
+          //   documentStyle.getPropertyValue('--red-300'),
+          //   // documentStyle.getPropertyValue('--purple-400'),
+          //   // documentStyle.getPropertyValue('--yellow-400'),
+          // ],
         },
       ],
       doughnutlabel: [],
@@ -527,7 +480,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
         if (activeElements.length > 0) {
           const index = activeElements[0].index;
           // console.log(index);
-          this.router.navigate([this.categoriesRoutes[index]]);
+          // this.router.navigate([this.categoriesRoutes[index]]);
         }
       },
     };
@@ -542,38 +495,18 @@ export class SavingsComponent implements OnInit, OnDestroy {
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
     this.barChartData = {
-      labels: [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ],
+      labels: this.finalBarChartLabels,
       datasets: [
         {
           type: 'bar',
-          label: 'Income',
-          backgroundColor: documentStyle.getPropertyValue('--green-300'),
-          data: this.incomeBarChartData,
-        },
-        {
-          type: 'bar',
-          label: 'Expense',
-          backgroundColor: documentStyle.getPropertyValue('--red-300'),
-          data: this.expenseBarChartData,
-        },
-        {
-          type: 'bar',
-          label: 'Balance',
-          backgroundColor: documentStyle.getPropertyValue('--blue-300'),
-          data: this.balanceBarChartData,
+          label: 'Records of selected dates',
+          backgroundColor: this.categoriesColor,
+          // backgroundColor: [
+          //   documentStyle.getPropertyValue('--green-300'),
+          //   documentStyle.getPropertyValue('--red-300'),
+          //   documentStyle.getPropertyValue('--blue-300'),
+          // ],
+          data: this.finalBarChartData,
         },
       ],
     };
