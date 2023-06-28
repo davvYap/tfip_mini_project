@@ -17,19 +17,20 @@ import { faRightToBracket } from '@fortawesome/free-solid-svg-icons';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
+  loginIcon = faRightToBracket;
   items!: MenuItem[];
   imgSrc!: string;
   updateUsersStockValue$!: Subscription;
   dialogRef!: DynamicDialogRef;
   isLogin: WritableSignal<boolean> = signal(false);
-  loginIcon = faRightToBracket;
 
   themes: string[] = [
     'mira',
+    'nano',
     'mdc-dark-deeppurple',
     'viva-dark',
     'lara-dark-teal',
-    'nano',
+    'arya-green',
   ];
 
   constructor(
@@ -147,24 +148,29 @@ export class AppComponent implements OnInit {
                   command: () => this.changeTheme(0),
                 },
                 {
-                  label: 'MDC Dark',
+                  label: 'Nano',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(1),
                 },
                 {
-                  label: 'Viva Dark',
+                  label: 'MDC Dark',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(2),
                 },
                 {
-                  label: 'Lara Dark Teal',
+                  label: 'Viva Dark',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(3),
                 },
                 {
-                  label: 'Nano',
+                  label: 'Lara Dark Teal',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(4),
+                },
+                {
+                  label: 'Arya Green',
+                  icon: 'pi pi-fw pi-images',
+                  command: () => this.changeTheme(5),
                 },
               ],
             },

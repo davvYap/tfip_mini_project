@@ -1,6 +1,7 @@
 export interface LoginStatus {
   isLogin: boolean;
   userId: string;
+  username: string;
 }
 
 export interface Stock {

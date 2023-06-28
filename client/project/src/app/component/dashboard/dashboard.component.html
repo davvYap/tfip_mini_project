@@ -1,75 +1,82 @@
 <div class="container">
-  <div class="dashboardcard flex justify-content-center">
-    <p-fieldset
-      inputId="ac1"
-      legend="Summary"
-      [toggleable]="true"
-      class="text-center"
-    >
-      <h3>
-        Total Assets Value
-        <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-        <span *ngIf="totalValue; else loading">
-          {{ totalValue | currency }}
-          <span class="ms-2" [className]="getColor(stockChangePercentage)">
-            ({{ stockChangePercentage | percent : "1.2-2" }})
+  <div class="row justify-content-center align-items-center">
+    <div class="col-10 text-center my-5 h1card">
+      <h1>Welcome {{ username() | titlecase }}</h1>
+    </div>
+    <div class="dashboardcard flex justify-content-center">
+      <p-fieldset
+        inputId="ac1"
+        legend="Summary"
+        [toggleable]="true"
+        class="text-center"
+      >
+        <h3>
+          Total Assets Value
+          <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
+          <span *ngIf="totalValue; else loading">
+            {{ totalValue | currency }}
+            <span class="ms-2" [className]="getColor(stockChangePercentage)">
+              ({{ stockChangePercentage | percent : "1.2-2" }})
+            </span>
           </span>
-        </span>
-      </h3>
-    </p-fieldset>
-  </div>
-
-  <div class="row justify-content-evenly align-items-center g-2">
-    <!-- DONUT CHART -->
-    <div class="col-4 card custom">
-      <p-chart
-        type="doughnut"
-        [data]="donutData"
-        [options]="donutOptions"
-      ></p-chart>
+        </h3>
+      </p-fieldset>
     </div>
 
-    <!-- LINE CHART -->
-    <div class="col-7 card custom">
-      <div *ngIf="!skeletonLoading; else skeleton">
-        <div class="d-flex flex-row-reverse">
-          <p-button
-            (click)="op.toggle($event)"
-            icon="pi pi-chart-line"
-            label="Set Goal"
-            styleClass="p-button-rounded"
-            pTooltip="Set your goal here"
-          ></p-button>
-        </div>
+    <div class="row justify-content-evenly align-items-center g-2 m-4">
+      <!-- DONUT CHART -->
+      <div class="col-4 donutbackground">
         <p-chart
-          type="line"
-          [data]="lineData"
-          [options]="lineOptions"
+          type="doughnut"
+          [data]="donutData"
+          [options]="donutOptions"
+          [plugins]="chartPlugin"
         ></p-chart>
       </div>
+
+      <!-- LINE CHART -->
+      <div class="col-7 linebackground">
+        <div *ngIf="!skeletonLoading; else skeleton">
+          <div class="d-flex flex-row-reverse mb-2">
+            <p-button
+              (click)="op.toggle($event)"
+              icon="pi pi-chart-line"
+              label="Set Goal"
+              styleClass="p-button-rounded"
+              pTooltip="Set your goal here"
+            ></p-button>
+          </div>
+          <p-chart
+            type="line"
+            [data]="lineData"
+            [options]="lineOptions"
+            [plugins]="chartPlugin"
+          ></p-chart>
+        </div>
+      </div>
     </div>
+
+    <p-overlayPanel #op>
+      <ng-template pTemplate="content">
+        <h6>Enter your yearly goal</h6>
+        <form [formGroup]="goalForm">
+          <input
+            pInputText
+            pKeyFilter="money"
+            class="p-inputtext-sm"
+            placeholder="Press 'Enter' to submit"
+            formControlName="goal"
+            (keypress)="submitGoal($event)"
+          />
+        </form>
+      </ng-template>
+    </p-overlayPanel>
+    <p-toast></p-toast>
   </div>
 
-  <p-overlayPanel #op>
-    <ng-template pTemplate="content">
-      <h6>Enter your yearly goal</h6>
-      <form [formGroup]="goalForm">
-        <input
-          pInputText
-          pKeyFilter="money"
-          class="p-inputtext-sm"
-          placeholder="Press 'Enter' to submit"
-          formControlName="goal"
-          (keypress)="submitGoal($event)"
-        />
-      </form>
-    </ng-template>
-  </p-overlayPanel>
-  <p-toast></p-toast>
+  <ng-template #loading>
+    Fetching data <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i
+  ></ng-template>
+
+  <ng-template #skeleton> <p-skeleton height="20rem"></p-skeleton></ng-template>
 </div>
-
-<ng-template #loading>
-  Fetching data <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i
-></ng-template>
-
-<ng-template #skeleton> <p-skeleton height="20rem"></p-skeleton></ng-template>

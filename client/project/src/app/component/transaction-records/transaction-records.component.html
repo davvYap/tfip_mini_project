@@ -107,27 +107,29 @@
 
   <section *ngIf="transactions.length > 0; else noTransactionData">
     <div class="row justify-content-evenly align-items-center g-2">
-      <div class="col-4 card custom-background">
+      <div class="col-4 donutbackground">
         <div class="d-flex flex-row-reverse"></div>
         <p-chart
           type="doughnut"
           [data]="donutData"
           [options]="donutOptions"
+          [plugins]="chartPlugin"
         ></p-chart>
       </div>
-      <div class="col-7 card custom-background">
+      <div class="col-7 linebackground">
         <div *ngIf="!skeletonLoading; else skeleton">
           <p-chart
             type="bar"
             [data]="barChartData"
             [options]="barChartOptions"
+            [plugins]="chartPlugin"
           ></p-chart>
         </div>
       </div>
     </div>
 
     <div class="row justify-content-center align-items-center g-2 mt-3">
-      <div class="col-12 card custom-background">
+      <div class="col-12 custom-background m-3">
         <p-toolbar styleClass="mb-4 gap-2">
           <ng-template pTemplate="left">
             <button

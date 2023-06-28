@@ -28,6 +28,11 @@
                 "inject": false
               },
               {
+                "input": "src/theme/theme-nano.css",
+                "bundleName": "nano",
+                "inject": false
+              },
+              {
                 "input": "src/theme/theme-mdc-dark-deeppurple.css",
                 "bundleName": "mdc-dark-deeppurple",
                 "inject": false
@@ -43,8 +48,8 @@
                 "inject": false
               },
               {
-                "input": "src/theme/theme-nano.css",
-                "bundleName": "nano",
+                "input": "src/theme/theme-arya-green.css",
+                "bundleName": "arya-green",
                 "inject": false
               }
             ],

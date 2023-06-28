@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 import { Chart } from 'chart.js';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',

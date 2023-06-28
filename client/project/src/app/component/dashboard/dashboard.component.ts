@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Chart } from 'chart.js';
@@ -15,8 +15,25 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
+  username: WritableSignal<string | null> = signal('visitor');
   donutData!: any;
   donutOptions!: any;
+  chartPlugin: {
+    id: string;
+    beforeDraw: (chart: any, args: any, options: any) => void;
+  }[] = [
+    {
+      id: 'customCanvasBackgroundColor',
+      beforeDraw: (chart: any, args: any, options: any) => {
+        const { ctx } = chart;
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = options.color || '#99ffff';
+        ctx.fillRect(0, 0, chart.width, chart.height);
+        ctx.restore();
+      },
+    },
+  ];
 
   lineData!: any;
   lineOptions!: any;
@@ -56,8 +73,8 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.title.setTitle(`${this.getSvc.applicationName} | Dashboard`);
-    this.themeSvc.initiateChartSetting();
-
+    // this.themeSvc.initiateChartSetting();
+    this.username.set(localStorage.getItem('username'));
     this.goalForm = this.createGoalForm();
 
     // GET USER THEME IN MONGO
@@ -185,7 +202,7 @@ export class DashboardComponent implements OnInit {
 
   initiateDonutChart() {
     const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--primary-color-text');
+    const textColor = documentStyle.getPropertyValue('--text-color');
 
     this.donutData = {
       labels: this.categories,
@@ -222,8 +239,8 @@ export class DashboardComponent implements OnInit {
       plugins: {
         legend: {
           labels: {
-            // color: textColor,
-            color: '#fff',
+            color: textColor,
+            // color: '#fff',
             padding: 10,
           },
         },
@@ -235,9 +252,14 @@ export class DashboardComponent implements OnInit {
             top: 20,
             bottom: 0,
           },
-          color: '#fff',
+          // color: '#fff',
+          color: textColor,
+        },
+        customCanvasBackgroundColor: {
+          color: documentStyle.getPropertyValue('--surface-ground'),
         },
       },
+
       onClick: (event: any, activeElements: any) => {
         if (activeElements.length > 0) {
           const index = activeElements[0].index;
@@ -301,6 +323,9 @@ export class DashboardComponent implements OnInit {
             color: textColorSecondary,
             // color: '#000000 ',
           },
+        },
+        customCanvasBackgroundColor: {
+          color: documentStyle.getPropertyValue('--surface-ground'),
         },
       },
       scales: {

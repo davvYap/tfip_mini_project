@@ -3,6 +3,7 @@ import {
   OnInit,
   AfterViewInit,
   AfterContentInit,
+  HostListener,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MessageService, PrimeNGConfig } from 'primeng/api';
@@ -10,6 +11,16 @@ import { Router } from '@angular/router';
 import { GetService } from 'src/app/service/get.service';
 import { ThemeService } from 'src/app/service/theme.service';
 import { Title } from '@angular/platform-browser';
+import {
+  faFacebookF,
+  faInstagram,
+  faYoutube,
+  faTwitter,
+} from '@fortawesome/free-brands-svg-icons';
+import {
+  faChartSimple,
+  faHandPointUp,
+} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-login',
@@ -17,6 +28,13 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit, AfterViewInit {
+  facebookIcon = faFacebookF;
+  instaIcon = faInstagram;
+  youtubeIcon = faYoutube;
+  twitterIcon = faTwitter;
+  chartIcon = faChartSimple;
+  pointUpIcon = faHandPointUp;
+  displayButton = false;
   form!: FormGroup;
   imgSrc: string = '/assets/images/user2.png';
   imgClass: string = 'user-img';
@@ -62,9 +80,11 @@ export class LoginComponent implements OnInit, AfterViewInit {
       .then((res) => {
         this.getSvc.isLogin = res.isLogin;
         this.getSvc.userId = res.userId;
+        this.getSvc.username = res.username;
         this.getSvc.isLogin$.next(true);
         localStorage.setItem('isLogin', 'true');
         localStorage.setItem('userId', res.userId);
+        localStorage.setItem('username', res.username);
         this.router.navigate(['/dashboard']);
       })
       .catch((err) => {
@@ -85,5 +105,26 @@ export class LoginComponent implements OnInit, AfterViewInit {
   resetLoginPage() {
     this.imgSrc = '/assets/images/user2.png';
     this.loginTitle = 'Login';
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    this.scrollFunction();
+  }
+
+  scrollFunction() {
+    if (
+      document.body.scrollTop > 20 ||
+      document.documentElement.scrollTop > 20
+    ) {
+      this.displayButton = true;
+    } else {
+      this.displayButton = false;
+    }
+  }
+
+  topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
   }
 }

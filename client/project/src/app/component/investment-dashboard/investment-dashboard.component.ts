@@ -1,4 +1,13 @@
-import { Component, OnInit, OnDestroy, ViewChild, Input } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  WritableSignal,
+  signal,
+  computed,
+  Signal,
+} from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Table } from 'primeng/table';
@@ -7,14 +16,10 @@ import {
   Observable,
   Subject,
   Subscription,
-  filter,
   map,
   switchMap,
-  mergeMap,
-  tap,
   of,
   forkJoin,
-  concatMap,
 } from 'rxjs';
 import {
   Column,
@@ -37,6 +42,7 @@ import { InvestmentComponent } from '../investment/investment.component';
 import { SellStockComponent } from '../sell-stock/sell-stock.component';
 import { UpdateService } from 'src/app/service/update.service';
 import { ExportService } from 'src/app/service/export.service';
+import { TreeNode } from 'primeng/api';
 
 @Component({
   selector: 'app-investment-dashboard',
@@ -44,10 +50,33 @@ import { ExportService } from 'src/app/service/export.service';
   styleUrls: ['./investment-dashboard.component.css'],
 })
 export class InvestmentDashboardComponent implements OnInit, OnDestroy {
+  donutData!: any;
+  donutOptions!: any;
+  chartPlugin: {
+    id: string;
+    beforeDraw: (chart: any, args: any, options: any) => void;
+  }[] = [
+    {
+      id: 'customCanvasBackgroundColor',
+      beforeDraw: (chart: any, args: any, options: any) => {
+        const { ctx } = chart;
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = options.color || '#99ffff';
+        ctx.fillRect(0, 0, chart.width, chart.height);
+        ctx.restore();
+      },
+    },
+  ];
+  stockCountDonutSymbol!: string[];
+  stockCountDonutData: WritableSignal<number[]> = signal([]);
+  categoriesColor!: string[];
   stocks!: PurchasedStock[];
   stocksCount!: PurchasedStocksCount[]; // HERE CAN GET ALL USER STOCK SYMBOL
   stocks$!: Subscription;
   stockPrice$!: Subscription;
+  completeStocksSignal: WritableSignal<boolean> = signal(false);
+  completeStocksCountSignal: WritableSignal<boolean> = signal(false);
 
   skeletonLoading: boolean = true;
   lineData!: any;
@@ -82,6 +111,16 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   soldTableCols!: Column[];
   soldTableExportColumns!: ExportColumn[];
 
+  treeTableLoading: boolean = true;
+  stockTreeTable!: TreeNode[];
+  frozenCols!: Column[];
+  initTreeTableSignal: Signal<boolean> = computed(() => {
+    return this.completeStocksSignal() && this.completeStocksCountSignal();
+  });
+  initTreeTableSignal$: Observable<boolean> = toObservable(
+    this.initTreeTableSignal
+  );
+
   constructor(
     private getSvc: GetService,
     private themeSvc: ThemeService,
@@ -100,11 +139,21 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.title.setTitle(`${this.getSvc.applicationName} | Investment`);
 
     // HERE FOR STOCK COUNT
+    this.stockCountDonutSymbol = [];
+    this.categoriesColor = [];
     this.stocksCount = [];
     this.initiateStockCount();
 
-    // HERE FOR TABLE
+    // HERE FOR PORTFOLIO TABLE
     this.initiateStockTable();
+
+    // HERE FOR TREE TABLE
+    this.stockTreeTable = [];
+    this.initTreeTableSignal$.subscribe((res: boolean) => {
+      console.log('initiate tree table');
+      this.initiateStockTreeTable();
+    });
+    this.frozenCols = [{ field: 'symbol', header: 'Symbol' }];
 
     // HERE FOR SOLD STOCKS
     this.initiateSoldStockTable();
@@ -370,7 +419,108 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         this.totalStockMarketValue =
           this.calculateUserTotalStockMarketValue(stockCounts);
         this.unrealizedProfit = this.calculateUnrealizedProfit(stockCounts);
+
+        // for stock donut chart
+        this.stocksCount.map((sc) => {
+          this.stockCountDonutSymbol.push(sc.symbol);
+          this.stockCountDonutData.mutate((scData) => {
+            scData.push(sc.marketPrice);
+          });
+          const latestIndex = this.stockCountDonutSymbol.length;
+          this.categoriesColor.push(this.getSvc.getColors(latestIndex));
+        });
+        this.initiateDonutChart();
+        this.completeStocksCountSignal.set(true);
       });
+  }
+
+  initiateStockTreeTable() {
+    this.stocksCount.map((sc) => {
+      let stockData: TreeNode<any> = {
+        data: {
+          symbol: sc.symbol,
+          name: sc.name,
+          quantity: sc.quantity,
+          cost: sc.cost,
+          marketPrice: sc.marketPrice,
+          performance: sc.performance,
+          logo: sc.logo,
+          fees: 0,
+        },
+        children: [],
+      };
+      let totalFees = 0;
+      this.stocks.map((stk) => {
+        if (sc.symbol === stk.symbol) {
+          totalFees += stk.fees;
+          stockData.children?.push({
+            data: {
+              symbol: stk.symbol,
+              name: stk.name,
+              quantity: stk.quantity,
+              cost: stk.price,
+              marketPrice: stk.marketPrice,
+              performance: stk.percentage,
+              // logo: stk.logo,
+              date: stk.date,
+              fees: stk.fees,
+              purchaseId: stk.purchaseId,
+            },
+          });
+        }
+      });
+      stockData.data.fees = totalFees;
+      this.stockTreeTable.push(stockData);
+    });
+    this.stockTreeTable = this.stockTreeTable.sort((a, b) =>
+      a.data.symbol.localeCompare(b.data.symbol)
+    );
+    this.treeTableLoading = false;
+  }
+
+  initiateDonutChart() {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--text-color');
+
+    this.donutData = {
+      labels: this.stockCountDonutSymbol,
+      datasets: [
+        {
+          data: this.stockCountDonutData(),
+          backgroundColor: this.categoriesColor,
+          hoverBackgroundColor: this.categoriesColor,
+        },
+      ],
+      doughnutlabel: [],
+    };
+
+    this.donutOptions = {
+      cutout: '60%',
+      hoverOffset: 10,
+      plugins: {
+        legend: {
+          labels: {
+            color: textColor,
+            // color: '#fff',
+            padding: 10,
+          },
+        },
+        title: {
+          display: true,
+          text: 'Portfolio Stocks',
+          position: 'bottom',
+          padding: {
+            top: 20,
+            bottom: 0,
+          },
+          // color: '#fff',
+          color: textColor,
+        },
+        customCanvasBackgroundColor: {
+          color: documentStyle.getPropertyValue('--surface-ground'),
+        },
+      },
+    };
   }
 
   initiateLineChart() {
@@ -418,9 +568,12 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       plugins: {
         legend: {
           labels: {
-            // color: textColor,
-            color: '#fff',
+            color: textColor,
+            // color: '#fff',
           },
+        },
+        customCanvasBackgroundColor: {
+          color: documentStyle.getPropertyValue('--surface-ground'),
         },
       },
       scales: {
@@ -479,7 +632,6 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
 
   getCurrentDate(): string {
     const currDate = new Date();
-    console.log('currDate1', currDate);
     // const yesterdayDate = new Date(currDate);
     // yesterdayDate.setDate(currDate.getDate() - 1);
 
@@ -588,6 +740,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       .subscribe((stocks) => {
         this.stocks = this.sortStockByDate(stocks);
         this.loading = false;
+        this.completeStocksSignal.set(true);
       });
   }
 
@@ -597,6 +750,35 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     const input2 = document.getElementById('input2') as HTMLInputElement;
     input1.value = '';
     input2.value = '';
+  }
+
+  deleteStockWithSymbol(symbol: string) {}
+
+  confirmDeleteWithSymbol(event: any, symbol: string) {
+    this.confirmationSvc.confirm({
+      target: event.target,
+      message: `Are you sure you want to delete ${symbol} ?`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.deleteStockWithSymbol(symbol);
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Confirmed',
+          detail: `You have deleted ${symbol} from your portfolio`,
+        });
+        setTimeout(() => {
+          // this.ngOnInit();
+          this.refreshAllTables();
+        }, 500);
+      },
+      reject: () => {
+        this.messageSvc.add({
+          severity: 'info',
+          summary: 'Cancelled',
+          detail: 'You have cancel the delete',
+        });
+      },
+    });
   }
 
   deleteStock(purchaseId: string) {
@@ -617,7 +799,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         });
         setTimeout(() => {
           this.ngOnInit();
-        }, 1000);
+        }, 5000);
       },
       reject: () => {
         this.messageSvc.add({
@@ -629,11 +811,58 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  refreshTreeTable() {
+    this.treeTableLoading = true;
+    this.completeStocksSignal.set(true);
+    this.completeStocksCountSignal.set(true);
+    // const newTable = [...this.stockTreeTable];
+    // this.stockTreeTable = newTable;
+    setTimeout(() => {
+      this.initiateStockTreeTable();
+    }, 500);
+  }
+
   refreshTable() {
     this.loading = true;
     setTimeout(() => {
       this.initiateStockTable();
     }, 500);
+  }
+
+  sellStockCount(rowData: any) {
+    const stock: PurchasedStock = {
+      purchaseId: '',
+      symbol: rowData.symbol,
+      name: rowData.symbol,
+      quantity: rowData.quantity,
+      fees: rowData.fees,
+      date: new Date().getTime(),
+      price: rowData.cost / rowData.quantity,
+      marketPrice: rowData.marketPrice / rowData.quantity,
+      percentage: rowData.performance,
+      logo: rowData.logo,
+    };
+    console.log('passed stock', stock);
+    this.getSvc.passStock = stock;
+    this.dialogRef = this.dialogSvc.open(SellStockComponent, {
+      header: 'Sell Order Details',
+      width: '70%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      dismissableMask: true,
+    });
+
+    this.dialogRef.onClose.subscribe((message: string) => {
+      if (message !== undefined) {
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Successful',
+          detail: message,
+        });
+        this.ngOnInit();
+      }
+    });
   }
 
   sellStock(stock: PurchasedStock) {
@@ -722,6 +951,13 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.initiateStockCount();
     }, 500);
+  }
+
+  refreshAllTables() {
+    this.refreshSoldStockTable();
+    this.refreshSoldStockTable();
+    this.refreshTable();
+    this.refreshTreeTable();
   }
 
   getProfitColorClass(unrealizedProfit: number): string {

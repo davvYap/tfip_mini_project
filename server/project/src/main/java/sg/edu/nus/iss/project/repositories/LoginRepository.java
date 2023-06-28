@@ -5,6 +5,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
+import sg.edu.nus.iss.project.models.User;
+
 import static sg.edu.nus.iss.project.repositories.DBQueries.*;
 
 @Repository
@@ -13,11 +15,11 @@ public class LoginRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public String verifyLogin(String username, String password) {
+    public User verifyLogin(String username, String password) {
         SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_VERIFY_LOGIN, username, password);
 
         while (rs.next()) {
-            return rs.getString("user_id");
+            return User.convertFromResult(rs);
         }
 
         return null;

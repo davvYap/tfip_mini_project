@@ -50,6 +50,22 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
   dateForm!: FormGroup;
   donutData!: any;
   donutOptions!: any;
+  chartPlugin: {
+    id: string;
+    beforeDraw: (chart: any, args: any, options: any) => void;
+  }[] = [
+    {
+      id: 'customCanvasBackgroundColor',
+      beforeDraw: (chart: any, args: any, options: any) => {
+        const { ctx } = chart;
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = options.color || '#99ffff';
+        ctx.fillRect(0, 0, chart.width, chart.height);
+        ctx.restore();
+      },
+    },
+  ];
 
   transactions!: Transaction[];
   transactions$!: Subscription;
@@ -215,10 +231,6 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
                   this.categoriesDonutData.mutate((categoriesArray) =>
                     categoriesArray.push(tran.amount)
                   );
-                  const randomColor = Math.floor(
-                    Math.random() * 16777215
-                  ).toString(16);
-
                   const latestIndex = this.categories.length;
                   this.categoriesColor.push(this.getSvc.getColors(latestIndex));
                   this.finalBarChartLabels.push(tran.categoryName);
@@ -428,7 +440,7 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
 
   initiateDonutChart() {
     const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--primary-color-text');
+    const textColor = documentStyle.getPropertyValue('--text-color');
 
     this.donutData = {
       labels: this.categories,
@@ -437,18 +449,6 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
           data: this.categoriesDonutData(),
           backgroundColor: this.categoriesColor,
           hoverBackgroundColor: this.categoriesColor,
-          // backgroundColor: [
-          //   documentStyle.getPropertyValue('--green-400'),
-          //   documentStyle.getPropertyValue('--red-400'),
-          //   // documentStyle.getPropertyValue('--purple-500'),
-          //   // documentStyle.getPropertyValue('--yellow-500'),
-          // ],
-          // hoverBackgroundColor: [
-          //   documentStyle.getPropertyValue('--green-300'),
-          //   documentStyle.getPropertyValue('--red-300'),
-          //   // documentStyle.getPropertyValue('--purple-400'),
-          //   // documentStyle.getPropertyValue('--yellow-400'),
-          // ],
         },
       ],
       doughnutlabel: [],
@@ -460,8 +460,8 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
       plugins: {
         legend: {
           labels: {
-            // color: textColor,
-            color: '#fff',
+            color: textColor,
+            // color: '#fff',
             padding: 10,
           },
         },
@@ -473,7 +473,11 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
             top: 20,
             bottom: 0,
           },
-          color: '#fff',
+          // color: '#fff',
+          color: textColor,
+        },
+        customCanvasBackgroundColor: {
+          color: documentStyle.getPropertyValue('--surface-ground'),
         },
       },
       onClick: (event: any, activeElements: any) => {
@@ -523,6 +527,9 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
           labels: {
             color: textColor,
           },
+        },
+        customCanvasBackgroundColor: {
+          color: documentStyle.getPropertyValue('--surface-ground'),
         },
       },
       scales: {

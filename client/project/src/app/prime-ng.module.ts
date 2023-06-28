@@ -32,6 +32,7 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
 import { TagModule } from 'primeng/tag';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { PanelModule } from 'primeng/panel';
+import { TreeTableModule } from 'primeng/treetable';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -67,6 +68,7 @@ const primeModules: any[] = [
   TagModule,
   InputTextareaModule,
   PanelModule,
+  TreeTableModule,
 ];
 
 @NgModule({

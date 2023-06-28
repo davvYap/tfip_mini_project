@@ -43,6 +43,22 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./savings.component.css'],
 })
 export class SavingsComponent implements OnInit, OnDestroy {
+  chartPlugin: {
+    id: string;
+    beforeDraw: (chart: any, args: any, options: any) => void;
+  }[] = [
+    {
+      id: 'customCanvasBackgroundColor',
+      beforeDraw: (chart: any, args: any, options: any) => {
+        const { ctx } = chart;
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = options.color || '#99ffff';
+        ctx.fillRect(0, 0, chart.width, chart.height);
+        ctx.restore();
+      },
+    },
+  ];
   thisYear: WritableSignal<number> = signal(2023);
   totalIncome: WritableSignal<number> = signal(0);
   totalExpense: WritableSignal<number> = signal(0);
@@ -475,7 +491,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
 
   initiateDonutChart() {
     const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--primary-color-text');
+    const textColor = documentStyle.getPropertyValue('--text-color');
 
     this.donutData = {
       labels: this.categories,
@@ -507,8 +523,8 @@ export class SavingsComponent implements OnInit, OnDestroy {
       plugins: {
         legend: {
           labels: {
-            // color: textColor,
-            color: '#fff',
+            color: textColor,
+            // color: '#fff',
             padding: 10,
           },
         },
@@ -520,7 +536,11 @@ export class SavingsComponent implements OnInit, OnDestroy {
             top: 20,
             bottom: 0,
           },
-          color: '#fff',
+          // color: '#fff',
+          color: textColor,
+        },
+        customCanvasBackgroundColor: {
+          color: documentStyle.getPropertyValue('--surface-ground'),
         },
       },
       onClick: (event: any, activeElements: any) => {
@@ -590,6 +610,9 @@ export class SavingsComponent implements OnInit, OnDestroy {
           labels: {
             color: textColor,
           },
+        },
+        customCanvasBackgroundColor: {
+          color: documentStyle.getPropertyValue('--surface-ground'),
         },
       },
       scales: {

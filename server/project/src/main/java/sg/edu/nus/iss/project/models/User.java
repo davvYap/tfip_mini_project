@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.bson.Document;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -28,6 +29,10 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public static User convertFromResult(SqlRowSet rs) {
+        return new User(rs.getString("user_id"), rs.getString("username"));
     }
 
     public Document toDocument() {

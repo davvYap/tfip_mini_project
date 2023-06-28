@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -30,17 +29,17 @@ public class LoginController {
 	public ResponseEntity<String> verifyLogin(@RequestParam String username, @RequestParam String password,
 			HttpSession session) {
 
-		String userId = loginSvc.verifyLogin(username, password);
-		if (userId == null) {
+		User user = loginSvc.verifyLogin(username, password);
+		if (user == null) {
 			session.setAttribute("isLogin", false);
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 					.contentType(MediaType.APPLICATION_JSON)
 					.body(Json.createObjectBuilder()
 							.add("isLogin", false)
 							.add("userId", "guest000")
+							.add("username", "guest")
 							.build().toString());
 		}
-		User user = new User(userId, username);
 		session.setAttribute("isLogin", true);
 		session.setAttribute("user", user);
 		// testSessionId(session);
@@ -49,7 +48,8 @@ public class LoginController {
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(Json.createObjectBuilder()
 						.add("isLogin", true)
-						.add("userId", userId)
+						.add("userId", user.getUserId())
+						.add("username", user.getUsername())
 						.build().toString());
 	}
 

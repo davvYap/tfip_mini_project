@@ -59,7 +59,11 @@ export class SellStockComponent implements OnInit {
     let userId: string = this.getSvc.userId;
     const soldStock: PurchasedStock = this.form.value as PurchasedStock;
     let timeLong: number = this.form.get('date')?.value?.getTime();
-    soldStock.purchaseId = this.stock.purchaseId;
+    if (this.stock.purchaseId) {
+      soldStock.purchaseId = this.stock.purchaseId;
+    } else {
+      soldStock.purchaseId = uuidv4().substring(0, 8);
+    }
     soldStock.date = timeLong;
     console.log(`${userId}`, soldStock);
     this.updateSvc
