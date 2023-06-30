@@ -1,4 +1,9 @@
 <div class="container">
+  <p-breadcrumb
+    class="max-w-full m-2"
+    [model]="breadcrumbItems"
+    [home]="breadcrumbHome"
+  ></p-breadcrumb>
   <div class="row justify-content-center align-items-center">
     <div class="col-8 text-center my-5 h1card">
       <h1>Portfolio Dashbooard</h1>
@@ -97,31 +102,46 @@
 
           <!-- NOTE  Tree Table-->
           <div
-            *ngIf="initTreeTableSignal()"
             class="row justify-content-center align-items-center m-2 stock-card"
           >
             <div class="col-12 d-flex justify-content-center h3-font">
               <h3>Portfolio</h3>
             </div>
             <p-treeTable
+              *ngIf="initTreeTableSignal(); else skeleton"
+              id="stocktt"
               #stocktt
+              [columns]="portfolioTableCols"
               [loading]="treeTableLoading"
               [value]="stockTreeTable"
               [scrollable]="true"
               [tableStyle]="{ 'min-width': '50rem' }"
               [paginator]="true"
-              [rows]="10"
               filterMode="strict"
               [globalFilterFields]="['symbol', 'name']"
               [scrollable]="true"
-              scrollHeight="300px"
+              scrollHeight="500px"
               [scrollable]="true"
               [frozenColumns]="frozenCols"
               [resizableColumns]="true"
               columnResizeMode="expand"
+              [rows]="10"
+              [showCurrentPageReport]="true"
+              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+              [rowsPerPageOptions]="[5, 10, 15, 50, 100]"
             >
               <ng-template pTemplate="caption">
-                <div class="d-flex justify-content-end align-items-center">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <button
+                      pButton
+                      pRipple
+                      label="New"
+                      icon="pi pi-plus"
+                      class="p-button-rounded p-button-info mr-2 me-3"
+                      routerLink="/investment"
+                    ></button>
+                  </div>
                   <div class="p-input-icon-left">
                     <i class="pi pi-search"></i>
                     <input
@@ -129,7 +149,7 @@
                       id="treeInput"
                       type="text"
                       pInputText
-                      placeholder="Search ticker"
+                      placeholder="Search symbol"
                       (input)="
                         stocktt.filterGlobal(treeInput.value, 'contains')
                       "
@@ -140,7 +160,7 @@
               <ng-template pTemplate="header">
                 <tr>
                   <th ttSortableColumn="symbol">
-                    Symbol
+                    Symbol | Date
                     <span>
                       <p-treeTableSortIcon field="symbol"></p-treeTableSortIcon>
                     </span>
@@ -154,15 +174,14 @@
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
-                <tr [ttRow]="rowNode">
-                  <td>
+                <tr [ttRow]="rowNode" *ngIf="rowData.quantity != 0">
+                  <td *ngIf="!!!rowData.date">
                     <p-treeTableToggler
                       [rowNode]="rowNode"
                     ></p-treeTableToggler>
                     <p-avatar
                       *ngIf="rowData.logo"
                       [image]="rowData.logo"
-                      class="me-2"
                       shape="circle"
                     ></p-avatar>
                     <span>
@@ -175,8 +194,8 @@
                       >
                       </p-button>
                     </span>
-                    <!-- {{ rowData.symbol }} -->
                   </td>
+                  <td *ngIf="rowData.date">{{ rowData.date | date }}</td>
                   <td>{{ rowData.name }}</td>
                   <td>{{ rowData.quantity }}</td>
                   <td>{{ rowData.cost | currency }}</td>
@@ -192,7 +211,11 @@
                         type="button"
                         styleClass="p-button-rounded p-button-danger"
                         (onClick)="
-                          confirmDeleteWithSymbol($event, rowData.symbol)
+                          confirmDeleteTreeTable(
+                            $event,
+                            rowData.symbol,
+                            rowData.purchaseId
+                          )
                         "
                       ></p-button>
                     </span>
@@ -202,16 +225,24 @@
                         type="button"
                         styleClass="p-button-rounded p-button-success"
                         (onClick)="sellStockCount(rowData)"
+                        [disabled]="rowData.quantity < 0"
                       ></p-button>
                     </span>
                   </td>
                 </tr>
               </ng-template>
               <ng-template pTemplate="paginatorleft">
-                <p-button
+                <!-- <p-button
                   icon="pi pi-download"
                   styleClass="p-button-text"
-                ></p-button>
+                ></p-button> -->
+                <p-splitButton
+                  icon="pi pi-download"
+                  styleClass="p-button-text"
+                  pTooltip="Export pdf"
+                  (onClick)="exportPdfPortfolio()"
+                  [model]="portfolioExportBtnItems"
+                ></p-splitButton>
               </ng-template>
               <ng-template pTemplate="paginatorright">
                 <p-button
@@ -222,7 +253,13 @@
               </ng-template>
             </p-treeTable>
           </div>
-          <!-- NOTE -->
+        </p-tabPanel>
+
+        <!-- TRANSACTIONS -->
+        <p-tabPanel>
+          <ng-template pTemplate="header">
+            <span class="mx-2">Transactions</span>
+          </ng-template>
           <!-- PORTFOLIO TABLE -->
           <div
             class="row justify-content-center align-items-center m-5 stock-card"
@@ -233,7 +270,7 @@
             <p-table
               id="dt1"
               #dt1
-              [columns]="portfolioTableCols"
+              [columns]="transactionsTableCols"
               [value]="stocks"
               [loading]="loading"
               [tableStyle]="{ 'min-width': '50rem' }"
@@ -262,7 +299,7 @@
                       pButton
                       pRipple
                       icon="pi pi-file-excel"
-                      (click)="exportExcelPortfolio()"
+                      (click)="exportExcelTransaction()"
                       class="p-button-success export-buttons"
                       pTooltip="XLS"
                       tooltipPosition="bottom"
@@ -272,7 +309,7 @@
                       pButton
                       pRipple
                       icon="pi pi-file-pdf"
-                      (click)="exportPdfPortfolio()"
+                      (click)="exportPdfTransaction()"
                       class="p-button-danger export-buttons"
                       pTooltip="PDF"
                       tooltipPosition="bottom"
@@ -317,7 +354,7 @@
                   <th style="width: 12%" pSortableColumn="quantity">
                     Quantity <p-sortIcon field="quantity"></p-sortIcon>
                   </th>
-                  <th style="width: 12.5%">Bought Price</th>
+                  <th style="width: 12.5%">Transaction Price</th>
                   <th style="width: 12.5%">Market Price</th>
                   <th style="width: 12%" pSortableColumn="percentage">
                     % Change <p-sortIcon field="percentage"></p-sortIcon>
@@ -331,11 +368,7 @@
                     <span
                       class="d-flex justify-content-evenly align-items-center"
                     >
-                      <p-avatar
-                        [image]="stock.logo"
-                        class="me-2"
-                        shape="circle"
-                      ></p-avatar>
+                      <p-avatar [image]="stock.logo" shape="circle"></p-avatar>
                       <span>
                         <p-button
                           [label]="stock.symbol"
@@ -351,7 +384,9 @@
                   </td>
                   <td>{{ stock.name }}</td>
                   <td>{{ stock.date | date }}</td>
-                  <td>{{ stock.quantity }}</td>
+                  <td [className]="getPerformanceClass(stock.quantity)">
+                    {{ stock.quantity }}
+                  </td>
                   <td>{{ stock.price | currency }}</td>
                   <td>{{ stock.marketPrice | currency }}</td>
                   <td [className]="getPerformanceClass(stock.percentage)">
@@ -375,6 +410,7 @@
                         type="button"
                         styleClass="p-button-rounded p-button-success"
                         (onClick)="sellStock(stock)"
+                        [disabled]="!(stock.quantity > 0)"
                       ></p-button>
                     </span>
                   </td>
@@ -440,7 +476,7 @@
             class="row justify-content-center align-items-center m-2 stock-card"
           >
             <div class="col-10 d-flex justify-content-center h3-font">
-              <h3>Stock Transactions</h3>
+              <h3>Sold Stocks Transactions</h3>
             </div>
             <p-table
               id="dt2"
@@ -544,11 +580,7 @@
                     <span
                       class="d-flex justify-content-evenly align-items-center"
                     >
-                      <p-avatar
-                        [image]="stock.logo"
-                        styleClass="mr-2"
-                        shape="circle"
-                      ></p-avatar>
+                      <p-avatar [image]="stock.logo" shape="circle"></p-avatar>
                       <span>
                         {{ stock.symbol }}
                       </span>

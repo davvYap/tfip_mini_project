@@ -13,6 +13,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   ConfirmationService,
+  MenuItem,
   MessageService,
   SelectItem,
   SelectItemGroup,
@@ -43,6 +44,9 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./savings.component.css'],
 })
 export class SavingsComponent implements OnInit, OnDestroy {
+  documentStyle = getComputedStyle(document.documentElement);
+  breadcrumbItems: MenuItem[] | undefined;
+  breadcrumbHome: MenuItem | undefined;
   chartPlugin: {
     id: string;
     beforeDraw: (chart: any, args: any, options: any) => void;
@@ -53,7 +57,9 @@ export class SavingsComponent implements OnInit, OnDestroy {
         const { ctx } = chart;
         ctx.save();
         ctx.globalCompositeOperation = 'destination-over';
-        ctx.fillStyle = options.color || '#99ffff';
+        ctx.fillStyle =
+          options.color ||
+          this.documentStyle.getPropertyValue('--surface-ground');
         ctx.fillRect(0, 0, chart.width, chart.height);
         ctx.restore();
       },
@@ -138,6 +144,11 @@ export class SavingsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.breadcrumbItems = [
+      { label: 'Dashboard', routerLink: '/' },
+      { label: 'Savings Dashboard', routerLink: '/savings' },
+    ];
+    this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
     this.title.setTitle(`${this.getSvc.applicationName} | Expense Tracker`);
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.categories = ['Income', 'Expense'];

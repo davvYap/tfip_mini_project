@@ -213,4 +213,11 @@ public class Stock {
         return sc;
     }
 
+    @Override
+    public String toString() {
+        return "Stock [purchaseId=" + purchaseId + ", stockName=" + stockName + ", quantity=" + quantity
+                + ", strikePrice=" + strikePrice + ", symbol=" + symbol + ", purchasedDate=" + purchasedDate + ", fees="
+                + fees + ", date=" + date + ", netProfit=" + netProfit + ", marketPrice=" + marketPrice + "]";
+    }
+
 }

@@ -15,6 +15,7 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
+  documentStyle = getComputedStyle(document.documentElement);
   username: WritableSignal<string | null> = signal('visitor');
   donutData!: any;
   donutOptions!: any;
@@ -28,7 +29,9 @@ export class DashboardComponent implements OnInit {
         const { ctx } = chart;
         ctx.save();
         ctx.globalCompositeOperation = 'destination-over';
-        ctx.fillStyle = options.color || '#99ffff';
+        ctx.fillStyle =
+          options.color ||
+          this.documentStyle.getPropertyValue('--surface-ground');
         ctx.fillRect(0, 0, chart.width, chart.height);
         ctx.restore();
       },

@@ -111,6 +111,10 @@ public class UserService {
         return userRepo.deleteUserStockMongo(userId, purchaseId);
     }
 
+    public boolean deteleUserStockMongoWithSymbol(String userId, String symbol) {
+        return userRepo.deteleUserStockMongoWithSymbol(userId, symbol);
+    }
+
     public boolean updateUserStockMongo(String userId, Stock stock) {
         return userRepo.updateUserStockMongo(userId, stock);
     }

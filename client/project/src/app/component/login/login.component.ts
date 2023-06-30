@@ -11,12 +11,7 @@ import { Router } from '@angular/router';
 import { GetService } from 'src/app/service/get.service';
 import { ThemeService } from 'src/app/service/theme.service';
 import { Title } from '@angular/platform-browser';
-import {
-  faFacebookF,
-  faInstagram,
-  faYoutube,
-  faTwitter,
-} from '@fortawesome/free-brands-svg-icons';
+
 import {
   faChartSimple,
   faHandPointUp,
@@ -28,10 +23,6 @@ import {
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit, AfterViewInit {
-  facebookIcon = faFacebookF;
-  instaIcon = faInstagram;
-  youtubeIcon = faYoutube;
-  twitterIcon = faTwitter;
   chartIcon = faChartSimple;
   pointUpIcon = faHandPointUp;
   displayButton = false;

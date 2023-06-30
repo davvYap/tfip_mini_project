@@ -9,6 +9,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Repository;
 
 import com.mongodb.client.result.UpdateResult;
 
+import ch.qos.logback.core.joran.conditional.IfAction;
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockPrice;
 import static sg.edu.nus.iss.project.repositories.DBQueries.*;
@@ -136,7 +138,7 @@ public class UserRepository {
     }
 
     // for deleting and updating user stock
-    public Stock findUserStock(String userId, String purchaseId) {
+    public Stock findUserStockWithPurchaseId(String userId, String purchaseId) {
         Query query = Query.query(Criteria.where("user_id").is(userId));
         Document d = mongo.findOne(query, Document.class, "stocks");
         Stock stock = null;
@@ -153,9 +155,26 @@ public class UserRepository {
         return stock;
     }
 
+    // for deleting and updating user stock
+    public List<Stock> findUserStockWithSymbol(String userId, String symbol) {
+        Query query = Query.query(Criteria.where("user_id").is(userId));
+        Document d = mongo.findOne(query, Document.class, "stocks");
+        List<Stock> stocksWithSelectedSymbol = new ArrayList<>();
+        if (d != null) {
+            List<Stock> stocks = d.getList("stocks", Document.class).stream()
+                    .map(Stock::convertFromDocument)
+                    .toList();
+            stocks.stream().forEach(s -> {
+                if (s.getSymbol().equalsIgnoreCase(symbol))
+                    stocksWithSelectedSymbol.add(s);
+            });
+        }
+        return stocksWithSelectedSymbol;
+    }
+
     public boolean deleteUserStockMongo(String userId, String purchaseId) {
         Query query = Query.query(Criteria.where("user_id").is(userId));
-        Stock stock = findUserStock(userId, purchaseId);
+        Stock stock = findUserStockWithPurchaseId(userId, purchaseId);
         System.out.println("Deleting stock with purchaseId -> %s in mongo".formatted(purchaseId));
         if (stock != null) {
             Update update = new Update().pull("stocks", stock.toDocument());
@@ -165,32 +184,96 @@ public class UserRepository {
         return false;
     }
 
+    public boolean deteleUserStockMongoWithSymbol(String userId, String symbol) {
+        Query query = Query.query(Criteria.where("user_id").is(userId));
+        List<Stock> stocksWithSelectedSymbol = findUserStockWithSymbol(userId, symbol);
+        System.out.println("Deleting stock with symbol -> %s in mongo".formatted(symbol));
+        int totalDeletedStocks = 0;
+        if (stocksWithSelectedSymbol.size() > 0) {
+            for (Stock stock : stocksWithSelectedSymbol) {
+                if (stock != null) {
+                    Update update = new Update().pull("stocks", stock.toDocument());
+                    mongo.updateFirst(query, update, "stocks");
+                    totalDeletedStocks++;
+                }
+            }
+        }
+        return totalDeletedStocks > 0;
+    }
+
+    // sell user stock
     public boolean updateUserStockMongo(String userId, Stock stock) {
         Query query = Query.query(Criteria.where("user_id").is(userId));
-        Stock originalStk = findUserStock(userId, stock.getPurchaseId());
-        if (originalStk != null) {
-            double profit = 0.0;
-            double remainingQty = originalStk.getQuantity() - stock.getQuantity();
-            deleteUserStockMongo(userId, stock.getPurchaseId());
-            double remainingFees = originalStk.getFees();
-            if (remainingQty != 0.0) {
-                remainingFees = (remainingQty / originalStk.getQuantity()) * originalStk.getFees();
-                originalStk.setQuantity(remainingQty);
-                originalStk.setFees(remainingFees);
-                upsertUserStocks(userId, originalStk);
-            }
-            double orignalFees = originalStk.getFees();
-            profit = ((stock.getStrikePrice() - originalStk.getStrikePrice()) * stock.getQuantity())
-                    - stock.getFees()
-                    - (orignalFees - remainingFees);
+        System.out.println("Selling stock >>> " + stock.toString());
+        // if (!stock.getPurchaseId().isEmpty() && !stock.getPurchaseId().isBlank()) {
+        // System.out.println(
+        // "Creating sell order for single stock with purchaseId
+        // %s".formatted(stock.getPurchaseId()));
+        // Stock originalStk = findUserStockWithPurchaseId(userId,
+        // stock.getPurchaseId());
+        // if (originalStk != null) {
+        // double profit = 0.0;
+        // // delete original stock then insert again with updated quantity and
+        // remaining
+        // // fees
+        // deleteUserStockMongo(userId, stock.getPurchaseId());
+        // double remainingQty = originalStk.getQuantity() - stock.getQuantity();
+        // double remainingFees = originalStk.getFees();
+        // if (remainingQty != 0.0) {
+        // remainingFees = (remainingQty / originalStk.getQuantity()) *
+        // originalStk.getFees();
+        // originalStk.setQuantity(remainingQty);
+        // originalStk.setFees(remainingFees);
+        // upsertUserStocks(userId, originalStk);
+        // }
+        // double orignalFees = originalStk.getFees();
+        // profit = ((stock.getStrikePrice() - originalStk.getStrikePrice()) *
+        // stock.getQuantity())
+        // - stock.getFees()
+        // - (orignalFees - remainingFees);
+
+        // // insert sold stocks into another collection
+        // Update udpateOps = new Update()
+        // .set("user_id", userId)
+        // .push("sold_stocks", stock.toDocumentSold(profit));
+        // System.out
+        // .println("Update user mongo stock %s with profit of
+        // %.2f".formatted(stock.getSymbol(), profit));
+        // UpdateResult upsertDoc = mongo.upsert(query, udpateOps, "sold_stocks");
+        // return upsertDoc.getModifiedCount() > 0;
+        // }
+        // return false;
+        // } else {
+        // }
+        System.out.println("Creating sell order for whole stock with symbol %s".formatted(stock.getSymbol()));
+        List<Stock> originalStks = findUserStockWithSymbol(userId, stock.getSymbol());
+        if (originalStks.size() > 0) {
+            String sellOrderId = UUID.randomUUID().toString().substring(0, 8);
+            stock.setPurchaseId(sellOrderId);
 
             // insert sold stocks into another collection
-            Update udpateOps = new Update()
+            double totalQuantity = 0.0;
+            double totalBoughtPrice = 0.0;
+            for (Stock s : originalStks) {
+                totalQuantity += s.getQuantity();
+                totalBoughtPrice += (s.getStrikePrice() * s.getQuantity()) + s.getFees();
+            }
+            double averagePrice = totalBoughtPrice / totalQuantity;
+            System.out.println("average price >>> " + averagePrice);
+            System.out.println("market price >>> " + stock.getStrikePrice());
+            double profit = ((stock.getStrikePrice() - averagePrice) * stock.getQuantity()) - stock.getFees();
+            Update updateOps = new Update()
                     .set("user_id", userId)
                     .push("sold_stocks", stock.toDocumentSold(profit));
-            System.out.println("Update user mongo stock %s with profit of %.2f".formatted(stock.getSymbol(), profit));
-            UpdateResult upsertDoc = mongo.upsert(query, udpateOps, "sold_stocks");
-            return upsertDoc.getModifiedCount() > 0;
+            System.out
+                    .println("Update user mongo stock %s with profit of %.2f".formatted(stock.getSymbol(), profit));
+            UpdateResult upsertDoc = mongo.upsert(query, updateOps, "sold_stocks");
+
+            // insert into user stock collection
+            double sellQuantity = stock.getQuantity() * -1;
+            stock.setQuantity(sellQuantity);
+            upsertUserStocks(userId, stock);
+            return true;
         }
         return false;
     }
@@ -215,7 +298,7 @@ public class UserRepository {
 
     public Optional<Double> retrieveUserStockMarketValueRedis(String userId, String symbol) {
         String marketprice = (String) redis.opsForHash().get(userId, symbol);
-        System.out.println("Checking redis for %s market price".formatted(symbol));
+        // System.out.println("Checking redis for %s market price".formatted(symbol));
         if (marketprice == null) {
             return Optional.empty();
         }
@@ -271,7 +354,8 @@ public class UserRepository {
         if (d == null) {
             return Optional.empty();
         }
-        System.out.println("Checking mongo for %s monthly performance".formatted(symbol));
+        // System.out.println("Checking mongo for %s monthly
+        // performance".formatted(symbol));
         List<StockPrice> prices = d.getList("prices", Document.class).stream()
                 .map(doc -> StockPrice.convertFromDocument(doc)).toList();
 

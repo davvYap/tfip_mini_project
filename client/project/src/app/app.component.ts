@@ -1,4 +1,11 @@
-import { Component, OnInit, WritableSignal, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  Renderer2,
+  WritableSignal,
+  signal,
+} from '@angular/core';
 import { MenuItem, MessageService, PrimeNGConfig } from 'primeng/api';
 import { ThemeService } from './service/theme.service';
 import { GetService } from './service/get.service';
@@ -9,7 +16,17 @@ import { RoutePersistenceService } from './service/route-persistence.service';
 import { Subscription } from 'rxjs';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AddTransactionComponent } from './component/add-transaction/add-transaction.component';
-import { faRightToBracket } from '@fortawesome/free-solid-svg-icons';
+import {
+  faRightToBracket,
+  faGem,
+  IconDefinition,
+} from '@fortawesome/free-solid-svg-icons';
+import {
+  faFacebookF,
+  faInstagram,
+  faYoutube,
+  faTwitter,
+} from '@fortawesome/free-brands-svg-icons';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +34,12 @@ import { faRightToBracket } from '@fortawesome/free-solid-svg-icons';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
+  facebookIcon = faFacebookF;
+  instaIcon = faInstagram;
+  youtubeIcon = faYoutube;
+  twitterIcon = faTwitter;
   loginIcon = faRightToBracket;
+  premiumIcon: IconDefinition = faGem;
   items!: MenuItem[];
   imgSrc!: string;
   updateUsersStockValue$!: Subscription;
@@ -39,9 +61,10 @@ export class AppComponent implements OnInit {
     private getSvc: GetService,
     private postSvc: PostService,
     private router: Router,
-    private routerPerSvc: RoutePersistenceService,
     private messageSvc: MessageService,
-    private dialogSvc: DialogService
+    private dialogSvc: DialogService,
+    private renderer: Renderer2,
+    private el: ElementRef
   ) {}
 
   ngOnInit(): void {
@@ -88,7 +111,7 @@ export class AppComponent implements OnInit {
                 {
                   label: 'Crypto',
                   icon: 'pi pi-fw pi-bitcoin',
-                  routerLink: '/investment',
+                  disabled: true,
                 },
               ],
             },
@@ -246,11 +269,12 @@ export class AppComponent implements OnInit {
         },
         {
           label: 'Premium',
-          icon: 'pi pi-fw pi-lock-open',
+          icon: 'pi pi-fw pi-verified',
         },
         {
           label: 'Contact Us',
           icon: 'pi pi-fw pi-telegram',
+          command: () => this.scrollToElement('footer'),
         },
       ];
     }
@@ -333,5 +357,16 @@ export class AppComponent implements OnInit {
         this.ngOnInit();
       }
     });
+  }
+
+  scrollToElement(elementId: string): void {
+    const element = this.el.nativeElement.querySelector('#' + elementId);
+    if (element) {
+      this.renderer.setProperty(
+        document.documentElement,
+        'scrollTop',
+        element.offsetTop
+      );
+    }
   }
 }

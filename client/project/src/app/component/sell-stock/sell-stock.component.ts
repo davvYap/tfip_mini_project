@@ -38,15 +38,15 @@ export class SellStockComponent implements OnInit {
 
   createForm(stock: PurchasedStock | null): FormGroup {
     // prefix today's date
-    let date: string = new Date().toISOString().split('T')[0];
+    const date = new Date();
     return this.fb.group({
       symbol: this.fb.control(!!stock ? stock.symbol : '', Validators.required),
       name: this.fb.control(!!stock ? stock.name : '', Validators.required),
       date: this.fb.control(date, Validators.required),
-      quantity: this.fb.control(
-        !!stock ? stock.quantity : '',
-        Validators.required
-      ),
+      quantity: this.fb.control(!!stock ? stock.quantity : '', [
+        Validators.required,
+        Validators.max(stock!.quantity),
+      ]),
       price: this.fb.control(
         !!stock ? stock.marketPrice : '',
         Validators.required
@@ -62,7 +62,7 @@ export class SellStockComponent implements OnInit {
     if (this.stock.purchaseId) {
       soldStock.purchaseId = this.stock.purchaseId;
     } else {
-      soldStock.purchaseId = uuidv4().substring(0, 8);
+      soldStock.purchaseId = '';
     }
     soldStock.date = timeLong;
     console.log(`${userId}`, soldStock);
@@ -78,5 +78,11 @@ export class SellStockComponent implements OnInit {
           detail: err.message,
         })
       );
+  }
+
+  invalidFields(fieldName: string): boolean {
+    return (
+      !!this.form.get(fieldName)?.invalid && !!this.form.get(fieldName)?.dirty
+    );
   }
 }

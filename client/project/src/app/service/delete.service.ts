@@ -10,11 +10,27 @@ import { Transaction } from '../models';
 export class DeleteService {
   constructor(private http: HttpClient) {}
 
-  deleteStock(purchaseId: string, userId: string): Promise<MessageResponse> {
+  deleteStockWithPurchaseId(
+    purchaseId: string,
+    userId: string
+  ): Promise<MessageResponse> {
     const qp = new HttpParams().set('purchaseId', purchaseId);
     return lastValueFrom(
       this.http.delete<MessageResponse>(
-        `http://localhost:8080/api/${userId}/delete_stock`,
+        `http://localhost:8080/api/${userId}/delete_stock_purchaseId`,
+        { params: qp }
+      )
+    );
+  }
+
+  deleteStockWithSymbol(
+    symbol: string,
+    userId: string
+  ): Promise<MessageResponse> {
+    const qp = new HttpParams().set('symbol', symbol);
+    return lastValueFrom(
+      this.http.delete<MessageResponse>(
+        `http://localhost:8080/api/${userId}/delete_stock_symbol`,
         { params: qp }
       )
     );

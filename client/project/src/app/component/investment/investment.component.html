@@ -1,12 +1,100 @@
-<div class="container mt-5">
+<div class="container">
+  <p-breadcrumb
+    class="max-w-full m-2"
+    [model]="breadcrumbItems"
+    [home]="breadcrumbHome"
+  ></p-breadcrumb>
   <div class="row justify-content-center align-items-center">
-    <div class="col-8 m-3 text-center">
+    <div class="col-10 ncard">
       <form [formGroup]="investmentForm" (submit)="addStock()">
-        <div class="row justify-content-center align-items-center">
-          <div class="col-8 text-center">
-            <div class="ncard flex justify-content-center">
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="symbol">Symbol</label>
+          <p-autoComplete
+            [style]="{ width: '100%' }"
+            [inputStyle]="{ width: '100%' }"
+            formControlName="symbol"
+            [suggestions]="filteredStocksSymbol"
+            (completeMethod)="filterStock($event)"
+            [forceSelection]="true"
+            placeholder="stock symbol"
+            (onSelect)="onSelectStock($event)"
+          ></p-autoComplete>
+        </div>
+
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="price">Price</label>
+          <p-inputNumber
+            [style]="{ width: '100%' }"
+            formControlName="price"
+            [showButtons]="true"
+            buttonLayout="horizontal"
+            inputId="horizontal"
+            spinnerMode="horizontal"
+            [step]="10.0"
+            decrementButtonClass="p-button-danger"
+            incrementButtonClass="p-button-success"
+            incrementButtonIcon="pi pi-plus"
+            decrementButtonIcon="pi pi-minus"
+            mode="currency"
+            currency="USD"
+          ></p-inputNumber>
+        </div>
+
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="quantity">Quantity</label>
+          <p-inputNumber
+            [style]="{ width: '100%' }"
+            formControlName="quantity"
+            mode="decimal"
+            [showButtons]="true"
+            inputId="minmax-buttons"
+            [min]="0.1"
+            [max]="10000"
+            [minFractionDigits]="0"
+            [maxFractionDigits]="2"
+          >
+          </p-inputNumber>
+        </div>
+
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="date">Date of Transaction</label>
+          <p-calendar
+            [style]="{ width: '100%' }"
+            formControlName="date"
+            [touchUI]="true"
+            [readonlyInput]="true"
+            [showButtonBar]="true"
+            [showIcon]="true"
+            [maxDate]="maxDate"
+            dateFormat="dd-mm-yy"
+          ></p-calendar>
+        </div>
+
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="fees">Fees</label>
+          <p-inputNumber
+            [style]="{ width: '100%' }"
+            formControlName="fees"
+            [showButtons]="true"
+            buttonLayout="horizontal"
+            inputId="horizontal"
+            spinnerMode="horizontal"
+            [step]="0.5"
+            decrementButtonClass="p-button-danger"
+            incrementButtonClass="p-button-success"
+            incrementButtonIcon="pi pi-plus"
+            decrementButtonIcon="pi pi-minus"
+            mode="currency"
+            currency="USD"
+          ></p-inputNumber>
+        </div>
+
+        <!-- <div class="row justify-content-center align-items-center">
+          <div class="col-9 text-center">
+            <div class="ncard d-flex justify-content-center">
               <span class="p-float-label">
                 <p-autoComplete
+                  [style]="{ width: '100%' }"
                   formControlName="symbol"
                   [suggestions]="filteredStocksSymbol"
                   (completeMethod)="filterStock($event)"
@@ -19,13 +107,14 @@
               </span>
             </div>
           </div>
-        </div>
+        </div> -->
 
-        <div class="row justify-content-center align-items-center">
-          <div class="col-8 text-center">
-            <div class="ncard flex justify-content-center">
+        <!-- <div class="row justify-content-center align-items-center">
+          <div class="col-9 text-center">
+            <div class="ncard d-flex justify-content-center">
               <span class="p-float-label">
                 <p-inputNumber
+                  [style]="{ width: '100%' }"
                   formControlName="price"
                   [showButtons]="true"
                   buttonLayout="horizontal"
@@ -43,11 +132,11 @@
               </span>
             </div>
           </div>
-        </div>
+        </div> -->
 
-        <div class="row justify-content-center align-items-center">
-          <div class="col-8 text-center">
-            <div class="ncard flex justify-content-center">
+        <!-- <div class="row justify-content-center align-items-center">
+          <div class="col-9 text-center">
+            <div class="ncard d-flex justify-content-center">
               <span class="p-float-label">
                 <p-inputNumber
                   formControlName="quantity"
@@ -64,11 +153,11 @@
               </span>
             </div>
           </div>
-        </div>
+        </div> -->
 
-        <div class="row justify-content-center align-items-center">
-          <div class="col-8 text-center">
-            <div class="ncard flex justify-content-center">
+        <!-- <div class="row justify-content-center align-items-center">
+          <div class="col-9 text-center">
+            <div class="ncard d-flex justify-content-center">
               <span class="p-float-label">
                 <p-calendar
                   formControlName="date"
@@ -83,11 +172,11 @@
               </span>
             </div>
           </div>
-        </div>
+        </div> -->
 
-        <div class="row justify-content-center align-items-center">
-          <div class="col-8 text-center">
-            <div class="ncard flex justify-content-center">
+        <!-- <div class="row justify-content-center align-items-center">
+          <div class="col-9 text-center">
+            <div class="ncard d-flex justify-content-center">
               <span class="p-float-label">
                 <p-inputNumber
                   formControlName="fees"
@@ -107,18 +196,11 @@
               </span>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <div class="row justify-content-center align-items-center my-3">
-          <div class="col-8 text-center">
+          <div class="col-9 text-center">
             <span class="p-buttonset">
-              <button
-                pButton
-                pRipple
-                label="Save"
-                icon="pi pi-check"
-                [disabled]="investmentForm.invalid"
-              ></button>
               <button
                 pButton
                 pRipple
@@ -132,6 +214,13 @@
                 label="Cancel"
                 icon="pi pi-times"
                 [routerLink]="'/investment-dashboard'"
+              ></button>
+              <button
+                pButton
+                pRipple
+                label="Save"
+                icon="pi pi-check"
+                [disabled]="investmentForm.invalid"
               ></button>
             </span>
           </div>

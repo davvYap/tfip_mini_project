@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { Subscription } from 'rxjs';
 import { PurchasedStock, Stock } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
@@ -14,6 +14,8 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./investment.component.css'],
 })
 export class InvestmentComponent implements OnInit, OnDestroy {
+  breadcrumbItems: MenuItem[] | undefined;
+  breadcrumbHome: MenuItem | undefined;
   investmentForm!: FormGroup;
   stocks!: Stock[];
   filteredStocksSymbol!: String[];
@@ -32,6 +34,12 @@ export class InvestmentComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.breadcrumbItems = [
+      { label: 'Dashboard', routerLink: '/' },
+      { label: 'Portfolio', routerLink: '/investment-dashboard' },
+      { label: 'New Stock', routerLink: '/investment' },
+    ];
+    this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
     this.title.setTitle(`${this.getSvc.applicationName} | +Stock`);
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.investmentForm = this.createForm();

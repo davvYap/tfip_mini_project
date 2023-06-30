@@ -19,6 +19,7 @@ import { SavingsComponent } from './component/savings/savings.component';
 import { AddTransactionComponent } from './component/add-transaction/add-transaction.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { TransactionRecordsComponent } from './component/transaction-records/transaction-records.component';
+import { DatePipe } from '@angular/common';
 
 @NgModule({
   declarations: [

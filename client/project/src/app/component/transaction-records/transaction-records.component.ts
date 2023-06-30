@@ -23,7 +23,12 @@ import { ThemeService } from 'src/app/service/theme.service';
 import { faFolderOpen } from '@fortawesome/free-solid-svg-icons';
 import { AddTransactionComponent } from '../add-transaction/add-transaction.component';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { ConfirmationService, MessageService, SelectItem } from 'primeng/api';
+import {
+  ConfirmationService,
+  MenuItem,
+  MessageService,
+  SelectItem,
+} from 'primeng/api';
 import { Title } from '@angular/platform-browser';
 import { ExportService } from 'src/app/service/export.service';
 import { Table } from 'primeng/table';
@@ -36,6 +41,9 @@ import { DeleteService } from 'src/app/service/delete.service';
   styleUrls: ['./transaction-records.component.css'],
 })
 export class TransactionRecordsComponent implements OnInit, OnDestroy {
+  documentStyle = getComputedStyle(document.documentElement);
+  breadcrumbItems: MenuItem[] | undefined;
+  breadcrumbHome: MenuItem | undefined;
   startDate: WritableSignal<string> = signal(this.getSvc.getStartDateOfYear());
   endDate: WritableSignal<string> = signal(
     new Date().toISOString().split('T')[0]
@@ -60,7 +68,9 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
         const { ctx } = chart;
         ctx.save();
         ctx.globalCompositeOperation = 'destination-over';
-        ctx.fillStyle = options.color || '#99ffff';
+        ctx.fillStyle =
+          options.color ||
+          this.documentStyle.getPropertyValue('--surface-ground');
         ctx.fillRect(0, 0, chart.width, chart.height);
         ctx.restore();
       },
@@ -108,6 +118,12 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.breadcrumbItems = [
+      { label: 'Dashboard', routerLink: '/' },
+      { label: 'Savings Dashboard', routerLink: '/savings' },
+      { label: 'Transaction Records', routerLink: '/transaction-records' },
+    ];
+    this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
     this.title.setTitle(`${this.getSvc.applicationName} | Expense Tracker`);
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     const documentStyle = getComputedStyle(document.documentElement);
