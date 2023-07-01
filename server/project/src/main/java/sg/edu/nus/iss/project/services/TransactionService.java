@@ -58,4 +58,9 @@ public class TransactionService {
     public List<Transaction> geTransactionsBasedOnDatesJdbc(String userId, String startDate, String endDate) {
         return transRepo.geTransactionsBasedOnDatesJdbc(userId, startDate, endDate);
     }
+
+    public List<Transaction> getUserAllTransactionsJdbc(String userId) {
+        return transRepo.getUserAllTransactionsJdbc(userId);
+    }
+
 }

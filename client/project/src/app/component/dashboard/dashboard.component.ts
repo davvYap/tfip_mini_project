@@ -1,9 +1,20 @@
-import { Component, OnInit, signal, WritableSignal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  signal,
+  WritableSignal,
+  computed,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Chart } from 'chart.js';
 import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
-import { LoginStatus, MessageResponse, UserSettings } from 'src/app/models';
+import {
+  LoginStatus,
+  MessageResponse,
+  Transaction,
+  UserSettings,
+} from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
@@ -15,7 +26,8 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-  documentStyle = getComputedStyle(document.documentElement);
+  thisYear = signal(new Date().getFullYear());
+  documentStyle = signal(getComputedStyle(document.documentElement));
   username: WritableSignal<string | null> = signal('visitor');
   donutData!: any;
   donutOptions!: any;
@@ -31,7 +43,7 @@ export class DashboardComponent implements OnInit {
         ctx.globalCompositeOperation = 'destination-over';
         ctx.fillStyle =
           options.color ||
-          this.documentStyle.getPropertyValue('--surface-ground');
+          this.documentStyle().getPropertyValue('--surface-ground');
         ctx.fillRect(0, 0, chart.width, chart.height);
         ctx.restore();
       },
@@ -42,27 +54,39 @@ export class DashboardComponent implements OnInit {
   lineOptions!: any;
   guideLineDataForYearlyGoal!: number[];
   portfolioPerformanceData!: number[];
+  portfolioPerformanceDataFinal: WritableSignal<number[]> = signal([]);
 
-  savingsValue!: number;
-  stocksValue!: number;
+  savingsValue = signal(0);
+  stocksValue = signal(0);
   stockChangePercentage!: number;
-  cryptoValue!: number;
+  cryptoValue = signal(1500);
+  totalValue = computed(() => {
+    return this.stocksValue() + this.savingsValue() + this.cryptoValue();
+  });
   investmentsValue!: number;
   propertiesValue!: number;
   miscValue!: number;
-  totalValue!: number;
 
   goalForm!: FormGroup;
 
   skeletonLoading: boolean = true;
 
   // CATEGORIES
-  categories: string[] = ['Savings', 'Investments', 'Property', 'Misc.'];
-  categoriesRoutes: string[] = [
-    '/savings',
-    '/investment-dashboard',
-    '/properties',
-    '/misc',
+  categories: string[] = ['Savings', 'Investments', 'Cypto'];
+  categoriesRoutes: string[] = ['/savings', '/investment-dashboard', '/crypto'];
+  monthsStr: string[] = [
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '10',
+    '11',
+    '12',
   ];
 
   constructor(
@@ -91,14 +115,12 @@ export class DashboardComponent implements OnInit {
     //   this.stocksValue = res.value;
     //   this.totalValue = this.stocksValue; // NOTE temporarily
     // });
-    this.totalValue = 0.0;
     this.stockChangePercentage = 0.0;
     this.getSvc
       .getUserTotalStockValue(this.getSvc.userId)
       .pipe(
         switchMap((res) => {
-          this.stocksValue = res.value;
-          this.totalValue += this.stocksValue;
+          this.stocksValue.set(res.value);
           return of(res);
         }),
         switchMap((res) => {
@@ -112,20 +134,35 @@ export class DashboardComponent implements OnInit {
               const msgRes: MessageResponse = res2[0];
               const yesterdayValue = msgRes.value;
               this.stockChangePercentage =
-                (this.stocksValue - yesterdayValue) / yesterdayValue;
+                (this.stocksValue() - yesterdayValue) / yesterdayValue;
               return res;
             })
           );
         })
       )
       .subscribe();
+    this.getSvc
+      .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
+      .pipe(
+        switchMap((trans: Transaction[]) => {
+          let totalIncome = 0;
+          let totalExpense = 0;
+          trans.map((tran) => {
+            if (tran.type === 'income') {
+              totalIncome += tran.amount;
+            } else {
+              totalExpense += tran.amount;
+            }
+          });
+          this.savingsValue.set(totalIncome - totalExpense);
+          return of(trans);
+        })
+      )
+      .subscribe();
 
     // this.stocksValue = 8000;
     // this.cryptoValue = 1200;
-    this.savingsValue = 8500;
     this.investmentsValue = 6900 + 8000 + 1200;
-    this.propertiesValue = 57500;
-    this.miscValue = 1200;
     // this.totalValue =
     // this.savingsValue +
     // this.investmentsValue +
@@ -149,17 +186,62 @@ export class DashboardComponent implements OnInit {
             })
           );
         }),
-        map((res) => {
+        switchMap((res) => {
           this.portfolioPerformanceData = res;
+          console.log(this.portfolioPerformanceData);
+          return of(res);
+        }),
+        switchMap((res) => {
+          // Create an array of observables
+          const observables: Observable<Transaction[]>[] = this.monthsStr.map(
+            (month) => {
+              return this.getSvc.getUserTransactionBasedOnMonthYear(
+                this.getSvc.userId,
+                month,
+                this.thisYear().toString()
+              );
+            }
+          );
+          // Wait for all observables to complete using forkJoin
+          forkJoin(observables).subscribe((results: Transaction[][]) => {
+            let index = 0;
+            let totalBalancePreviousMonth = 0;
+            results.forEach((transEachMonth: Transaction[]) => {
+              let totalIncomePerMonth = 0;
+              let totalExpensePerMonth = 0;
+              transEachMonth.forEach((tran: Transaction) => {
+                if (tran.type === 'income') {
+                  totalIncomePerMonth += tran.amount;
+                } else {
+                  totalExpensePerMonth += tran.amount;
+                }
+              });
+              const totalBalancePerMonth =
+                totalIncomePerMonth - totalExpensePerMonth;
+              const totalAccumulateBalance =
+                totalBalancePerMonth + totalBalancePreviousMonth;
+              totalBalancePreviousMonth += totalBalancePerMonth;
+              if (totalAccumulateBalance !== 0) {
+                this.portfolioPerformanceData[index] =
+                  this.portfolioPerformanceData[index] + totalAccumulateBalance;
+              }
+              index++;
+            });
+            console.log(this.portfolioPerformanceData);
+            this.portfolioPerformanceDataFinal.set(
+              this.portfolioPerformanceData
+            );
+            this.initiateLineChart();
+          });
+          return of(res);
         })
       )
       .subscribe(() => {
         // console.log('line chart');
+        console.log('final', this.portfolioPerformanceDataFinal());
         this.skeletonLoading = false;
-        this.initiateLineChart();
+        this.initiateDonutChart();
       });
-
-    this.initiateDonutChart();
 
     // this.getSvc.getUserGoal(this.getSvc.userId).then((res) => {
     //   this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
@@ -204,32 +286,25 @@ export class DashboardComponent implements OnInit {
   }
 
   initiateDonutChart() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
+    // const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = this.documentStyle().getPropertyValue('--text-color');
 
     this.donutData = {
       labels: this.categories,
       datasets: [
         {
-          data: [
-            // this.stocksValue,
-            // this.cryptoValue,
-            this.savingsValue,
-            this.investmentsValue,
-            this.propertiesValue,
-            this.miscValue,
-          ],
+          data: [this.savingsValue(), this.stocksValue(), this.cryptoValue()],
           backgroundColor: [
-            documentStyle.getPropertyValue('--blue-500'),
-            documentStyle.getPropertyValue('--yellow-500'),
-            documentStyle.getPropertyValue('--green-500'),
-            documentStyle.getPropertyValue('--purple-500'),
+            this.documentStyle().getPropertyValue('--blue-500'),
+            this.documentStyle().getPropertyValue('--yellow-500'),
+            this.documentStyle().getPropertyValue('--green-500'),
+            this.documentStyle().getPropertyValue('--purple-500'),
           ],
           hoverBackgroundColor: [
-            documentStyle.getPropertyValue('--blue-400'),
-            documentStyle.getPropertyValue('--yellow-400'),
-            documentStyle.getPropertyValue('--green-400'),
-            documentStyle.getPropertyValue('--purple-400'),
+            this.documentStyle().getPropertyValue('--blue-400'),
+            this.documentStyle().getPropertyValue('--yellow-400'),
+            this.documentStyle().getPropertyValue('--green-400'),
+            this.documentStyle().getPropertyValue('--purple-400'),
           ],
         },
       ],
@@ -259,7 +334,7 @@ export class DashboardComponent implements OnInit {
           color: textColor,
         },
         customCanvasBackgroundColor: {
-          color: documentStyle.getPropertyValue('--surface-ground'),
+          color: this.documentStyle().getPropertyValue('--surface-ground'),
         },
       },
 
@@ -274,12 +349,15 @@ export class DashboardComponent implements OnInit {
   }
 
   initiateLineChart() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--primary-color-text');
-    const textColorSecondary = documentStyle.getPropertyValue(
+    // const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = this.documentStyle().getPropertyValue(
+      '--primary-color-text'
+    );
+    const textColorSecondary = this.documentStyle().getPropertyValue(
       '--text-color-secondary'
     );
-    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+    const surfaceBorder =
+      this.documentStyle().getPropertyValue('--surface-border');
 
     this.lineData = {
       labels: [
@@ -300,7 +378,7 @@ export class DashboardComponent implements OnInit {
         {
           label: 'Yearly Goal',
           fill: false,
-          borderColor: documentStyle.getPropertyValue('--blue-500'),
+          borderColor: this.documentStyle().getPropertyValue('--blue-500'),
           // yAxisID: 'y',
           tension: 0.4,
           data: this.guideLineDataForYearlyGoal,
@@ -308,10 +386,10 @@ export class DashboardComponent implements OnInit {
         {
           label: 'Portfolio',
           fill: false,
-          borderColor: documentStyle.getPropertyValue('--green-500'),
+          borderColor: this.documentStyle().getPropertyValue('--green-500'),
           // yAxisID: 'y1',
           tension: 0.4,
-          data: this.portfolioPerformanceData,
+          data: this.portfolioPerformanceDataFinal(),
         },
       ],
     };
@@ -328,7 +406,12 @@ export class DashboardComponent implements OnInit {
           },
         },
         customCanvasBackgroundColor: {
-          color: documentStyle.getPropertyValue('--surface-ground'),
+          color: this.documentStyle().getPropertyValue('--surface-ground'),
+        },
+        title: {
+          display: true,
+          text: `${this.thisYear()} Target Goal`,
+          color: textColorSecondary,
         },
       },
       scales: {

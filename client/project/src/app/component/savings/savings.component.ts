@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Params, Router } from '@angular/router';
 import {
   ConfirmationService,
   MenuItem,
@@ -44,7 +44,7 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./savings.component.css'],
 })
 export class SavingsComponent implements OnInit, OnDestroy {
-  documentStyle = getComputedStyle(document.documentElement);
+  documentStyle = signal(getComputedStyle(document.documentElement));
   breadcrumbItems: MenuItem[] | undefined;
   breadcrumbHome: MenuItem | undefined;
   chartPlugin: {
@@ -59,7 +59,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
         ctx.globalCompositeOperation = 'destination-over';
         ctx.fillStyle =
           options.color ||
-          this.documentStyle.getPropertyValue('--surface-ground');
+          this.documentStyle().getPropertyValue('--surface-ground');
         ctx.fillRect(0, 0, chart.width, chart.height);
         ctx.restore();
       },
@@ -102,12 +102,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
   categoriesData = signal<number[]>([]);
   categoriesColor!: string[];
   categories$!: Subscription;
-  categoriesRoutes: string[] = [
-    '/savings',
-    '/investment-dashboard',
-    '/properties',
-    '/misc',
-  ];
+  categoriesRoutes: string[] = ['income', 'expense'];
   categoriesItems!: categoryOptionItem[];
   typesItems!: SelectItem[];
   clonedTransactions: { [s: string]: Transaction } = {};
@@ -156,6 +151,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
     this.categoriesItems = [];
     this.categoryForm = this.createCategoryForm();
     this.yearForm = this.createYearForm();
+    this.thisYear.set(new Date().getFullYear());
 
     this.categories$ = this.getSvc
       .getUserCategories(this.getSvc.userId)
@@ -501,8 +497,8 @@ export class SavingsComponent implements OnInit, OnDestroy {
   }
 
   initiateDonutChart() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
+    // const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = this.documentStyle().getPropertyValue('--text-color');
 
     this.donutData = {
       labels: this.categories,
@@ -512,16 +508,16 @@ export class SavingsComponent implements OnInit, OnDestroy {
           // backgroundColor: this.categoriesColor,
           // hoverBackgroundColor: this.categoriesColor,
           backgroundColor: [
-            documentStyle.getPropertyValue('--green-400'),
-            documentStyle.getPropertyValue('--red-400'),
-            // documentStyle.getPropertyValue('--purple-500'),
-            // documentStyle.getPropertyValue('--yellow-500'),
+            this.documentStyle().getPropertyValue('--green-400'),
+            this.documentStyle().getPropertyValue('--red-400'),
+            // this.documentStyle().getPropertyValue('--purple-500'),
+            // this.documentStyle().getPropertyValue('--yellow-500'),
           ],
           hoverBackgroundColor: [
-            documentStyle.getPropertyValue('--green-300'),
-            documentStyle.getPropertyValue('--red-300'),
-            // documentStyle.getPropertyValue('--purple-400'),
-            // documentStyle.getPropertyValue('--yellow-400'),
+            this.documentStyle().getPropertyValue('--green-300'),
+            this.documentStyle().getPropertyValue('--red-300'),
+            // this.documentStyle().getPropertyValue('--purple-400'),
+            // this.documentStyle().getPropertyValue('--yellow-400'),
           ],
         },
       ],
@@ -551,26 +547,28 @@ export class SavingsComponent implements OnInit, OnDestroy {
           color: textColor,
         },
         customCanvasBackgroundColor: {
-          color: documentStyle.getPropertyValue('--surface-ground'),
+          color: this.documentStyle().getPropertyValue('--surface-ground'),
         },
       },
       onClick: (event: any, activeElements: any) => {
         if (activeElements.length > 0) {
           const index = activeElements[0].index;
-          // console.log(index);
-          this.router.navigate([this.categoriesRoutes[index]]);
+          console.log(index);
+          const qp: Params = { type: this.categoriesRoutes[index] };
+          this.router.navigate(['/transaction-records'], { queryParams: qp });
         }
       },
     };
   }
 
   initiateBarChart() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
-    const textColorSecondary = documentStyle.getPropertyValue(
+    // const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = this.documentStyle().getPropertyValue('--text-color');
+    const textColorSecondary = this.documentStyle().getPropertyValue(
       '--text-color-secondary'
     );
-    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+    const surfaceBorder =
+      this.documentStyle().getPropertyValue('--surface-border');
 
     this.barChartData = {
       labels: [
@@ -591,19 +589,19 @@ export class SavingsComponent implements OnInit, OnDestroy {
         {
           type: 'bar',
           label: 'Income',
-          backgroundColor: documentStyle.getPropertyValue('--green-300'),
+          backgroundColor: this.documentStyle().getPropertyValue('--green-300'),
           data: this.incomeBarChartData,
         },
         {
           type: 'bar',
           label: 'Expense',
-          backgroundColor: documentStyle.getPropertyValue('--red-300'),
+          backgroundColor: this.documentStyle().getPropertyValue('--red-300'),
           data: this.expenseBarChartData,
         },
         {
           type: 'bar',
           label: 'Balance',
-          backgroundColor: documentStyle.getPropertyValue('--blue-300'),
+          backgroundColor: this.documentStyle().getPropertyValue('--blue-300'),
           data: this.balanceBarChartData,
         },
       ],
@@ -623,7 +621,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
           },
         },
         customCanvasBackgroundColor: {
-          color: documentStyle.getPropertyValue('--surface-ground'),
+          color: this.documentStyle().getPropertyValue('--surface-ground'),
         },
       },
       scales: {

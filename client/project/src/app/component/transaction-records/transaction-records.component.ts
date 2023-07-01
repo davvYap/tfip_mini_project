@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subscription, map } from 'rxjs';
+import { Observable, Subscription, map } from 'rxjs';
 import {
   Categories,
   Column,
@@ -34,6 +34,7 @@ import { ExportService } from 'src/app/service/export.service';
 import { Table } from 'primeng/table';
 import { UpdateService } from 'src/app/service/update.service';
 import { DeleteService } from 'src/app/service/delete.service';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 
 @Component({
   selector: 'app-transaction-records',
@@ -41,7 +42,7 @@ import { DeleteService } from 'src/app/service/delete.service';
   styleUrls: ['./transaction-records.component.css'],
 })
 export class TransactionRecordsComponent implements OnInit, OnDestroy {
-  documentStyle = getComputedStyle(document.documentElement);
+  documentStyle = signal(getComputedStyle(document.documentElement));
   breadcrumbItems: MenuItem[] | undefined;
   breadcrumbHome: MenuItem | undefined;
   startDate: WritableSignal<string> = signal(this.getSvc.getStartDateOfYear());
@@ -70,7 +71,7 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
         ctx.globalCompositeOperation = 'destination-over';
         ctx.fillStyle =
           options.color ||
-          this.documentStyle.getPropertyValue('--surface-ground');
+          this.documentStyle().getPropertyValue('--surface-ground');
         ctx.fillRect(0, 0, chart.width, chart.height);
         ctx.restore();
       },
@@ -114,7 +115,9 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
     private exportSvc: ExportService,
     private updateSvc: UpdateService,
     private confirmationSvc: ConfirmationService,
-    private deleteSvc: DeleteService
+    private deleteSvc: DeleteService,
+    private activatedRoute: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -126,7 +129,11 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
     this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
     this.title.setTitle(`${this.getSvc.applicationName} | Expense Tracker`);
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
-    const documentStyle = getComputedStyle(document.documentElement);
+
+    if (this.activatedRoute.snapshot.queryParams['type']) {
+      this.typeOfRecord.set(this.activatedRoute.snapshot.queryParams['type']);
+    }
+
     this.dateForm = this.createForm();
     this.categories = [];
     this.categoriesItems = [];
@@ -221,9 +228,9 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
             this.totalExpense.set(totalExpense);
             this.categories = ['Income', 'Expense', 'Balance'];
             this.categoriesColor = [
-              documentStyle.getPropertyValue('--green-400'),
-              documentStyle.getPropertyValue('--red-400'),
-              documentStyle.getPropertyValue('--blue-400'),
+              this.documentStyle().getPropertyValue('--green-400'),
+              this.documentStyle().getPropertyValue('--red-400'),
+              this.documentStyle().getPropertyValue('--blue-400'),
             ];
 
             this.categoriesDonutData.set([
@@ -316,7 +323,15 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
     this.typeOfRecord.set(typeOfRecord);
     this.closeDialog();
     console.log(this.typeOfRecord());
-    this.ngOnInit();
+    const qp: Params = { type: this.typeOfRecord() };
+    this.router.navigate(['/transaction-records'], { queryParams: qp });
+
+    setTimeout(() => {
+      this.ngOnInit();
+    }, 100);
+
+    // this.ngOnInit();
+    // location.reload();
   }
 
   sortTransactionByDate(trans: Transaction[]): Transaction[] {
@@ -455,8 +470,8 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
   }
 
   initiateDonutChart() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
+    // const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = this.documentStyle().getPropertyValue('--text-color');
 
     this.donutData = {
       labels: this.categories,
@@ -493,7 +508,7 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
           color: textColor,
         },
         customCanvasBackgroundColor: {
-          color: documentStyle.getPropertyValue('--surface-ground'),
+          color: this.documentStyle().getPropertyValue('--surface-ground'),
         },
       },
       onClick: (event: any, activeElements: any) => {
@@ -507,12 +522,13 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
   }
 
   initiateBarChart() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
-    const textColorSecondary = documentStyle.getPropertyValue(
+    // const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = this.documentStyle().getPropertyValue('--text-color');
+    const textColorSecondary = this.documentStyle().getPropertyValue(
       '--text-color-secondary'
     );
-    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+    const surfaceBorder =
+      this.documentStyle().getPropertyValue('--surface-border');
 
     this.barChartData = {
       labels: this.finalBarChartLabels,
@@ -545,7 +561,7 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
           },
         },
         customCanvasBackgroundColor: {
-          color: documentStyle.getPropertyValue('--surface-ground'),
+          color: this.documentStyle().getPropertyValue('--surface-ground'),
         },
       },
       scales: {

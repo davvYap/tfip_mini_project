@@ -216,7 +216,7 @@
           [rows]="10"
           [showCurrentPageReport]="true"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-          [rowsPerPageOptions]="[10, 20, 50, 100]"
+          [rowsPerPageOptions]="[10, 20, 50, transactions.length]"
         >
           <ng-template pTemplate="header">
             <tr>

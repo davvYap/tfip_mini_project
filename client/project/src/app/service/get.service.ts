@@ -248,6 +248,12 @@ export class GetService {
     );
   }
 
+  getUserAllTransaction(userId: string): Observable<Transaction[]> {
+    return this.http.get<Transaction[]>(
+      `http://localhost:8080/api/${userId}/all_trans`
+    );
+  }
+
   getUserTransaction(userId: string, year: string): Observable<Transaction[]> {
     let qp = new HttpParams().set('year', year);
     return this.http.get<Transaction[]>(

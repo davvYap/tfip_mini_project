@@ -184,6 +184,22 @@ public class TransactionController {
 
 	}
 
+	@GetMapping(path = "/{userId}/all_trans")
+	@ResponseBody
+	public ResponseEntity<String> getUserAllTransactions(@PathVariable String userId) {
+
+		List<Transaction> trans = transSvc.getUserAllTransactionsJdbc(userId);
+
+		JsonArrayBuilder jsArr = Json.createArrayBuilder();
+		trans.stream().forEach((tran) -> {
+			jsArr.add(tran.toJsonObjectBuilder());
+		});
+
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(jsArr.build().toString());
+	}
+
 	@GetMapping(path = "/{userId}/trans_month_year")
 	@ResponseBody
 	public ResponseEntity<String> geTransactionsBasedOnMonthAndYearJdbc(@PathVariable String userId,

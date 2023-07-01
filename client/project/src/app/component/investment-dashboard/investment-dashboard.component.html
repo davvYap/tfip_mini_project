@@ -128,7 +128,7 @@
               [rows]="10"
               [showCurrentPageReport]="true"
               currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-              [rowsPerPageOptions]="[5, 10, 15, 50, 100]"
+              [rowsPerPageOptions]="[5, 10, 15, 50, stockTreeTable.length]"
             >
               <ng-template pTemplate="caption">
                 <div class="d-flex justify-content-between align-items-center">
@@ -279,7 +279,7 @@
               [rows]="5"
               [showCurrentPageReport]="true"
               currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-              [rowsPerPageOptions]="[5, 10, 15, 50, 100]"
+              [rowsPerPageOptions]="[5, 10, 15, 50, stocks.length]"
             >
               <ng-template pTemplate="caption">
                 <div class="d-flex justify-content-between">
@@ -489,7 +489,7 @@
               [showCurrentPageReport]="true"
               [tableStyle]="{ 'min-width': '50rem' }"
               currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-              [rowsPerPageOptions]="[10, 15, 20, 50, 100]"
+              [rowsPerPageOptions]="[10, 15, 20, 50, soldStocks.length]"
               [globalFilterFields]="['symbol', 'name', 'quantity', 'date']"
               [exportHeader]="'customExportHeader'"
             >

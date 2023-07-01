@@ -4,22 +4,58 @@
       <h1>Welcome {{ username() | titlecase }}</h1>
     </div>
     <div class="dashboardcard flex justify-content-center">
-      <p-fieldset
-        inputId="ac1"
-        legend="Summary"
-        [toggleable]="true"
-        class="text-center"
-      >
-        <h3>
-          Total Assets Value
-          <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-          <span *ngIf="totalValue; else loading">
-            {{ totalValue | currency }}
-            <span class="ms-2" [className]="getColor(stockChangePercentage)">
-              ({{ stockChangePercentage | percent : "1.2-2" }})
+      <p-fieldset inputId="ac1" [toggleable]="true" class="text-center">
+        <ng-template pTemplate="header">
+          <div class="d-flex align-items-center">
+            <h3>
+              Total Assets Value
+              <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
+              <span *ngIf="totalValue; else loading">
+                {{ totalValue() | currency }}
+                <span
+                  class="ms-2"
+                  [className]="getColor(stockChangePercentage)"
+                >
+                  ({{ stockChangePercentage | percent : "1.2-2" }})
+                </span>
+              </span>
+            </h3>
+          </div>
+        </ng-template>
+
+        <div>
+          <h4>
+            Savings
+            <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
+            <span *ngIf="stocksValue; else loading">
+              {{ savingsValue() | currency }}
             </span>
-          </span>
-        </h3>
+          </h4>
+        </div>
+        <div>
+          <h4>
+            Stocks
+            <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
+            <span *ngIf="stocksValue; else loading">
+              {{ stocksValue() | currency }}
+              <span class="ms-2" [className]="getColor(stockChangePercentage)">
+                ({{ stockChangePercentage | percent : "1.2-2" }})
+              </span>
+            </span>
+          </h4>
+        </div>
+        <div>
+          <h4>
+            Cypto
+            <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
+            <span *ngIf="stocksValue; else loading">
+              {{ cryptoValue() | currency }}
+              <span class="ms-2" [className]="getColor(0.09)">
+                ({{ 0.09 | percent : "1.2-2" }})
+              </span>
+            </span>
+          </h4>
+        </div>
       </p-fieldset>
     </div>
 

@@ -88,4 +88,13 @@ public class TransactionRepository {
         }
         return trans;
     }
+
+    public List<Transaction> getUserAllTransactionsJdbc(String userId) {
+        List<Transaction> trans = new LinkedList<>();
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_USER_TRANSACTIONS, userId);
+        while (rs.next()) {
+            trans.add(Transaction.convertFromResult(rs));
+        }
+        return trans;
+    }
 }

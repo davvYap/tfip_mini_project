@@ -50,7 +50,8 @@ import { TreeNode } from 'primeng/api';
   styleUrls: ['./investment-dashboard.component.css'],
 })
 export class InvestmentDashboardComponent implements OnInit, OnDestroy {
-  documentStyle = getComputedStyle(document.documentElement);
+  today = new Date();
+  documentStyle = signal(getComputedStyle(document.documentElement));
   breadcrumbItems: MenuItem[] | undefined;
   breadcrumbHome: MenuItem | undefined;
   portfolioExportBtnItems!: MenuItem[];
@@ -69,7 +70,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         ctx.globalCompositeOperation = 'destination-over';
         ctx.fillStyle =
           options.color ||
-          this.documentStyle.getPropertyValue('--surface-ground');
+          this.documentStyle().getPropertyValue('--surface-ground');
         ctx.fillRect(0, 0, chart.width, chart.height);
         ctx.restore();
       },
@@ -455,8 +456,8 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   }
 
   initiateDonutChart() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
+    // const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = this.documentStyle().getPropertyValue('--text-color');
 
     this.donutData = {
       labels: this.stockCountDonutSymbol,
@@ -493,7 +494,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           color: textColor,
         },
         customCanvasBackgroundColor: {
-          color: documentStyle.getPropertyValue('--surface-ground'),
+          color: this.documentStyle().getPropertyValue('--surface-ground'),
         },
       },
     };
@@ -591,12 +592,13 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   }
 
   initiateLineChart() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
-    const textColorSecondary = documentStyle.getPropertyValue(
+    // const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = this.documentStyle().getPropertyValue('--text-color');
+    const textColorSecondary = this.documentStyle().getPropertyValue(
       '--text-color-secondary'
     );
-    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+    const surfaceBorder =
+      this.documentStyle().getPropertyValue('--surface-border');
 
     this.lineData = {
       labels: this.months,
@@ -604,7 +606,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         {
           label: 'S&P 500',
           fill: false,
-          borderColor: documentStyle.getPropertyValue('--yellow-500'),
+          borderColor: this.documentStyle().getPropertyValue('--yellow-500'),
           // yAxisID: 'y',
           tension: 0.4,
           data: this.sp500data,
@@ -612,7 +614,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         {
           label: 'NASDAQ 100',
           fill: false,
-          borderColor: documentStyle.getPropertyValue('--blue-500'),
+          borderColor: this.documentStyle().getPropertyValue('--blue-500'),
           // yAxisID: 'y',
           tension: 0.4,
           data: this.nasdaq100data,
@@ -620,7 +622,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         {
           label: 'Portfolio',
           fill: true,
-          borderColor: documentStyle.getPropertyValue('--green-500'),
+          borderColor: this.documentStyle().getPropertyValue('--green-500'),
           // yAxisID: 'y1',
           tension: 0.4,
           // data: this.userStockData,
@@ -641,7 +643,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           },
         },
         customCanvasBackgroundColor: {
-          color: documentStyle.getPropertyValue('--surface-ground'),
+          color: this.documentStyle().getPropertyValue('--surface-ground'),
         },
       },
       scales: {
@@ -1130,22 +1132,39 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   }
 
   exportExcelPortfolio(): void {
-    this.exportSvc.exportExcel('stocktt', 'portfolio');
+    this.exportSvc.exportExcel(
+      'stocktt',
+      `portfolio_${
+        this.getSvc.userId
+      }_${this.today.getMonth()}${this.today.getFullYear()}`
+    );
   }
 
   exportExcelTransaction(): void {
-    this.exportSvc.exportExcel('dt1', 'transactions');
+    this.exportSvc.exportExcel(
+      'dt1',
+      `transactions_${
+        this.getSvc.userId
+      }_${this.today.getMonth()}${this.today.getFullYear()}`
+    );
   }
 
   exportExcelSoldStocks(): void {
-    this.exportSvc.exportExcel('dt2', 'sold-stock-transactions');
+    this.exportSvc.exportExcel(
+      'dt2',
+      `sold-stock-transactions_${
+        this.getSvc.userId
+      }_${this.today.getMonth()}${this.today.getFullYear()}`
+    );
   }
 
   exportPdfPortfolio(): void {
     this.exportSvc.exportPdf(
       this.portfolioTableExportColumns,
       this.stocksCount,
-      'portfolio'
+      `portfolio_${
+        this.getSvc.userId
+      }_${this.today.getMonth()}${this.today.getFullYear()}`
     );
   }
 
@@ -1153,7 +1172,9 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.exportSvc.exportPdf(
       this.transactionsTableExportColumns,
       this.stocks,
-      'transactions'
+      `transactions_${
+        this.getSvc.userId
+      }_${this.today.getMonth()}${this.today.getFullYear()}`
     );
   }
 
@@ -1166,7 +1187,9 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.exportSvc.exportPdf(
       this.soldTableExportColumns,
       this.soldStocks,
-      'sold-stock-transactions'
+      `sold-stock-transactions_${
+        this.getSvc.userId
+      }_${this.today.getMonth()}${this.today.getFullYear()}`
     );
   }
 
