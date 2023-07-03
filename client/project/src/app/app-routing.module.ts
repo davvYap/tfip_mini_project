@@ -12,7 +12,7 @@ import { TransactionRecordsComponent } from './component/transaction-records/tra
 
 const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [loginGuard] },
-  { path: 'login', component: LoginComponent },
+  { path: 'home', component: LoginComponent },
   {
     path: 'dashboard',
     component: DashboardComponent,

@@ -4,13 +4,13 @@
       <h1>Welcome {{ username() | titlecase }}</h1>
     </div>
     <div class="dashboardcard flex justify-content-center">
-      <p-fieldset inputId="ac1" [toggleable]="true" class="text-center">
+      <p-fieldset [toggleable]="true" class="text-center">
         <ng-template pTemplate="header">
           <div class="d-flex align-items-center">
             <h3>
               Total Assets Value
               <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-              <span *ngIf="totalValue; else loading">
+              <span *ngIf="!skeletonLoading; else loading">
                 {{ totalValue() | currency }}
                 <span
                   class="ms-2"
@@ -27,7 +27,7 @@
           <h4>
             Savings
             <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-            <span *ngIf="stocksValue; else loading">
+            <span *ngIf="savingsValue(); else loading">
               {{ savingsValue() | currency }}
             </span>
           </h4>
@@ -36,7 +36,7 @@
           <h4>
             Stocks
             <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-            <span *ngIf="stocksValue; else loading">
+            <span *ngIf="!skeletonLoading; else loading">
               {{ stocksValue() | currency }}
               <span class="ms-2" [className]="getColor(stockChangePercentage)">
                 ({{ stockChangePercentage | percent : "1.2-2" }})
@@ -48,7 +48,7 @@
           <h4>
             Cypto
             <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-            <span *ngIf="stocksValue; else loading">
+            <span *ngIf="cryptoValue(); else loading">
               {{ cryptoValue() | currency }}
               <span class="ms-2" [className]="getColor(0.09)">
                 ({{ 0.09 | percent : "1.2-2" }})

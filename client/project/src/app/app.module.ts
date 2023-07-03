@@ -20,6 +20,7 @@ import { AddTransactionComponent } from './component/add-transaction/add-transac
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { TransactionRecordsComponent } from './component/transaction-records/transaction-records.component';
 import { DatePipe } from '@angular/common';
+import { AuthenticationComponent } from './component/authentication/authentication.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { DatePipe } from '@angular/common';
     SavingsComponent,
     AddTransactionComponent,
     TransactionRecordsComponent,
+    AuthenticationComponent,
   ],
   imports: [
     BrowserModule,

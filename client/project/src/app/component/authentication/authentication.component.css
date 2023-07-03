@@ -1,0 +1,7 @@
+h2 {
+  font-family: "Righteous", cursive;
+}
+
+.login {
+  border-right: 1px solid var(--surface-border);
+}

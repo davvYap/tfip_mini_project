@@ -33,6 +33,16 @@
                 "inject": false
               },
               {
+                "input": "src/theme/theme-material-indigo-light.css",
+                "bundleName": "md-light-indigo",
+                "inject": false
+              },
+              {
+                "input": "src/theme/theme-material-deep-purple.css",
+                "bundleName": "md-dark-purple",
+                "inject": false
+              },
+              {
                 "input": "src/theme/theme-mdc-dark-deeppurple.css",
                 "bundleName": "mdc-dark-deeppurple",
                 "inject": false

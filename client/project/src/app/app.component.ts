@@ -9,10 +9,9 @@ import {
 import { MenuItem, MessageService, PrimeNGConfig } from 'primeng/api';
 import { ThemeService } from './service/theme.service';
 import { GetService } from './service/get.service';
-import { NavigationEnd, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { LoginStatus } from './models';
 import { PostService } from './service/post.service';
-import { RoutePersistenceService } from './service/route-persistence.service';
 import { Subscription } from 'rxjs';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AddTransactionComponent } from './component/add-transaction/add-transaction.component';
@@ -27,6 +26,7 @@ import {
   faYoutube,
   faTwitter,
 } from '@fortawesome/free-brands-svg-icons';
+import { AuthenticationComponent } from './component/authentication/authentication.component';
 
 @Component({
   selector: 'app-root',
@@ -49,6 +49,8 @@ export class AppComponent implements OnInit {
   themes: string[] = [
     'mira',
     'nano',
+    'md-light-indigo',
+    'md-dark-purple',
     'mdc-dark-deeppurple',
     'viva-dark',
     'lara-dark-teal',
@@ -176,24 +178,34 @@ export class AppComponent implements OnInit {
                   command: () => this.changeTheme(1),
                 },
                 {
-                  label: 'MDC Dark',
+                  label: 'MD Light Indigo',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(2),
                 },
                 {
-                  label: 'Viva Dark',
+                  label: 'MD Dark Purple',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(3),
                 },
                 {
-                  label: 'Lara Dark Teal',
+                  label: 'MDC Dark',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(4),
                 },
                 {
-                  label: 'Arya Green',
+                  label: 'Viva Dark',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(5),
+                },
+                {
+                  label: 'Lara Dark Teal',
+                  icon: 'pi pi-fw pi-images',
+                  command: () => this.changeTheme(6),
+                },
+                {
+                  label: 'Arya Green',
+                  icon: 'pi pi-fw pi-images',
+                  command: () => this.changeTheme(7),
                 },
               ],
             },
@@ -296,7 +308,7 @@ export class AppComponent implements OnInit {
     localStorage.removeItem('isLogin');
     localStorage.removeItem('userId');
     localStorage.removeItem('isLoginRecently');
-    this.router.navigate(['/login']);
+    this.router.navigate(['/home']);
     this.ngOnInit();
   }
 
@@ -310,6 +322,29 @@ export class AppComponent implements OnInit {
       .catch((err) => {
         console.log('user login >>> ', err.isLogin);
       });
+  }
+
+  showLoginDialog() {
+    this.dialogRef = this.dialogSvc.open(AuthenticationComponent, {
+      header: 'Login / Sign Up',
+      width: '50%',
+      // height: '90%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      dismissableMask: true,
+    });
+
+    this.dialogRef.onClose.subscribe((user) => {
+      if (user !== undefined) {
+        console.log('Login');
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Successful',
+          detail: `user authenticated. Welcome ${user}`,
+        });
+      }
+    });
   }
 
   triggerUpdateUsersStockValue() {

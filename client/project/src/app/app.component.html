@@ -6,6 +6,7 @@
       size="large"
       shape="circle"
     ></p-avatar>
+
     <!-- <img src="/assets/images/puzzle.png" height="30" class="mr-2" /> -->
   </ng-template>
   <ng-template #menuItemTempalte let-item>
@@ -29,7 +30,7 @@
 <p-menubar *ngIf="!isLogin()" [model]="items" id="applicationMenubar">
   <ng-template pTemplate="start" class="mx-2">
     <div class="application-name fs-2">
-      <p>AMG</p>
+      <p>am.app</p>
     </div>
   </ng-template>
   <ng-template #menuItemTempalte let-item>
@@ -40,9 +41,9 @@
   </ng-template>
 
   <ng-template pTemplate="end">
-    <p-button styleClass=" p-button-text">
+    <p-button styleClass=" p-button-text" (onClick)="showLoginDialog()">
       <fa-icon [icon]="loginIcon" animation="bounce"></fa-icon>
-      <span class="ms-2 fw-bolder">Login </span>
+      <span class="ms-2 fw-bolder">Login</span>
     </p-button>
     <p-button
       icon="pi pi-user"
@@ -75,8 +76,8 @@
       </ul>
     </div>
 
-    <div class="row ps-3">
-      AMG Copyright © 2023 TFIP - All rights reserved || Designed By: David
+    <div class="row ps-4">
+      Copyright © 2023 TFIP - All rights reserved || Designed By: David
     </div>
   </div>
 </footer>

@@ -42,7 +42,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    this.title.setTitle(`${this.getSvc.applicationName}| Home`);
+    this.title.setTitle(`${this.getSvc.applicationName} | Home`);
     this.primengConfig.ripple = true;
     this.getSvc.isLogin = false;
     this.loginTitle = 'Login';

@@ -16,7 +16,7 @@ import {
   Transaction,
   UserSettings,
 } from '../models';
-import { Observable, Subject, last, lastValueFrom } from 'rxjs';
+import { Observable, Subject, lastValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +29,7 @@ export class GetService {
   isLogin$ = new Subject<boolean>();
   totalStockValue!: number;
   passStock!: PurchasedStock;
-  applicationName: string = 'AMG';
+  applicationName: string = 'ap.app';
 
   constructor(private http: HttpClient) {}
 
@@ -299,6 +299,28 @@ export class GetService {
     )
       .toString()
       .padStart(2, '0')}-${startOfYear.getDate().toString().padStart(2, '0')}`;
+    return formattedDate;
+  }
+
+  getStartDateByYear(year: number): string {
+    const startDate = new Date(year, 0, 1);
+
+    const formattedDate = `${startDate.getFullYear()}-${(
+      startDate.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}-${startDate.getDate().toString().padStart(2, '0')}`;
+    return formattedDate;
+  }
+
+  getEndDateByYear(year: number): string {
+    const month = 11; // 0 is january
+    const firstDayOfNextMonth = new Date(year, month + 1, 1);
+    const endDate = new Date(firstDayOfNextMonth.getTime() - 1);
+
+    const formattedDate = `${endDate.getFullYear()}-${(endDate.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${endDate.getDate().toString().padStart(2, '0')}`;
     return formattedDate;
   }
 

@@ -45,9 +45,12 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
   documentStyle = signal(getComputedStyle(document.documentElement));
   breadcrumbItems: MenuItem[] | undefined;
   breadcrumbHome: MenuItem | undefined;
-  startDate: WritableSignal<string> = signal(this.getSvc.getStartDateOfYear());
+  thisYear = signal(new Date().getFullYear());
+  startDate: WritableSignal<string> = signal(
+    this.getSvc.getStartDateByYear(this.thisYear())
+  );
   endDate: WritableSignal<string> = signal(
-    new Date().toISOString().split('T')[0]
+    this.getSvc.getEndDateByYear(this.thisYear())
   );
   typeOfRecord: WritableSignal<string> = signal('all');
   totalIncome: WritableSignal<number> = signal(0);
@@ -132,6 +135,11 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
 
     if (this.activatedRoute.snapshot.queryParams['type']) {
       this.typeOfRecord.set(this.activatedRoute.snapshot.queryParams['type']);
+    }
+    if (this.activatedRoute.snapshot.queryParams['year']) {
+      this.thisYear.set(this.activatedRoute.snapshot.queryParams['year']);
+      this.startDate.set(this.getSvc.getStartDateByYear(this.thisYear()));
+      this.endDate.set(this.getSvc.getEndDateByYear(this.thisYear()));
     }
 
     this.dateForm = this.createForm();
@@ -562,6 +570,12 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
         },
         customCanvasBackgroundColor: {
           color: this.documentStyle().getPropertyValue('--surface-ground'),
+        },
+        title: {
+          display: true,
+          text: `${this.thisYear()} ${this.typeOfRecord().toUpperCase()} CATEGORIES`,
+          color: textColorSecondary,
+          position: 'bottom',
         },
       },
       scales: {

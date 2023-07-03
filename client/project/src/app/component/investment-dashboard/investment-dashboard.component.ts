@@ -645,6 +645,12 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         customCanvasBackgroundColor: {
           color: this.documentStyle().getPropertyValue('--surface-ground'),
         },
+        title: {
+          display: true,
+          text: `Performance Benchmark`,
+          color: textColorSecondary,
+          position: 'bottom',
+        },
       },
       scales: {
         x: {

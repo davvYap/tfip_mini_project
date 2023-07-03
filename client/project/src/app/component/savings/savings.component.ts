@@ -65,7 +65,8 @@ export class SavingsComponent implements OnInit, OnDestroy {
       },
     },
   ];
-  thisYear: WritableSignal<number> = signal(2023);
+  thisYear: WritableSignal<number> = signal(new Date().getFullYear());
+
   totalIncome: WritableSignal<number> = signal(0);
   totalExpense: WritableSignal<number> = signal(0);
   totalBalance: Signal<number> = computed(() => {
@@ -151,7 +152,6 @@ export class SavingsComponent implements OnInit, OnDestroy {
     this.categoriesItems = [];
     this.categoryForm = this.createCategoryForm();
     this.yearForm = this.createYearForm();
-    this.thisYear.set(new Date().getFullYear());
 
     this.categories$ = this.getSvc
       .getUserCategories(this.getSvc.userId)
@@ -491,9 +491,12 @@ export class SavingsComponent implements OnInit, OnDestroy {
 
   getTransaction() {
     const year: number = this.yearForm.get('year')?.value;
+    console.log('year', year);
     this.thisYear.set(year);
     this.closeDialog();
     this.ngOnInit();
+    // setTimeout(() => {
+    // }, 2000);
   }
 
   initiateDonutChart() {
@@ -554,7 +557,10 @@ export class SavingsComponent implements OnInit, OnDestroy {
         if (activeElements.length > 0) {
           const index = activeElements[0].index;
           console.log(index);
-          const qp: Params = { type: this.categoriesRoutes[index] };
+          const qp: Params = {
+            type: this.categoriesRoutes[index],
+            year: this.thisYear(),
+          };
           this.router.navigate(['/transaction-records'], { queryParams: qp });
         }
       },
@@ -622,6 +628,12 @@ export class SavingsComponent implements OnInit, OnDestroy {
         },
         customCanvasBackgroundColor: {
           color: this.documentStyle().getPropertyValue('--surface-ground'),
+        },
+        title: {
+          display: true,
+          text: `${this.thisYear()} METADATA`,
+          color: textColorSecondary,
+          position: 'bottom',
         },
       },
       scales: {

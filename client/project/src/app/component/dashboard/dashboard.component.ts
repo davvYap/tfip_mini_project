@@ -412,6 +412,7 @@ export class DashboardComponent implements OnInit {
           display: true,
           text: `${this.thisYear()} Target Goal`,
           color: textColorSecondary,
+          position: 'bottom',
         },
       },
       scales: {
