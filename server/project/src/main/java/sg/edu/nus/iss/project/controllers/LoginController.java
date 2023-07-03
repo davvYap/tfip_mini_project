@@ -15,6 +15,7 @@ import jakarta.json.Json;
 import jakarta.servlet.http.HttpSession;
 import sg.edu.nus.iss.project.models.User;
 import sg.edu.nus.iss.project.services.LoginService;
+import sg.edu.nus.iss.project.utils.gmail.GMailer;
 
 @Controller
 @CrossOrigin(origins = { "http://localhost:4200" }, allowCredentials = "true", allowedHeaders = "*")
@@ -27,7 +28,7 @@ public class LoginController {
 	@GetMapping(path = "/login")
 	@ResponseBody
 	public ResponseEntity<String> verifyLogin(@RequestParam String username, @RequestParam String password,
-			HttpSession session) {
+			HttpSession session) throws Exception {
 
 		User user = loginSvc.verifyLogin(username, password);
 		if (user == null) {
@@ -44,6 +45,17 @@ public class LoginController {
 		session.setAttribute("user", user);
 		// testSessionId(session);
 		System.out.println("Login...");
+		GMailer gmailer = new GMailer();
+		gmailer.sendMail("Sign Up Successful", """
+				Dear %s,
+
+				Thank you for signing up to Assets Management Application ! Begin your
+				journey with us.
+
+				Best Regards,
+				am.app Developer Team
+				""".formatted(username));
+
 		return ResponseEntity.status(HttpStatus.OK)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(Json.createObjectBuilder()

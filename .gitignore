@@ -2,3 +2,5 @@
 *.sql
 *.docx
 *.pdf
+server/project/src/main/resources/*.json
+server/project/tokens
