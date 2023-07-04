@@ -153,6 +153,13 @@ export class SavingsComponent implements OnInit, OnDestroy {
     this.categoryForm = this.createCategoryForm();
     this.yearForm = this.createYearForm();
 
+    this.themeSvc.switchTheme$.subscribe((res) => {
+      if (res) {
+        this.initiateBarChartData();
+        this.initiateDonutChartData();
+      }
+    });
+
     this.categories$ = this.getSvc
       .getUserCategories(this.getSvc.userId)
       .pipe(
@@ -204,82 +211,16 @@ export class SavingsComponent implements OnInit, OnDestroy {
       dataKey: col.field,
     }));
 
+    // NOTE Initiate transaction donut chart
     this.transactions = [];
-    this.transactions$ = this.getSvc
-      .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
-      .pipe(
-        map((trans: Transaction[]) => {
-          trans.map((tran) => {
-            // console.log(tran);
-            this.transactions.push(tran);
-          });
-          return trans;
-        }),
-        map((trans: Transaction[]) => {
-          let totalIncome: number = 0.0;
-          let totalExpense: number = 0.0;
+    this.initiateDonutChartData();
 
-          trans.map((tran) => {
-            if (tran.type === 'income') {
-              totalIncome += tran.amount;
-            } else {
-              totalExpense += tran.amount;
-            }
-          });
-          this.totalIncome.set(totalIncome);
-          this.totalExpense.set(totalExpense);
-          this.categoriesData.set([totalIncome, totalExpense]);
-        })
-      )
-      .subscribe(() => {
-        this.transactionloading = false;
-        let transArr = [...this.transactions];
-        //  reason of doing that is because the paginator for p-table unable to track the entries if we insert the transaction one by one
-        // we have to assign the transactions one shot
-        this.transactions = this.sortTransactionByDate(transArr);
-        this.initiateDonutChart();
-      });
-
+    // NOTE Initiate bar chart
     this.incomeBarChartData = [];
     this.expenseBarChartData = [];
     this.balanceBarChartData = [];
     // const thisYear: number = new Date().getFullYear();
-
-    // Create an array of observables
-    const observables: Observable<Transaction[]>[] = this.monthsStr.map(
-      (month) => {
-        return this.getSvc.getUserTransactionBasedOnMonthYear(
-          this.getSvc.userId,
-          month,
-          this.thisYear().toString()
-        );
-      }
-    );
-
-    // Wait for all observables to complete using forkJoin
-    forkJoin(observables).subscribe((results: Transaction[][]) => {
-      results.forEach((trans: Transaction[]) => {
-        let totalIncomePerMonth = 0;
-        let totalExpensePerMonth = 0;
-
-        trans.forEach((tran: Transaction) => {
-          if (tran.type === 'income') {
-            totalIncomePerMonth += tran.amount;
-          } else {
-            totalExpensePerMonth += tran.amount;
-          }
-        });
-
-        this.incomeBarChartData.push(totalIncomePerMonth);
-        this.expenseBarChartData.push(totalExpensePerMonth);
-        this.balanceBarChartData.push(
-          totalIncomePerMonth - totalExpensePerMonth
-        );
-      });
-
-      this.initiateBarChart();
-      this.skeletonLoading = false;
-    });
+    this.initiateBarChartData();
   }
 
   ngOnDestroy(): void {
@@ -499,6 +440,43 @@ export class SavingsComponent implements OnInit, OnDestroy {
     // }, 2000);
   }
 
+  initiateDonutChartData() {
+    this.transactions$ = this.getSvc
+      .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
+      .pipe(
+        map((trans: Transaction[]) => {
+          trans.map((tran) => {
+            // console.log(tran);
+            this.transactions.push(tran);
+          });
+          return trans;
+        }),
+        map((trans: Transaction[]) => {
+          let totalIncome: number = 0.0;
+          let totalExpense: number = 0.0;
+
+          trans.map((tran) => {
+            if (tran.type === 'income') {
+              totalIncome += tran.amount;
+            } else {
+              totalExpense += tran.amount;
+            }
+          });
+          this.totalIncome.set(totalIncome);
+          this.totalExpense.set(totalExpense);
+          this.categoriesData.set([totalIncome, totalExpense]);
+        })
+      )
+      .subscribe(() => {
+        this.transactionloading = false;
+        let transArr = [...this.transactions];
+        //  reason of doing that is because the paginator for p-table unable to track the entries if we insert the transaction one by one
+        // we have to assign the transactions one shot
+        this.transactions = this.sortTransactionByDate(transArr);
+        this.initiateDonutChart();
+      });
+  }
+
   initiateDonutChart() {
     // const documentStyle = getComputedStyle(document.documentElement);
     const textColor = this.documentStyle().getPropertyValue('--text-color');
@@ -565,6 +543,44 @@ export class SavingsComponent implements OnInit, OnDestroy {
         }
       },
     };
+  }
+
+  initiateBarChartData() {
+    // Create an array of observables
+    const observables: Observable<Transaction[]>[] = this.monthsStr.map(
+      (month) => {
+        return this.getSvc.getUserTransactionBasedOnMonthYear(
+          this.getSvc.userId,
+          month,
+          this.thisYear().toString()
+        );
+      }
+    );
+
+    // Wait for all observables to complete using forkJoin
+    forkJoin(observables).subscribe((results: Transaction[][]) => {
+      results.forEach((trans: Transaction[]) => {
+        let totalIncomePerMonth = 0;
+        let totalExpensePerMonth = 0;
+
+        trans.forEach((tran: Transaction) => {
+          if (tran.type === 'income') {
+            totalIncomePerMonth += tran.amount;
+          } else {
+            totalExpensePerMonth += tran.amount;
+          }
+        });
+
+        this.incomeBarChartData.push(totalIncomePerMonth);
+        this.expenseBarChartData.push(totalExpensePerMonth);
+        this.balanceBarChartData.push(
+          totalIncomePerMonth - totalExpensePerMonth
+        );
+      });
+
+      this.initiateBarChart();
+      this.skeletonLoading = false;
+    });
   }
 
   initiateBarChart() {

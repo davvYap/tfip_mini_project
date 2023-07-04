@@ -1,67 +1,103 @@
 <div class="container">
   <div class="row justify-content-center align-items-center">
-    <div class="col-6">
-      <section class="login">
-        <div
-          class="d-flex justify-content-center align-items-center m-3 text-center"
-        >
-          <img [src]="imgSrc" [className]="imgClass" alt="" srcset="" />
-        </div>
+    <div class="col-10">
+      <fieldset>
+        <legend>Or</legend>
+        <section class="login">
+          <div
+            class="d-flex justify-content-center align-items-center m-3 text-center"
+          >
+            <img [src]="imgSrc" [className]="imgClass" alt="" srcset="" />
+          </div>
 
-        <div
-          class="d-flex justify-content-center align-items-center m-3 text-center"
-        >
-          <h2>{{ loginTitle }}</h2>
-        </div>
+          <div
+            class="d-flex justify-content-center align-items-center m-3 text-center"
+          >
+            <h2>{{ loginTitle }}</h2>
+          </div>
 
-        <div
-          class="d-flex justify-content-center align-items-center m-3 text-center"
-        >
-          <form [formGroup]="form" (submit)="login()">
-            <div class="p-inputgroup my-3">
-              <span class="p-inputgroup-addon">
-                <i class="pi pi-user"></i>
-              </span>
-              <input
-                [style]="{ width: '100%' }"
-                pInputText
-                placeholder="Username"
-                formControlName="username"
-                (click)="resetLoginPage()"
-              />
-            </div>
-            <div>
-              <p-password
-                [style]="{ width: '100%' }"
-                [inputStyle]="{ width: '100%' }"
-                id="pwd"
-                formControlName="password"
-                placeholder="Password"
-                [toggleMask]="true"
-              ></p-password>
-            </div>
+          <div
+            class="d-flex justify-content-center align-items-center m-3 text-center"
+          >
+            <form [formGroup]="form" (submit)="login()">
+              <div class="p-inputgroup my-3">
+                <span class="p-inputgroup-addon">
+                  <i class="pi pi-user"></i>
+                </span>
+                <input
+                  [style]="{ width: '100%' }"
+                  pInputText
+                  placeholder="Username"
+                  formControlName="username"
+                  (click)="resetLoginPage()"
+                />
+              </div>
+              <div>
+                <div class="p-inputgroup">
+                  <span class="p-inputgroup-addon">
+                    <fa-icon [icon]="passwordIcon"></fa-icon>
+                  </span>
+                  <p-password
+                    [style]="{ width: '100%' }"
+                    [inputStyle]="{ width: '100%' }"
+                    id="pwd"
+                    formControlName="password"
+                    placeholder="Password"
+                    [toggleMask]="true"
+                    [feedback]="false"
+                  ></p-password>
+                </div>
+              </div>
 
-            <button
-              class="mt-3 ms-3"
-              type="submit"
-              pButton
-              [disabled]="form.invalid"
-            >
-              Login
-            </button>
-          </form>
-        </div>
-      </section>
+              <div class="d-flex flex-row-reverse align-items-center">
+                <p-button
+                  label="Forget Password?"
+                  styleClass="p-button-info p-button-text"
+                ></p-button>
+              </div>
+
+              <p-button
+                class="mt-3"
+                styleClass="p-button-outlined"
+                [disabled]="form.invalid"
+                type="submit"
+              >
+                Log In
+              </p-button>
+            </form>
+          </div>
+        </section>
+      </fieldset>
     </div>
 
-    <div class="col-6">
-      <section class="sign-up">
-        <div
-          class="d-flex justify-content-center align-items-center m-3 text-center"
-        >
-          <h2>Sign Up</h2>
-        </div>
-      </section>
+    <div class="row justify-content-center align-items-center mt-3 mb-3">
+      <div class="col-10">
+        <section class="sign-up">
+          <div class="d-flex justify-content-center align-items-center">
+            <p-button
+              type="button"
+              styleClass="p-button-help"
+              (onClick)="showSignUpDialog()"
+            >
+              Sign Up
+            </p-button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="row justify-content-center align-items-center mt-3">
+      <div class="col-10">
+        <section class="mobile-app">
+          <div class="d-flex justify-content-center align-items-center">
+            Download the app for full mobile experience
+          </div>
+          <div class="d-flex justify-content-center align-items-center">
+            <img alt="app-store" src="/assets/images/apple.png" />
+            <img alt="app-store" src="/assets/images/google.png" />
+          </div>
+        </section>
+      </div>
     </div>
   </div>
 </div>

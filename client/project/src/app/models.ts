@@ -1,7 +1,18 @@
+export interface SignUp {
+  firstname: string;
+  lastname: string;
+  username: string;
+  password: string;
+  email: string;
+  profileIcon: string;
+}
+
 export interface LoginStatus {
   isLogin: boolean;
   userId: string;
   username: string;
+  firstname: string;
+  lastname: string;
 }
 
 export interface Stock {

@@ -14,6 +14,9 @@ import jakarta.json.JsonReader;
 public class User {
     private String userId;
     private String username;
+    private String firstname;
+    private String lastname;
+    private byte[] profilePic;
 
     public User() {
     }
@@ -21,6 +24,14 @@ public class User {
     public User(String userId, String username) {
         this.userId = userId;
         this.username = username;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getUsername() {
@@ -31,8 +42,37 @@ public class User {
         this.username = username;
     }
 
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+
+    public byte[] getProfilePic() {
+        return profilePic;
+    }
+
+    public void setProfilePic(byte[] profilePic) {
+        this.profilePic = profilePic;
+    }
+
     public static User convertFromResult(SqlRowSet rs) {
-        return new User(rs.getString("user_id"), rs.getString("username"));
+        User user = new User();
+        user.setUserId(rs.getString("user_id"));
+        user.setUsername(rs.getString("username"));
+        user.setFirstname(rs.getString("firstname"));
+        user.setLastname(rs.getString("lastname"));
+        return user;
     }
 
     public Document toDocument() {
@@ -40,7 +80,6 @@ public class User {
         doc.append("userId", userId);
         doc.append("username", username);
         return doc;
-
     }
 
     public static User convertFromJsonString(String js) throws IOException {
@@ -56,14 +95,6 @@ public class User {
             }
         }
         return us;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
 }

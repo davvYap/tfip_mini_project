@@ -1,8 +1,10 @@
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { GetService } from 'src/app/service/get.service';
+import { SignUpComponent } from '../sign-up/sign-up.component';
+import { faKey } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-authentication',
@@ -10,6 +12,7 @@ import { GetService } from 'src/app/service/get.service';
   styleUrls: ['./authentication.component.css'],
 })
 export class AuthenticationComponent implements OnInit {
+  passwordIcon = faKey;
   panelSizes: WritableSignal<number[]> = signal([]);
   imgSrc: string = '/assets/images/user2.png';
   imgClass: string = 'user-img';
@@ -20,12 +23,13 @@ export class AuthenticationComponent implements OnInit {
     private fb: FormBuilder,
     private getSvc: GetService,
     private router: Router,
-    public dialogRef: DynamicDialogRef
+    public dialogRef: DynamicDialogRef,
+    private dialogSvc: DialogService
   ) {}
 
   ngOnInit(): void {
     this.panelSizes.set([90, 10]);
-    this.loginTitle = 'Login';
+    this.loginTitle = 'Welcome to am.app';
     this.form = this.createForm();
   }
 
@@ -45,10 +49,14 @@ export class AuthenticationComponent implements OnInit {
         this.getSvc.isLogin = res.isLogin;
         this.getSvc.userId = res.userId;
         this.getSvc.username = res.username;
+        this.getSvc.firstname = res.firstname;
+        this.getSvc.lastname = res.lastname;
         this.getSvc.isLogin$.next(true);
         localStorage.setItem('isLogin', 'true');
         localStorage.setItem('userId', res.userId);
         localStorage.setItem('username', res.username);
+        localStorage.setItem('firstname', res.firstname);
+        localStorage.setItem('lastname', res.lastname);
         this.router.navigate(['/dashboard']);
         this.dialogRef.close(res.username);
       })
@@ -61,6 +69,19 @@ export class AuthenticationComponent implements OnInit {
 
   resetLoginPage() {
     this.imgSrc = '/assets/images/user2.png';
-    this.loginTitle = 'Login';
+    this.loginTitle = 'Welcome to am.app';
+  }
+
+  showSignUpDialog() {
+    this.dialogRef.close();
+    this.dialogRef = this.dialogSvc.open(SignUpComponent, {
+      // header: 'Login',
+      width: '50%',
+      // height: '90%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      dismissableMask: true,
+    });
   }
 }

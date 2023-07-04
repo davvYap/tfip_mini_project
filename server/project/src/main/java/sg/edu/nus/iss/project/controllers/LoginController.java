@@ -39,22 +39,24 @@ public class LoginController {
 							.add("isLogin", false)
 							.add("userId", "guest000")
 							.add("username", "guest")
+							.add("firstname", "guest")
+							.add("lastname", "")
 							.build().toString());
 		}
 		session.setAttribute("isLogin", true);
 		session.setAttribute("user", user);
 		// testSessionId(session);
 		System.out.println("Login...");
-		GMailer gmailer = new GMailer();
-		gmailer.sendMail("Sign Up Successful", """
-				Dear %s,
+		// GMailer gmailer = new GMailer();
+		// gmailer.sendMail("Sign Up Successful", """
+		// Dear %s,
 
-				Thank you for signing up to Assets Management Application ! Begin your
-				journey with us.
+		// Thank you for signing up to Assets Management Application ! Begin your
+		// journey with us.
 
-				Best Regards,
-				am.app Developer Team
-				""".formatted(username));
+		// Best Regards,
+		// am.app Developer Team
+		// """.formatted(username));
 
 		return ResponseEntity.status(HttpStatus.OK)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -62,6 +64,8 @@ public class LoginController {
 						.add("isLogin", true)
 						.add("userId", user.getUserId())
 						.add("username", user.getUsername())
+						.add("firstname", user.getFirstname())
+						.add("lastname", user.getLastname())
 						.build().toString());
 	}
 

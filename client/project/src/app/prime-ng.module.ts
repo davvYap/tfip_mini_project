@@ -35,6 +35,8 @@ import { PanelModule } from 'primeng/panel';
 import { TreeTableModule } from 'primeng/treetable';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { SplitButtonModule } from 'primeng/splitbutton';
+import { StepsModule } from 'primeng/steps';
+import { FileUploadModule } from 'primeng/fileupload';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -73,6 +75,8 @@ const primeModules: any[] = [
   TreeTableModule,
   BreadcrumbModule,
   SplitButtonModule,
+  StepsModule,
+  FileUploadModule,
 ];
 
 @NgModule({

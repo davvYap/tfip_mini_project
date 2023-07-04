@@ -1,0 +1,243 @@
+<div class="container">
+  <p-steps
+    class="m-3"
+    [model]="pageItems"
+    [readonly]="false"
+    [activeIndex]="activeIndex"
+    (activeIndexChange)="onActiveIndexChange($event)"
+  ></p-steps>
+  <div class="row justify-content-center align-items-center mt-3">
+    <form [formGroup]="form" enctype="multipart/form-data">
+      <section id="pageOne">
+        <div class="d-flex justify-content-center align-items-center m-1">
+          <div class="d-flex flex-column m-2" [style]="{ width: '39%' }">
+            <label htmlFor="firstname" class="mb-2">First Name</label>
+            <input
+              pInputText
+              id="firstname"
+              formControlName="firstname"
+              autofocus
+              [style]="{ width: '100%' }"
+            />
+          </div>
+          <div class="m-2 d-flex flex-column" [style]="{ width: '39%' }">
+            <label htmlFor="lastname" class="mb-2">Last Name</label>
+            <input
+              pInputText
+              id="lastname"
+              formControlName="lastname"
+              autofocus
+              [style]="{ width: '100%' }"
+            />
+          </div>
+        </div>
+        <div class="d-flex flex-column justify-content-center m-3">
+          <div
+            class="text-start mb-2"
+            [style]="{ width: '80%', margin: 'auto' }"
+          >
+            <label htmlFor="email">E-mail</label>
+          </div>
+
+          <div class="p-inputgroup" [style]="{ width: '80%', margin: 'auto' }">
+            <span class="p-inputgroup-addon">
+              <fa-icon [icon]="emailIcon"></fa-icon>
+            </span>
+            <input
+              pInputText
+              id="email"
+              formControlName="email"
+              autofocus
+              [style]="{ width: '80%', margin: 'auto' }"
+              placeholder="Please enter valid e-mail address for validation"
+            />
+          </div>
+        </div>
+        <div class="d-flex flex-column justify-content-center m-3">
+          <div
+            class="text-start mb-2"
+            [style]="{ width: '80%', margin: 'auto' }"
+          >
+            <label htmlFor="username">Username</label>
+          </div>
+          <div class="p-inputgroup" [style]="{ width: '80%', margin: 'auto' }">
+            <span class="p-inputgroup-addon">
+              <i class="pi pi-user"></i>
+            </span>
+            <input
+              pInputText
+              id="username"
+              formControlName="username"
+              autofocus
+              placeholder="4 - 20 characters"
+            />
+          </div>
+        </div>
+        <div class="d-flex flex-column justify-content-center m-3">
+          <div
+            class="text-start mb-2"
+            [style]="{ width: '80%', margin: 'auto' }"
+          >
+            <label htmlFor="password">Password</label>
+          </div>
+          <div class="p-inputgroup" [style]="{ width: '80%', margin: 'auto' }">
+            <span class="p-inputgroup-addon">
+              <fa-icon [icon]="passwordIcon"></fa-icon>
+            </span>
+            <p-password
+              formControlName="password"
+              [style]="{ width: '100%' }"
+              [inputStyle]="{ width: '100%' }"
+              [toggleMask]="true"
+            >
+              <ng-template pTemplate="header">
+                <!-- <h6>Enter a password</h6> -->
+              </ng-template>
+              <ng-template pTemplate="footer">
+                <p-divider></p-divider>
+                <p class="mt-2">Suggestions</p>
+                <ul class="pl-2 ml-2 mt-0" style="line-height: 1.5">
+                  <li>At least one lowercase</li>
+                  <li>At least one uppercase</li>
+                  <li>At least one numeric</li>
+                  <li>Minimum 8 characters</li>
+                </ul>
+              </ng-template>
+            </p-password>
+          </div>
+        </div>
+
+        <div class="d-flex flex-column justify-content-center m-3">
+          <div
+            class="text-start mb-2"
+            [style]="{ width: '80%', margin: 'auto' }"
+          >
+            <label htmlFor="confirmPassword">Confirm Your Password</label>
+          </div>
+          <div class="p-inputgroup" [style]="{ width: '80%', margin: 'auto' }">
+            <span class="p-inputgroup-addon">
+              <fa-icon [icon]="confirmPasswordIcon"></fa-icon>
+            </span>
+            <p-password
+              formControlName="confirmPassword"
+              [style]="{ width: '100%' }"
+              [inputStyle]="{ width: '100%' }"
+              [toggleMask]="true"
+              [feedback]="false"
+            >
+            </p-password>
+          </div>
+          <div
+            *ngIf="differentPassword()"
+            [style]="{ width: '80%', margin: 'auto' }"
+          >
+            <code>Password must be similar</code>
+          </div>
+        </div>
+
+        <div class="d-flex flex-row-reverse m-4">
+          <div>
+            <button
+              pButton
+              pRipple
+              label="Next"
+              icon="pi pi-arrow-right"
+              class="p-button-text"
+              (click)="nextPage()"
+              [disabled]="invalidForm()"
+            ></button>
+          </div>
+        </div>
+      </section>
+
+      <section id="pageTwo">
+        <p-fileUpload
+          name="demo[]"
+          url="https://www.primefaces.org/cdn/api/upload.php"
+          (onUpload)="onUpload($event)"
+          [multiple]="false"
+          accept="image/*"
+          [maxFileSize]="1000000"
+        >
+          <ng-template pTemplate="content">
+            <!-- <ul *ngIf="uploadedFiles.length">
+              <li *ngFor="let file of uploadedFiles">
+                {{ file.name }} - {{ file.size }} bytes
+              </li>
+            </ul> -->
+            <div
+              *ngIf="uploadedFile"
+              class="d-flex justify-content-start align-items-center"
+            >
+              <p-avatar
+                [image]="imageUrl"
+                size="xlarge"
+                shape="circle"
+              ></p-avatar>
+              <span class="ms-2">
+                {{ uploadedFile.name }} - {{ uploadedFile.size }} bytes
+              </span>
+            </div>
+          </ng-template>
+        </p-fileUpload>
+      </section>
+    </form>
+    <section id="pageThree">
+      <div class="d-flex justify-content-center align-items-center">
+        <div *ngIf="newUser" [style]="{ width: '80%' }">
+          <h3>Confirmation</h3>
+          <table [style]="{ width: '80%' }">
+            <tr>
+              <td>Profile Icon:</td>
+              <td>
+                <span
+                  ><p-avatar
+                    [image]="imageUrl"
+                    size="xlarge"
+                    shape="circle"
+                  ></p-avatar
+                ></span>
+              </td>
+            </tr>
+            <tr>
+              <td>Firstname:</td>
+              <td>
+                {{ newUser.firstname }}
+              </td>
+            </tr>
+            <tr>
+              <td>Lastname:</td>
+              <td>
+                {{ newUser.lastname }}
+              </td>
+            </tr>
+            <tr>
+              <td>E-mail:</td>
+              <td>
+                {{ newUser.email }}
+              </td>
+            </tr>
+            <tr>
+              <td>Username:</td>
+              <td>
+                {{ newUser.username }}
+              </td>
+            </tr>
+            <tr>
+              <td>Password:</td>
+              <td>
+                {{ newUser.password }}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="d-flex flex-row-reverse align-items-center">
+        <p-button styleClass=" p-button-text">
+          <fa-icon [icon]="loginIcon"></fa-icon>
+          <span class="ms-2 fw-bolder">Sign Up</span>
+        </p-button>
+      </div>
+    </section>
+  </div>
+</div>

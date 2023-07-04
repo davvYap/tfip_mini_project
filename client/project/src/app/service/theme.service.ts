@@ -7,6 +7,8 @@ import { Subject } from 'rxjs';
   providedIn: 'root',
 })
 export class ThemeService {
+  switchTheme$ = new Subject<boolean>();
+
   constructor(@Inject(DOCUMENT) private document: Document) {}
 
   switchTheme(theme: string) {

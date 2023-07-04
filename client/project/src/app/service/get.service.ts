@@ -26,6 +26,8 @@ export class GetService {
   isLogout: boolean = false;
   userId!: string;
   username!: string;
+  firstname!: string;
+  lastname!: string;
   isLogin$ = new Subject<boolean>();
   totalStockValue!: number;
   passStock!: PurchasedStock;

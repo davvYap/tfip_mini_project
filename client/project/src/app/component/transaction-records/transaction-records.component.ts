@@ -149,6 +149,10 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
     this.finalBarChartData = [];
     this.finalBarChartLabels = [];
 
+    this.themeSvc.switchTheme$.subscribe((res) => {
+      if (res) this.initiateChartsData();
+    });
+
     this.categories$ = this.getSvc
       .getUserCategories(this.getSvc.userId)
       .pipe(
@@ -202,97 +206,10 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
       dataKey: col.field,
     }));
 
+    // NOTE Initiate donut and bar chart
     // get user transactions
     this.transactions = [];
-    this.transactions$ = this.getSvc
-      .getUserTransactionBasedOnDates(
-        this.getSvc.userId,
-        this.startDate(),
-        this.endDate()
-      )
-      .pipe(
-        map((trans: Transaction[]) => {
-          trans.map((tran) => {
-            if (
-              tran.type === this.typeOfRecord() ||
-              this.typeOfRecord() === 'all'
-            )
-              this.transactions.push(tran);
-          });
-          return trans;
-        }),
-        map((trans: Transaction[]) => {
-          let totalIncome: number = 0.0;
-          let totalExpense: number = 0.0;
-          if (this.typeOfRecord() === 'all') {
-            trans.map((tran) => {
-              if (tran.type === 'income') {
-                totalIncome += tran.amount;
-              } else {
-                totalExpense += tran.amount;
-              }
-            });
-            this.totalIncome.set(totalIncome);
-            this.totalExpense.set(totalExpense);
-            this.categories = ['Income', 'Expense', 'Balance'];
-            this.categoriesColor = [
-              this.documentStyle().getPropertyValue('--green-400'),
-              this.documentStyle().getPropertyValue('--red-400'),
-              this.documentStyle().getPropertyValue('--blue-400'),
-            ];
-
-            this.categoriesDonutData.set([
-              totalIncome,
-              totalExpense,
-              this.totalBalance(),
-            ]);
-            this.finalBarChartLabels = ['Income', 'Expense', 'Balance'];
-            this.finalBarChartData.push(
-              totalIncome,
-              totalExpense,
-              this.totalBalance()
-            );
-          } else if (this.typeOfRecord() === this.typeOfRecord()) {
-            this.categoriesDonutData.set([]);
-            trans.map((tran) => {
-              if (tran.type === this.typeOfRecord()) {
-                // check if the data already include this transaction category
-                if (!this.categories.includes(tran.categoryName)) {
-                  this.categories.push(tran.categoryName);
-                  this.categoriesDonutData.mutate((categoriesArray) =>
-                    categoriesArray.push(tran.amount)
-                  );
-                  const latestIndex = this.categories.length;
-                  this.categoriesColor.push(this.getSvc.getColors(latestIndex));
-                  this.finalBarChartLabels.push(tran.categoryName);
-                  this.finalBarChartData.push(tran.amount);
-                } else {
-                  const catNameIndex: number = this.categories.indexOf(
-                    tran.categoryName
-                  );
-                  this.categoriesDonutData()[catNameIndex] += tran.amount;
-                  this.finalBarChartData[catNameIndex] += tran.amount;
-                }
-                totalIncome += tran.amount;
-                totalExpense += tran.amount;
-                this.totalIncome.set(totalIncome);
-                this.totalExpense.set(totalExpense);
-              }
-            });
-          }
-        })
-      )
-      .subscribe(() => {
-        this.transactionloading = false;
-        let transArr = [...this.transactions];
-        //  reason of doing that is because the paginator for p-table unable to track the entries if we insert the transaction one by one
-        // we have to assign the transactions one shot
-        this.transactions = this.sortTransactionByDate(transArr);
-        this.initiateDonutChart();
-
-        this.skeletonLoading = false;
-        this.initiateBarChart();
-      });
+    this.initiateChartsData();
   }
 
   ngOnDestroy(): void {
@@ -475,6 +392,98 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
         this.ngOnInit();
       }
     });
+  }
+
+  initiateChartsData() {
+    this.transactions$ = this.getSvc
+      .getUserTransactionBasedOnDates(
+        this.getSvc.userId,
+        this.startDate(),
+        this.endDate()
+      )
+      .pipe(
+        map((trans: Transaction[]) => {
+          trans.map((tran) => {
+            if (
+              tran.type === this.typeOfRecord() ||
+              this.typeOfRecord() === 'all'
+            )
+              this.transactions.push(tran);
+          });
+          return trans;
+        }),
+        map((trans: Transaction[]) => {
+          let totalIncome: number = 0.0;
+          let totalExpense: number = 0.0;
+          if (this.typeOfRecord() === 'all') {
+            trans.map((tran) => {
+              if (tran.type === 'income') {
+                totalIncome += tran.amount;
+              } else {
+                totalExpense += tran.amount;
+              }
+            });
+            this.totalIncome.set(totalIncome);
+            this.totalExpense.set(totalExpense);
+            this.categories = ['Income', 'Expense', 'Balance'];
+            this.categoriesColor = [
+              this.documentStyle().getPropertyValue('--green-400'),
+              this.documentStyle().getPropertyValue('--red-400'),
+              this.documentStyle().getPropertyValue('--blue-400'),
+            ];
+
+            this.categoriesDonutData.set([
+              totalIncome,
+              totalExpense,
+              this.totalBalance(),
+            ]);
+            this.finalBarChartLabels = ['Income', 'Expense', 'Balance'];
+            this.finalBarChartData.push(
+              totalIncome,
+              totalExpense,
+              this.totalBalance()
+            );
+          } else if (this.typeOfRecord() === this.typeOfRecord()) {
+            this.categoriesDonutData.set([]);
+            trans.map((tran) => {
+              if (tran.type === this.typeOfRecord()) {
+                // check if the data already include this transaction category
+                if (!this.categories.includes(tran.categoryName)) {
+                  this.categories.push(tran.categoryName);
+                  this.categoriesDonutData.mutate((categoriesArray) =>
+                    categoriesArray.push(tran.amount)
+                  );
+                  const latestIndex = this.categories.length;
+                  this.categoriesColor.push(this.getSvc.getColors(latestIndex));
+                  this.finalBarChartLabels.push(tran.categoryName);
+                  this.finalBarChartData.push(tran.amount);
+                } else {
+                  const catNameIndex: number = this.categories.indexOf(
+                    tran.categoryName
+                  );
+                  this.categoriesDonutData()[catNameIndex] += tran.amount;
+                  this.finalBarChartData[catNameIndex] += tran.amount;
+                }
+                totalIncome += tran.amount;
+                totalExpense += tran.amount;
+                this.totalIncome.set(totalIncome);
+                this.totalExpense.set(totalExpense);
+              }
+            });
+          }
+        })
+      )
+      .subscribe(() => {
+        this.transactionloading = false;
+        let transArr = [...this.transactions];
+        //  reason of doing that is because the paginator for p-table unable to track the entries if we insert the transaction one by one
+        // we have to assign the transactions one shot
+        this.transactions = this.sortTransactionByDate(transArr);
+        this.initiateDonutChart();
+
+        this.skeletonLoading = false;
+        this.initiateBarChart();
+      });
   }
 
   initiateDonutChart() {

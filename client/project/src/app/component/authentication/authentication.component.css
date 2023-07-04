@@ -1,7 +1,43 @@
-h2 {
+h2,
+p {
   font-family: "Righteous", cursive;
 }
 
+/* fieldset {
+  border: 1px solid var(--surface-border);
+} */
+
+.mobile-app img {
+  margin-top: 2rem;
+  margin: 1rem;
+  width: 12rem;
+  object-fit: scale-down;
+}
+
+fieldset {
+  min-width: 0;
+  padding: 20px;
+  margin: 0;
+  border: 1px solid transparent;
+  border-top-color: var(--surface-border);
+  transform: rotate(180deg);
+}
+
+legend {
+  float: unset;
+  width: auto;
+  margin: auto;
+  padding: 0 1.5rem;
+  margin-bottom: 0rem;
+  font-size: calc(1rem + 0.3vw);
+  font-family: "Righteous", cursive;
+  line-height: inherit;
+}
+
+fieldset > legend {
+  transform: rotate(180deg);
+}
+
 .login {
-  border-right: 1px solid var(--surface-border);
+  transform: rotate(180deg);
 }

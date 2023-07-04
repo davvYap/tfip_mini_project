@@ -27,6 +27,7 @@ import {
   faTwitter,
 } from '@fortawesome/free-brands-svg-icons';
 import { AuthenticationComponent } from './component/authentication/authentication.component';
+import { SignUpComponent } from './component/sign-up/sign-up.component';
 
 @Component({
   selector: 'app-root',
@@ -295,6 +296,7 @@ export class AppComponent implements OnInit {
   changeTheme(i: number) {
     let theme = this.themes[i];
     this.themeSvc.switchTheme(theme);
+    this.themeSvc.switchTheme$.next(true);
     let userId = this.getSvc.userId;
     this.postSvc.updateUserTheme(userId, theme);
     localStorage.setItem('theme', theme);
@@ -308,6 +310,9 @@ export class AppComponent implements OnInit {
     localStorage.removeItem('isLogin');
     localStorage.removeItem('userId');
     localStorage.removeItem('isLoginRecently');
+    localStorage.removeItem('username');
+    localStorage.removeItem('firstname');
+    localStorage.removeItem('lastname');
     this.router.navigate(['/home']);
     this.ngOnInit();
   }
@@ -326,7 +331,7 @@ export class AppComponent implements OnInit {
 
   showLoginDialog() {
     this.dialogRef = this.dialogSvc.open(AuthenticationComponent, {
-      header: 'Login / Sign Up',
+      // header: 'Login',
       width: '50%',
       // height: '90%',
       contentStyle: { overflow: 'auto' },
@@ -335,16 +340,21 @@ export class AppComponent implements OnInit {
       dismissableMask: true,
     });
 
-    this.dialogRef.onClose.subscribe((user) => {
-      if (user !== undefined) {
-        console.log('Login');
-        this.messageSvc.add({
-          severity: 'success',
-          summary: 'Successful',
-          detail: `user authenticated. Welcome ${user}`,
-        });
-      }
+    this.dialogRef.onClose.subscribe();
+  }
+
+  showSignUpDialog() {
+    this.dialogRef = this.dialogSvc.open(SignUpComponent, {
+      // header: 'Login',
+      width: '50%',
+      // height: '90%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      dismissableMask: true,
     });
+
+    this.dialogRef.onClose.subscribe();
   }
 
   triggerUpdateUsersStockValue() {

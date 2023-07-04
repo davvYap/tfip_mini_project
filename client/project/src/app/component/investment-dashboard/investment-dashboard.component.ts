@@ -154,6 +154,17 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.themeSvc.initiateChartSetting();
     this.title.setTitle(`${this.getSvc.applicationName} | Investment`);
 
+    this.themeSvc.switchTheme$.subscribe((res) => {
+      console.log(res);
+      if (res) {
+        this.initiateLineChartData();
+        this.initiateStockCount();
+      }
+    });
+
+    // NOTE EXPORT FUNCTION FOR ALL TABLES
+    this.initiateTableCols();
+
     // HERE FOR STOCK COUNT
     this.stockCountDonutSymbol = [];
     this.categoriesColor = [];
@@ -205,121 +216,6 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
 
     //NOTE Initiate Line Chart
     this.initiateLineChartData();
-
-    // NOTE EXPORT FUNCTION FOR ALL TABLES
-
-    this.portfolioTableCols = [
-      {
-        header: 'Symbol',
-        field: 'symbol',
-      },
-      {
-        header: 'Name',
-        field: 'name',
-      },
-      {
-        header: 'Quantity',
-        field: 'quantity',
-      },
-      {
-        header: 'Cost',
-        field: 'cost',
-      },
-      {
-        header: 'Market Price',
-        field: 'marketPrice',
-      },
-      {
-        header: 'Percentage',
-        field: 'percentage',
-      },
-    ];
-    this.portfolioTableExportColumns = this.portfolioTableCols.map((col) => ({
-      title: col.header,
-      dataKey: col.field,
-    }));
-
-    this.transactionsTableCols = [
-      {
-        header: 'Symbol',
-        field: 'symbol',
-      },
-      {
-        header: 'Name',
-        field: 'name',
-      },
-      {
-        header: 'Date',
-        field: 'date',
-        customExportHeader: 'Transaction Date',
-      },
-      {
-        header: 'Quantity',
-        field: 'quantity',
-      },
-      {
-        header: 'Bought Price',
-        field: 'price',
-      },
-      {
-        header: 'Market Price',
-        field: 'marketPrice',
-      },
-      {
-        header: '% Change',
-        field: 'percentage',
-      },
-    ];
-    this.transactionsTableExportColumns = this.transactionsTableCols.map(
-      (col) => ({
-        title: col.header,
-        dataKey: col.field,
-      })
-    );
-
-    this.soldTableCols = [
-      {
-        header: 'Symbol',
-        field: 'symbol',
-      },
-      {
-        header: 'Name',
-        field: 'name',
-      },
-      {
-        header: 'Date',
-        field: 'date',
-        customExportHeader: 'Transaction Date',
-      },
-      {
-        header: 'Quantity',
-        field: 'quantity',
-      },
-      {
-        header: 'Sold Price',
-        field: 'price',
-      },
-      {
-        header: 'Realized Profit',
-        field: 'netProfit',
-      },
-      {
-        header: '% ROI',
-        field: 'percentage',
-      },
-    ];
-    this.soldTableExportColumns = this.soldTableCols.map((col) => ({
-      title: col.header,
-      dataKey: col.field,
-    }));
-
-    this.portfolioExportBtnItems = [
-      {
-        label: 'Excel',
-        icon: 'pi pi-file-excel',
-        command: () => this.exportExcelPortfolio(),
-      },
-    ];
   }
 
   ngOnDestroy(): void {
@@ -1137,21 +1033,132 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  initiateTableCols() {
+    this.portfolioTableCols = [
+      {
+        header: 'Symbol',
+        field: 'symbol',
+      },
+      {
+        header: 'Name',
+        field: 'name',
+      },
+      {
+        header: 'Quantity',
+        field: 'quantity',
+      },
+      {
+        header: 'Cost',
+        field: 'cost',
+      },
+      {
+        header: 'Market Price',
+        field: 'marketPrice',
+      },
+      {
+        header: 'Percentage',
+        field: 'percentage',
+      },
+    ];
+    this.portfolioTableExportColumns = this.portfolioTableCols.map((col) => ({
+      title: col.header,
+      dataKey: col.field,
+    }));
+
+    this.transactionsTableCols = [
+      {
+        header: 'Symbol',
+        field: 'symbol',
+      },
+      {
+        header: 'Name',
+        field: 'name',
+      },
+      {
+        header: 'Date',
+        field: 'date',
+        customExportHeader: 'Transaction Date',
+      },
+      {
+        header: 'Quantity',
+        field: 'quantity',
+      },
+      {
+        header: 'Bought Price',
+        field: 'price',
+      },
+      {
+        header: 'Market Price',
+        field: 'marketPrice',
+      },
+      {
+        header: '% Change',
+        field: 'percentage',
+      },
+    ];
+    this.transactionsTableExportColumns = this.transactionsTableCols.map(
+      (col) => ({
+        title: col.header,
+        dataKey: col.field,
+      })
+    );
+
+    this.soldTableCols = [
+      {
+        header: 'Symbol',
+        field: 'symbol',
+      },
+      {
+        header: 'Name',
+        field: 'name',
+      },
+      {
+        header: 'Date',
+        field: 'date',
+        customExportHeader: 'Transaction Date',
+      },
+      {
+        header: 'Quantity',
+        field: 'quantity',
+      },
+      {
+        header: 'Sold Price',
+        field: 'price',
+      },
+      {
+        header: 'Realized Profit',
+        field: 'netProfit',
+      },
+      {
+        header: '% ROI',
+        field: 'percentage',
+      },
+    ];
+    this.soldTableExportColumns = this.soldTableCols.map((col) => ({
+      title: col.header,
+      dataKey: col.field,
+    }));
+
+    this.portfolioExportBtnItems = [
+      {
+        label: 'Excel',
+        icon: 'pi pi-file-excel',
+        command: () => this.exportExcelPortfolio(),
+      },
+    ];
+  }
+
   exportExcelPortfolio(): void {
     this.exportSvc.exportExcel(
       'stocktt',
-      `portfolio_${
-        this.getSvc.userId
-      }_${this.today.getMonth()}${this.today.getFullYear()}`
+      `portfolio_${this.getSvc.userId}_${this.today.getFullYear()}`
     );
   }
 
   exportExcelTransaction(): void {
     this.exportSvc.exportExcel(
       'dt1',
-      `transactions_${
-        this.getSvc.userId
-      }_${this.today.getMonth()}${this.today.getFullYear()}`
+      `transactions_${this.getSvc.userId}_${this.today.getFullYear()}`
     );
   }
 
@@ -1160,7 +1167,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       'dt2',
       `sold-stock-transactions_${
         this.getSvc.userId
-      }_${this.today.getMonth()}${this.today.getFullYear()}`
+      }_${this.today.getFullYear()}`
     );
   }
 
@@ -1168,9 +1175,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.exportSvc.exportPdf(
       this.portfolioTableExportColumns,
       this.stocksCount,
-      `portfolio_${
-        this.getSvc.userId
-      }_${this.today.getMonth()}${this.today.getFullYear()}`
+      `portfolio_${this.getSvc.userId}_${this.today.getFullYear()}`
     );
   }
 
@@ -1178,9 +1183,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.exportSvc.exportPdf(
       this.transactionsTableExportColumns,
       this.stocks,
-      `transactions_${
-        this.getSvc.userId
-      }_${this.today.getMonth()}${this.today.getFullYear()}`
+      `transactions_${this.getSvc.userId}_${this.today.getFullYear()}`
     );
   }
 
@@ -1195,7 +1198,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       this.soldStocks,
       `sold-stock-transactions_${
         this.getSvc.userId
-      }_${this.today.getMonth()}${this.today.getFullYear()}`
+      }_${this.today.getFullYear()}`
     );
   }
 

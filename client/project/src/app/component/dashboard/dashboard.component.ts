@@ -101,13 +101,20 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.title.setTitle(`${this.getSvc.applicationName} | Dashboard`);
     // this.themeSvc.initiateChartSetting();
-    this.username.set(localStorage.getItem('username'));
+    this.username.set(
+      `${localStorage.getItem('firstname')} ${localStorage.getItem('lastname')}`
+    );
     this.goalForm = this.createGoalForm();
 
     // GET USER THEME IN MONGO
     this.getSvc.getUserTheme(this.getSvc.userId).then((res: UserSettings) => {
       this.themeSvc.switchTheme(res.theme);
       localStorage.setItem('theme', res.theme);
+    });
+
+    this.themeSvc.switchTheme$.subscribe((res) => {
+      console.log('change theme', res);
+      if (res) this.initiateChartsData();
     });
 
     // GET USER STOCK VALUE
@@ -170,6 +177,51 @@ export class DashboardComponent implements OnInit {
     // this.miscValue;
 
     // LINE CHART
+    this.initiateChartsData();
+
+    // this.getSvc.getUserGoal(this.getSvc.userId).then((res) => {
+    //   this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
+    //   this.initiateLineChart();
+    // });
+  }
+
+  createGoalForm(): FormGroup {
+    return this.fb.group({
+      goal: this.fb.control('', Validators.required),
+    });
+  }
+
+  submitGoal(event: any) {
+    if (event.key === 'Enter') {
+      const goal: number = this.goalForm.value.goal;
+      console.log(goal);
+      console.log(event.key);
+      this.postSvc.updateUserGoal(this.getSvc.userId, goal).then((res) => {
+        console.log(res);
+      });
+      this.getSvc.getUserGoalPromise(this.getSvc.userId).then((res) => {
+        this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
+        this.initiateLineChart();
+      });
+      this.ngOnInit();
+    }
+  }
+
+  setYearlyGuideLine(goal: number): number[] {
+    let months = 12;
+    let yearlyGoal: number[] = [];
+    for (let i = 0; i < months; i++) {
+      let monthlyGoal = (goal / months) * (i + 1);
+      yearlyGoal.push(monthlyGoal);
+    }
+    return yearlyGoal;
+  }
+
+  getColor(percent: number): string {
+    return percent > 0 ? 'positive' : 'negative';
+  }
+
+  initiateChartsData() {
     this.getSvc
       .getUserStockMonthlyValue(this.getSvc.userId, new Date().getFullYear())
       .pipe(
@@ -242,47 +294,6 @@ export class DashboardComponent implements OnInit {
         this.skeletonLoading = false;
         this.initiateDonutChart();
       });
-
-    // this.getSvc.getUserGoal(this.getSvc.userId).then((res) => {
-    //   this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
-    //   this.initiateLineChart();
-    // });
-  }
-
-  createGoalForm(): FormGroup {
-    return this.fb.group({
-      goal: this.fb.control('', Validators.required),
-    });
-  }
-
-  submitGoal(event: any) {
-    if (event.key === 'Enter') {
-      const goal: number = this.goalForm.value.goal;
-      console.log(goal);
-      console.log(event.key);
-      this.postSvc.updateUserGoal(this.getSvc.userId, goal).then((res) => {
-        console.log(res);
-      });
-      this.getSvc.getUserGoalPromise(this.getSvc.userId).then((res) => {
-        this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
-        this.initiateLineChart();
-      });
-      this.ngOnInit();
-    }
-  }
-
-  setYearlyGuideLine(goal: number): number[] {
-    let months = 12;
-    let yearlyGoal: number[] = [];
-    for (let i = 0; i < months; i++) {
-      let monthlyGoal = (goal / months) * (i + 1);
-      yearlyGoal.push(monthlyGoal);
-    }
-    return yearlyGoal;
-  }
-
-  getColor(percent: number): string {
-    return percent > 0 ? 'positive' : 'negative';
   }
 
   initiateDonutChart() {
@@ -384,8 +395,8 @@ export class DashboardComponent implements OnInit {
           data: this.guideLineDataForYearlyGoal,
         },
         {
-          label: 'Portfolio',
-          fill: false,
+          label: 'Assets Value',
+          fill: true,
           borderColor: this.documentStyle().getPropertyValue('--green-500'),
           // yAxisID: 'y1',
           tension: 0.4,
