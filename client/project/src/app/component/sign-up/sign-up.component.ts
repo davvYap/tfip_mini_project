@@ -6,9 +6,14 @@ import {
   faKey,
   faUnlockKeyhole,
   faRightToBracket,
+  faCheck,
 } from '@fortawesome/free-solid-svg-icons';
 import { FileUploadEvent } from 'primeng/fileupload';
-import { SignUp } from 'src/app/models';
+import { MessageResponse, SignUp } from 'src/app/models';
+import { PostService } from 'src/app/service/post.service';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
+import { GetService } from 'src/app/service/get.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sign-up',
@@ -20,6 +25,7 @@ export class SignUpComponent implements OnInit {
   emailIcon = faEnvelope;
   passwordIcon = faKey;
   confirmPasswordIcon = faUnlockKeyhole;
+  confirmDetialsIcon = faCheck;
   pageItems!: MenuItem[];
   uploadedFiles: File[] = [];
   uploadedFile!: File;
@@ -28,8 +34,20 @@ export class SignUpComponent implements OnInit {
   activeIndex: number = 0;
   form!: FormGroup;
   samePassword: boolean = true;
+  pStepsReadOnly: boolean = true;
+  showCaptcha: boolean = false;
+  captchaError: string | undefined;
 
-  constructor(private fb: FormBuilder) {}
+  @ViewChild('captchaInput', { static: false })
+  captchaInput!: ElementRef;
+
+  constructor(
+    private fb: FormBuilder,
+    private postSvc: PostService,
+    public dialogRef: DynamicDialogRef,
+    private getSvc: GetService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.pageItems = [
@@ -66,6 +84,10 @@ export class SignUpComponent implements OnInit {
   }
 
   onActiveIndexChange(event: number) {
+    this.captchaError = undefined;
+    const newUser = this.form.value as SignUp;
+    this.newUser = newUser;
+
     const firstPage = document.getElementById('pageOne');
     const secondPage = document.getElementById('pageTwo');
     const lastPage = document.getElementById('pageThree');
@@ -119,15 +141,14 @@ export class SignUpComponent implements OnInit {
   }
 
   onUpload(event: FileUploadEvent) {
-    console.log(event.files);
+    // console.log(event.files);
     this.uploadedFiles.push(event.files[0]);
     this.uploadedFile = event.files[0];
     this.readImage(this.uploadedFile);
-    this.nextPage();
     const newUser = this.form.value as SignUp;
-    newUser.profileIcon = this.imageUrl;
-    console.log(newUser);
     this.newUser = newUser;
+    this.nextPage();
+    this.pStepsReadOnly = false;
   }
 
   readImage(file: File) {
@@ -136,5 +157,64 @@ export class SignUpComponent implements OnInit {
       this.imageUrl = reader.result as string;
     };
     reader.readAsDataURL(file);
+  }
+
+  confirmDetails() {
+    const newUser = this.form.value as SignUp;
+    this.getSvc
+      .getCaptcha(newUser.username, newUser.email)
+      .then((res) => {
+        this.showCaptcha = true;
+      })
+      .catch((err) => {
+        console.log(err.error.message);
+        this.captchaError = err.error.message;
+      });
+  }
+
+  signUp() {
+    const newUser = this.form.value as SignUp;
+    // newUser.profileIcon = this.imageUrl;
+    this.newUser = newUser;
+    // console.log(newUser);
+    const captcha: string = this.captchaInput.nativeElement.value;
+    const formData = new FormData();
+    formData.append('firstname', newUser.firstname);
+    formData.append('lastname', newUser.lastname);
+    formData.append('username', newUser.username);
+    formData.append('password', newUser.password);
+    formData.append('email', newUser.email);
+    formData.append('file', this.uploadedFile);
+    formData.append('captcha', captcha);
+    this.postSvc
+      .signUp(formData)
+      .then((res) => {
+        this.dialogRef.close();
+        // console.log(res.message);
+        this.getSvc
+          .verifyLogin(newUser.username, newUser.password)
+          .then((res) => {
+            this.getSvc.isLogin = res.isLogin;
+            this.getSvc.userId = res.userId;
+            this.getSvc.username = res.username;
+            this.getSvc.firstname = res.firstname;
+            this.getSvc.lastname = res.lastname;
+            this.getSvc.isLogin$.next(true);
+            localStorage.setItem('isLogin', 'true');
+            localStorage.setItem('userId', res.userId);
+            localStorage.setItem('username', res.username);
+            localStorage.setItem('firstname', res.firstname);
+            localStorage.setItem('lastname', res.lastname);
+            this.router.navigate(['/dashboard']);
+            this.dialogRef.close(res.username);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })
+      .catch((err) => {
+        // console.log(err.error.message);
+        this.captchaError = err.error.message;
+      });
   }
 }

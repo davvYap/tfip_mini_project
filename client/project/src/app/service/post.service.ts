@@ -4,6 +4,7 @@ import {
   LoginStatus,
   MessageResponse,
   PurchasedStock,
+  SignUp,
   Transaction,
 } from '../models';
 import { Observable, lastValueFrom } from 'rxjs';
@@ -87,6 +88,18 @@ export class PostService {
       this.http.post<MessageResponse>(
         `http://localhost:8080/api/${userId}/add_transaction`,
         tran
+      )
+    );
+  }
+
+  signUp(formData: FormData): Promise<MessageResponse> {
+    return lastValueFrom(
+      this.http.post<MessageResponse>(
+        'http://localhost:8080/api/sign_up',
+        formData,
+        {
+          withCredentials: true,
+        }
       )
     );
   }

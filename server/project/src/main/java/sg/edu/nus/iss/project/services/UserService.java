@@ -76,24 +76,26 @@ public class UserService {
         List<Stock> stocks = userRepo.retrieveUserStocks(userId, limit, skip);
 
         List<StockCount> stocksCount = new LinkedList<>();
-        for (Stock stock : stocks) {
-            int combinedCount = 0;
-            for (StockCount sc : stocksCount) {
-                if (stocksCount.size() < 1) {
+        if (stocks != null) {
+            for (Stock stock : stocks) {
+                int combinedCount = 0;
+                for (StockCount sc : stocksCount) {
+                    if (stocksCount.size() < 1) {
+                        stocksCount.add(stock.toStockCount());
+                        break;
+                    }
+                    if (stock.getSymbol().equalsIgnoreCase(sc.getSymbol())) {
+                        combinedCount++;
+                        sc.setQuantity((sc.getQuantity() + stock.getQuantity()));
+                        double newPrice = stock.getQuantity() * stock.getStrikePrice();
+                        sc.setCost(sc.getCost() + newPrice);
+                        break;
+                    }
+                }
+                if (combinedCount == 0) {
                     stocksCount.add(stock.toStockCount());
-                    break;
-                }
-                if (stock.getSymbol().equalsIgnoreCase(sc.getSymbol())) {
-                    combinedCount++;
-                    sc.setQuantity((sc.getQuantity() + stock.getQuantity()));
-                    double newPrice = stock.getQuantity() * stock.getStrikePrice();
-                    sc.setCost(sc.getCost() + newPrice);
-                    break;
-                }
-            }
-            if (combinedCount == 0) {
-                stocksCount.add(stock.toStockCount());
 
+                }
             }
         }
         return stocksCount;
@@ -222,6 +224,13 @@ public class UserService {
         List<Stock> decStocks = new LinkedList<>();
 
         List<Stock> userStocks = userRepo.retrieveUserStocks(userId, limit, skip);
+
+        if (userStocks == null) {
+            List<Stock> stocks = new LinkedList<>();
+            return Optional.of(stocks);
+        
+        }
+
         for (Stock stock : userStocks) {
             long time = stock.getPurchasedDate();
             Instant instant = Instant.ofEpochMilli(time);

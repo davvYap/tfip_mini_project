@@ -4,7 +4,6 @@ export interface SignUp {
   username: string;
   password: string;
   email: string;
-  profileIcon: string;
 }
 
 export interface LoginStatus {
@@ -142,4 +141,10 @@ export interface categoryOptionItem<T = any> {
   label: string;
   value: string;
   object: T;
+}
+
+export interface quote {
+  q: string;
+  a: string;
+  h: string;
 }

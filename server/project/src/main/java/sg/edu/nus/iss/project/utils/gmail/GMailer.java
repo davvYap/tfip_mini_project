@@ -78,13 +78,13 @@ public class GMailer {
         return credential;
     }
 
-    public void sendMail(String subject, String message) throws Exception {
+    public void sendMail(String receiverEmail, String subject, String message) throws Exception {
         // Encode as MIME message
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
         MimeMessage email = new MimeMessage(session);
         email.setFrom(new InternetAddress(TEST_EMAIL_ADDRESS));
-        email.addRecipient(TO, new InternetAddress(TEST_RECEIVE_EMAIL_ADDRESS));
+        email.addRecipient(TO, new InternetAddress(receiverEmail));
         email.setSubject(subject);
         email.setText(message);
 

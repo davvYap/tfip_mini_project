@@ -110,6 +110,12 @@ public class LoginController {
 				.body(Json.createObjectBuilder().add("isLogin", false).build().toString());
 	}
 
+	@GetMapping(path = "/quote")
+	@ResponseBody
+	public ResponseEntity<String> getQuoteOfTheDay() {
+		return loginSvc.getQuoteOfTheDay();
+	}
+
 	// EXTRA
 	private void testSessionId(HttpSession session) {
 		System.out.println("session id >>> " + session.getId());

@@ -6,6 +6,7 @@ import {
   MessageResponse,
   PurchasedStock,
   PurchasedStocksCount,
+  quote,
   SoldStock,
   Stock,
   StockLogo,
@@ -287,6 +288,27 @@ export class GetService {
     return this.http.get<Transaction[]>(
       `http://localhost:8080/api/${userId}/trans_dates`,
       { params: qp }
+    );
+  }
+
+  getQuoteOfTheDay(): Promise<quote[]> {
+    return lastValueFrom(
+      this.http.get<quote[]>('http://localhost:8080/api/quote')
+    );
+  }
+
+  getCaptcha(username: string, email: string): Promise<MessageResponse> {
+    const qp = new HttpParams()
+      .set('username', username)
+      .append('email', email);
+    return lastValueFrom(
+      this.http.get<MessageResponse>(
+        'http://localhost:8080/api/sign_up/captcha',
+        {
+          params: qp,
+          withCredentials: true,
+        }
+      )
     );
   }
 

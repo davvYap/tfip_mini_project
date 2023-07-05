@@ -2,7 +2,7 @@
   <p-steps
     class="m-3"
     [model]="pageItems"
-    [readonly]="false"
+    [readonly]="pStepsReadOnly"
     [activeIndex]="activeIndex"
     (activeIndexChange)="onActiveIndexChange($event)"
   ></p-steps>
@@ -49,7 +49,7 @@
               formControlName="email"
               autofocus
               [style]="{ width: '80%', margin: 'auto' }"
-              placeholder="Please enter valid e-mail address for validation"
+              placeholder="Please enter valid e-mail address for verification"
             />
           </div>
         </div>
@@ -229,11 +229,41 @@
                 {{ newUser.password }}
               </td>
             </tr>
+            <tr *ngIf="showCaptcha">
+              <td>6 digit registration code sent to your e-mail:</td>
+              <td>
+                <input
+                  pInputText
+                  autofocus
+                  placeholder="Capital letters"
+                  #captchaInput
+                />
+              </td>
+            </tr>
+            <tr *ngIf="captchaError">
+              <td></td>
+              <td>
+                <code>{{ captchaError }}</code>
+              </td>
+            </tr>
           </table>
         </div>
       </div>
+
       <div class="d-flex flex-row-reverse align-items-center">
-        <p-button styleClass=" p-button-text">
+        <p-button
+          *ngIf="!showCaptcha"
+          styleClass=" p-button-text"
+          (onClick)="confirmDetails()"
+        >
+          <fa-icon [icon]="confirmDetialsIcon"></fa-icon>
+          <span class="ms-2 fw-bolder">Confirm</span>
+        </p-button>
+        <p-button
+          *ngIf="showCaptcha"
+          styleClass=" p-button-text"
+          (onClick)="signUp()"
+        >
           <fa-icon [icon]="loginIcon"></fa-icon>
           <span class="ms-2 fw-bolder">Sign Up</span>
         </p-button>

@@ -53,4 +53,13 @@ public class DBQueries {
             select trans_id, trans_name, date_of_trans, amount, remarks, t.cat_id, c.cat_name, c.type from transactions t join categories c on t.cat_id = c.cat_id
             where t.user_id  = ? and date_of_trans >= ? and date_of_trans<= ?;
                                     """;
+    public static final String SQL_NEW_USER_SIGNUP = """
+            insert into users(user_id, username, password, email, firstname, lastname, profile_pic)
+            values
+            (?,?,?,?,?,?,?);
+                        """;
+
+    public static final String SQL_CHECK_USER_EXISTS = """
+            select * from users where email = ?;
+            """;
 }

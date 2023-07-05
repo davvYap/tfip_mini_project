@@ -14,6 +14,7 @@ import {
   MessageResponse,
   Transaction,
   UserSettings,
+  quote,
 } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
@@ -71,6 +72,8 @@ export class DashboardComponent implements OnInit {
 
   skeletonLoading: boolean = true;
 
+  quoteOfTheDay!: string;
+
   // CATEGORIES
   categories: string[] = ['Savings', 'Investments', 'Cypto'];
   categoriesRoutes: string[] = ['/savings', '/investment-dashboard', '/crypto'];
@@ -115,6 +118,13 @@ export class DashboardComponent implements OnInit {
     this.themeSvc.switchTheme$.subscribe((res) => {
       console.log('change theme', res);
       if (res) this.initiateChartsData();
+    });
+
+    // GET Quote of the day
+    this.getSvc.getQuoteOfTheDay().then((res: quote[]) => {
+      const quote = res[0];
+      console.log(quote.q);
+      this.quoteOfTheDay = quote.q;
     });
 
     // GET USER STOCK VALUE
