@@ -65,10 +65,6 @@ dialog::backdrop {
   box-shadow: 2px 4px #888888;
 }
 
-#addTransaction:hover {
-  cursor: pointer;
-}
-
 #year {
   color: green;
   box-shadow: 5px 10px #888888;
@@ -80,4 +76,13 @@ dialog::backdrop {
 
 .dialogBtn:hover {
   transform: scale(1.1);
+}
+
+.add-transaction {
+  font-family: "Righteous", cursive;
+}
+
+.add-transaction:hover {
+  cursor: pointer;
+  transform: scale(1.03);
 }

@@ -43,6 +43,10 @@ import { SellStockComponent } from '../sell-stock/sell-stock.component';
 import { UpdateService } from 'src/app/service/update.service';
 import { ExportService } from 'src/app/service/export.service';
 import { TreeNode } from 'primeng/api';
+import {
+  faFolderOpen,
+  faHandPointRight,
+} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-investment-dashboard',
@@ -50,6 +54,8 @@ import { TreeNode } from 'primeng/api';
   styleUrls: ['./investment-dashboard.component.css'],
 })
 export class InvestmentDashboardComponent implements OnInit, OnDestroy {
+  pointRightIcon = faHandPointRight;
+  emptyIcon = faFolderOpen;
   today = new Date();
   documentStyle = signal(getComputedStyle(document.documentElement));
   breadcrumbItems: MenuItem[] | undefined;
@@ -82,6 +88,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   stocks!: PurchasedStock[];
   stocksCount!: PurchasedStocksCount[]; // HERE CAN GET ALL USER STOCK SYMBOL
   stocks$!: Subscription;
+  stocksCount$!: Subscription;
   stockPrice$!: Subscription;
   completeStocksSignal: WritableSignal<boolean> = signal(false);
   completeStocksCountSignal: WritableSignal<boolean> = signal(false);
@@ -89,6 +96,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   skeletonLoading: boolean = true;
   lineData!: any;
   lineOptions!: any;
+  lineChartData$!: Subscription;
   sp500data!: number[];
   nasdaq100data!: number[];
   userStockData!: number[];
@@ -154,6 +162,9 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.themeSvc.initiateChartSetting();
     this.title.setTitle(`${this.getSvc.applicationName} | Investment`);
 
+    // NOTE EXPORT FUNCTION FOR ALL TABLES
+    this.initiateTableCols();
+
     this.themeSvc.switchTheme$.subscribe((res) => {
       console.log(res);
       if (res) {
@@ -161,9 +172,6 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         this.initiateStockCount();
       }
     });
-
-    // NOTE EXPORT FUNCTION FOR ALL TABLES
-    this.initiateTableCols();
 
     // HERE FOR STOCK COUNT
     this.stockCountDonutSymbol = [];
@@ -220,7 +228,9 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.stocks$) this.stocks$.unsubscribe();
+    if (this.stocksCount$) this.stocksCount$.unsubscribe();
     if (this.stockPrice$) this.stockPrice$.unsubscribe();
+    if (this.lineChartData$) this.lineChartData$.unsubscribe();
   }
 
   sortStockByDate(PurchasedStocks: PurchasedStock[]): PurchasedStock[] {
@@ -244,7 +254,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   }
 
   initiateStockCount() {
-    this.stocks$ = this.getSvc
+    this.stocksCount$ = this.getSvc
       .getUserStocksCount(this.getSvc.userId)
       .pipe(
         // get market price and performance
@@ -397,10 +407,11 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   }
 
   initiateLineChartData() {
-    this.getSvc
+    this.lineChartData$ = this.getSvc
       .getUserMonthlyPerformance(this.getSvc.userId, new Date().getFullYear())
       .pipe(
         switchMap((performance) => {
+          console.log('user performance', performance);
           this.userStockData = performance;
           this.userStockDataLineData.set(performance);
           return of(performance);
@@ -664,7 +675,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   }
 
   initiateStockTable() {
-    this.getSvc
+    this.stocks$ = this.getSvc
       .getUserStocksMongo(this.getSvc.userId)
       .pipe(
         // get market price
@@ -703,7 +714,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         map((stocks: PurchasedStock[]) => {
           for (let i = 0; i < stocks.length; i++) {
             const stock = stocks[i];
-            // console.log(`${stock.symbol} ${stock.price} ${stock.marketPrice}`);
+            console.log(`${stock.symbol} ${stock.price} ${stock.marketPrice}`);
             stock.percentage = (stock.marketPrice - stock.price) / stock.price;
           }
           return stocks;
@@ -732,7 +743,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         // when no purchaseId -> stock count
-        console.log(purchaseId);
+        // console.log(purchaseId);
         if (!!!purchaseId) {
           this.deleteSvc
             .deleteStockWithSymbol(symbol, userId)

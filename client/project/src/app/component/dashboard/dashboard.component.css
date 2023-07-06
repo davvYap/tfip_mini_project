@@ -8,7 +8,8 @@ h1 {
 }
 
 h3,
-h4 {
+h4,
+h5 {
   font-family: "Righteous", cursive;
 }
 
@@ -24,6 +25,11 @@ h4 {
   padding: 1rem;
   border-radius: 10px;
   margin-bottom: 1rem;
+}
+
+.add-transaction:hover {
+  cursor: pointer;
+  transform: scale(1.03);
 }
 
 /* .card {

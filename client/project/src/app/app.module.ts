@@ -22,6 +22,13 @@ import { TransactionRecordsComponent } from './component/transaction-records/tra
 import { DatePipe } from '@angular/common';
 import { AuthenticationComponent } from './component/authentication/authentication.component';
 import { SignUpComponent } from './component/sign-up/sign-up.component';
+import {
+  SocialLoginModule,
+  SocialAuthServiceConfig,
+  GoogleLoginProvider,
+  GoogleSigninButtonDirective,
+  GoogleSigninButtonModule,
+} from '@abacritt/angularx-social-login';
 
 @NgModule({
   declarations: [
@@ -47,8 +54,32 @@ import { SignUpComponent } from './component/sign-up/sign-up.component';
     FormsModule,
     HttpClientModule,
     FontAwesomeModule,
+    SocialLoginModule,
+    GoogleSigninButtonModule,
   ],
-  providers: [MessageService, ConfirmationService, DialogService],
+  providers: [
+    MessageService,
+    ConfirmationService,
+    DialogService,
+    {
+      provide: 'SocialAuthServiceConfig',
+      useValue: {
+        autoLogin: false,
+        providers: [
+          {
+            id: GoogleLoginProvider.PROVIDER_ID,
+            provider: new GoogleLoginProvider(
+              '993725644664-0ltkao19ker6dp0lomiabeuuqogkuoor.apps.googleusercontent.com'
+            ),
+          },
+        ],
+        onError: (err) => {
+          console.error(err);
+        },
+      } as SocialAuthServiceConfig,
+    },
+    GoogleSigninButtonDirective,
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

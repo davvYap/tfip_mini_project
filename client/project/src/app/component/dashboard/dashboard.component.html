@@ -6,94 +6,107 @@
         <p class="mb-0 font-monospace">"{{ quoteOfTheDay }}"</p>
       </div>
     </div>
-    <div class="dashboardcard flex justify-content-center">
-      <p-fieldset [toggleable]="true" class="text-center">
-        <ng-template pTemplate="header">
-          <div class="d-flex align-items-center">
-            <h3>
-              Total Assets Value
+    <section *ngIf="totalValue(); else newUser">
+      <div class="dashboardcard flex justify-content-center">
+        <p-fieldset [toggleable]="true" class="text-center">
+          <ng-template pTemplate="header">
+            <div class="d-flex align-items-center">
+              <h3>
+                Total Assets Value
+                <span
+                  class="pi pi-angle-right"
+                  style="font-size: 1.5rem"
+                ></span>
+                <span *ngIf="!skeletonLoading; else loading">
+                  {{ totalValue() | currency }}
+                  <span
+                    *ngIf="totalValue()"
+                    class="ms-2"
+                    [className]="getColor(stockChangePercentage)"
+                  >
+                    ({{ stockChangePercentage | percent : "1.2-2" }})
+                  </span>
+                </span>
+              </h3>
+            </div>
+          </ng-template>
+          <div>
+            <h4>
+              Stocks
               <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
               <span *ngIf="!skeletonLoading; else loading">
-                {{ totalValue() | currency }}
+                {{ stocksValue() | currency }}
                 <span
+                  *ngIf="stocksValue()"
                   class="ms-2"
                   [className]="getColor(stockChangePercentage)"
                 >
                   ({{ stockChangePercentage | percent : "1.2-2" }})
                 </span>
               </span>
-            </h3>
+            </h4>
           </div>
-        </ng-template>
-
-        <div>
-          <h4>
-            Savings
-            <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-            <span *ngIf="savingsValue(); else loading">
-              {{ savingsValue() | currency }}
-            </span>
-          </h4>
-        </div>
-        <div>
-          <h4>
-            Stocks
-            <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-            <span *ngIf="!skeletonLoading; else loading">
-              {{ stocksValue() | currency }}
-              <span class="ms-2" [className]="getColor(stockChangePercentage)">
-                ({{ stockChangePercentage | percent : "1.2-2" }})
+          <div>
+            <h4>
+              Savings
+              <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
+              <span *ngIf="!skeletonLoading; else loading">
+                {{ savingsValue() | currency }}
               </span>
-            </span>
-          </h4>
-        </div>
-        <div>
-          <h4>
-            Cypto
-            <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-            <span *ngIf="cryptoValue(); else loading">
-              {{ cryptoValue() | currency }}
-              <span class="ms-2" [className]="getColor(0.09)">
-                ({{ 0.09 | percent : "1.2-2" }})
+            </h4>
+          </div>
+          <!-- <div>
+            <h4>
+              Cypto
+              <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
+              <span>
+                {{ cryptoValue() | currency }}
+                <span
+                  *ngIf="cryptoValue()"
+                  class="ms-2"
+                  [className]="getColor(0.09)"
+                >
+                  ({{ 0.09 | percent : "1.2-2" }})
+                </span>
               </span>
-            </span>
-          </h4>
-        </div>
-      </p-fieldset>
-    </div>
-
-    <div class="row justify-content-evenly align-items-center g-2 m-4">
-      <!-- DONUT CHART -->
-      <div class="col-4 donutbackground">
-        <p-chart
-          type="doughnut"
-          [data]="donutData"
-          [options]="donutOptions"
-          [plugins]="chartPlugin"
-        ></p-chart>
+            </h4>
+          </div> -->
+        </p-fieldset>
       </div>
 
-      <!-- LINE CHART -->
-      <div class="col-7 linebackground">
-        <div *ngIf="!skeletonLoading; else skeleton">
-          <div class="d-flex flex-row-reverse mb-2">
-            <p-button
-              (click)="op.toggle($event)"
-              icon="pi pi-chart-line"
-              label="Set Goal"
-              styleClass="p-button-rounded"
-              pTooltip="Set your goal here"
-            ></p-button>
-          </div>
+      <div class="row justify-content-evenly align-items-center g-2 m-4">
+        <!-- DONUT CHART -->
+        <div class="col-4 donutbackground">
           <p-chart
-            type="line"
-            [data]="lineData"
-            [options]="lineOptions"
+            type="doughnut"
+            [data]="donutData"
+            [options]="donutOptions"
             [plugins]="chartPlugin"
           ></p-chart>
         </div>
+
+        <!-- LINE CHART -->
+        <div class="col-7 linebackground">
+          <div *ngIf="!skeletonLoading; else skeleton">
+            <div class="d-flex flex-row-reverse mb-2">
+              <p-button
+                (click)="op.toggle($event)"
+                icon="pi pi-chart-line"
+                label="Set Goal"
+                styleClass="p-button-rounded"
+                pTooltip="Set your goal here"
+              ></p-button>
+            </div>
+            <p-chart
+              type="line"
+              [data]="lineData"
+              [options]="lineOptions"
+              [plugins]="chartPlugin"
+            ></p-chart>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
 
     <p-overlayPanel #op>
       <ng-template pTemplate="content">
@@ -112,10 +125,54 @@
     </p-overlayPanel>
     <p-toast></p-toast>
   </div>
-
-  <ng-template #loading>
-    Fetching data <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i
-  ></ng-template>
-
-  <ng-template #skeleton> <p-skeleton height="20rem"></p-skeleton></ng-template>
 </div>
+
+<ng-template #loading>
+  Fetching data <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i
+></ng-template>
+
+<ng-template #skeleton> <p-skeleton height="20rem"></p-skeleton></ng-template>
+
+<ng-template #newUser>
+  <div class="row justify-content-center align-items-center my-5">
+    <div
+      class="col-10 d-flex justify-content-center align-items-center h1card"
+      [style]="{ height: '50dvh' }"
+    >
+      <div class="d-flex flex-column align-items-center">
+        <div>
+          <h3>
+            Hi new joinee, welcome to am.app
+            <fa-icon [icon]="smileIcon"></fa-icon>
+          </h3>
+        </div>
+
+        <div>
+          <h3>
+            To begin your jouney, please follow the steps below to build your
+            profile:
+          </h3>
+        </div>
+
+        <div class="my-5 d-flex flex-column justify-content-evenly">
+          <div
+            class="add-transaction mb-3"
+            [routerLink]="'/investment-dashboard'"
+          >
+            <h5>
+              <fa-icon [icon]="pointRightIcon"></fa-icon>
+              Add stock transactions to your portfolio
+            </h5>
+          </div>
+
+          <div class="add-transaction" [routerLink]="'/savings'">
+            <h5>
+              <fa-icon [icon]="pointRightIcon"></fa-icon>
+              Add expense and income record to your savings
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

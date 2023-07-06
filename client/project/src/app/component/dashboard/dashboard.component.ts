@@ -20,6 +20,10 @@ import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
 import { Title } from '@angular/platform-browser';
+import {
+  faFaceSmileWink,
+  faHandPointRight,
+} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,6 +31,8 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
+  smileIcon = faFaceSmileWink;
+  pointRightIcon = faHandPointRight;
   thisYear = signal(new Date().getFullYear());
   documentStyle = signal(getComputedStyle(document.documentElement));
   username: WritableSignal<string | null> = signal('visitor');
@@ -60,7 +66,7 @@ export class DashboardComponent implements OnInit {
   savingsValue = signal(0);
   stocksValue = signal(0);
   stockChangePercentage!: number;
-  cryptoValue = signal(1500);
+  cryptoValue = signal(0);
   totalValue = computed(() => {
     return this.stocksValue() + this.savingsValue() + this.cryptoValue();
   });
@@ -75,7 +81,7 @@ export class DashboardComponent implements OnInit {
   quoteOfTheDay!: string;
 
   // CATEGORIES
-  categories: string[] = ['Savings', 'Investments', 'Cypto'];
+  categories: string[] = ['Savings', 'Investments'];
   categoriesRoutes: string[] = ['/savings', '/investment-dashboard', '/crypto'];
   monthsStr: string[] = [
     '1',
@@ -123,7 +129,7 @@ export class DashboardComponent implements OnInit {
     // GET Quote of the day
     this.getSvc.getQuoteOfTheDay().then((res: quote[]) => {
       const quote = res[0];
-      console.log(quote.q);
+      // console.log(quote.q);
       this.quoteOfTheDay = quote.q;
     });
 
@@ -150,8 +156,12 @@ export class DashboardComponent implements OnInit {
             map((res2: MessageResponse[]) => {
               const msgRes: MessageResponse = res2[0];
               const yesterdayValue = msgRes.value;
-              this.stockChangePercentage =
-                (this.stocksValue() - yesterdayValue) / yesterdayValue;
+              if (yesterdayValue === 0) {
+                this.stockChangePercentage = 0;
+              } else {
+                this.stockChangePercentage =
+                  (this.stocksValue() - yesterdayValue) / yesterdayValue;
+              }
               return res;
             })
           );
@@ -228,7 +238,7 @@ export class DashboardComponent implements OnInit {
   }
 
   getColor(percent: number): string {
-    return percent > 0 ? 'positive' : 'negative';
+    return percent >= 0 ? 'positive' : 'negative';
   }
 
   initiateChartsData() {

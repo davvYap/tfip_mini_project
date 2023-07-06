@@ -415,9 +415,13 @@
             <fa-icon [icon]="emptyIcon" animation="spin-pulse"></fa-icon>
           </h3>
         </div>
-
-        <div class="mt-2" id="addTransaction" (click)="newTransaction()">
-          <h4 class="text-decoration-underline">Add transaction</h4>
+        <div class="my-5 d-flex flex-column justify-content-evenly">
+          <div class="add-transaction" [routerLink]="'/savings'">
+            <h5>
+              <fa-icon [icon]="pointRightIcon"></fa-icon>
+              Go to Savings Dashboard
+            </h5>
+          </div>
         </div>
       </div>
     </div>

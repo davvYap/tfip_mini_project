@@ -83,3 +83,12 @@ dialog::backdrop {
 .dialogBtn:hover {
   transform: scale(1.1);
 }
+
+.add-transaction {
+  font-family: "Righteous", cursive;
+}
+
+.add-transaction:hover {
+  cursor: pointer;
+  transform: scale(1.03);
+}

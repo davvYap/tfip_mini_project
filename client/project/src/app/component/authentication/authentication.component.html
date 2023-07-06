@@ -56,14 +56,26 @@
                 ></p-button>
               </div>
 
-              <p-button
-                class="mt-3"
-                styleClass="p-button-outlined"
-                [disabled]="form.invalid"
-                type="submit"
+              <div
+                class="d-flex justify-content-center align-items-center mt-3"
               >
-                Log In
-              </p-button>
+                <asl-google-signin-button
+                  type="standard"
+                  theme="filled_black"
+                ></asl-google-signin-button>
+                <p-button
+                  class="ms-3"
+                  styleClass="p-button-outlined"
+                  [disabled]="form.invalid"
+                  type="submit"
+                >
+                  Log In
+                </p-button>
+                <!-- <p-button
+                  icon="pi pi-google"
+                  styleClass="p-button-rounded p-button-danger p-button-outlined"
+                ></p-button> -->
+              </div>
             </form>
           </div>
         </section>

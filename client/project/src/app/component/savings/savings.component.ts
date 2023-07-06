@@ -35,7 +35,10 @@ import { AddTransactionComponent } from '../add-transaction/add-transaction.comp
 import { DeleteService } from 'src/app/service/delete.service';
 import { UpdateService } from 'src/app/service/update.service';
 import { ExportService } from 'src/app/service/export.service';
-import { faFolderOpen } from '@fortawesome/free-solid-svg-icons';
+import {
+  faFolderOpen,
+  faHandPointRight,
+} from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@angular/platform-browser';
 
 @Component({
@@ -44,6 +47,7 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./savings.component.css'],
 })
 export class SavingsComponent implements OnInit, OnDestroy {
+  pointRightIcon = faHandPointRight;
   documentStyle = signal(getComputedStyle(document.documentElement));
   breadcrumbItems: MenuItem[] | undefined;
   breadcrumbHome: MenuItem | undefined;

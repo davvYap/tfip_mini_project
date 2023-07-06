@@ -313,6 +313,7 @@ export class AppComponent implements OnInit {
     localStorage.removeItem('username');
     localStorage.removeItem('firstname');
     localStorage.removeItem('lastname');
+    localStorage.removeItem('theme');
     this.router.navigate(['/home']);
     this.ngOnInit();
   }

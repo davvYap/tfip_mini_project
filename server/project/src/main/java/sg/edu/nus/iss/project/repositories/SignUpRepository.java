@@ -36,5 +36,4 @@ public class SignUpRepository {
         }
         return false;
     }
-
 }

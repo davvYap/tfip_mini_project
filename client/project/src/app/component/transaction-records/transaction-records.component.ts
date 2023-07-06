@@ -35,6 +35,7 @@ import { Table } from 'primeng/table';
 import { UpdateService } from 'src/app/service/update.service';
 import { DeleteService } from 'src/app/service/delete.service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
+import { faHandPointRight } from '@fortawesome/free-regular-svg-icons';
 
 @Component({
   selector: 'app-transaction-records',
@@ -42,6 +43,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
   styleUrls: ['./transaction-records.component.css'],
 })
 export class TransactionRecordsComponent implements OnInit, OnDestroy {
+  pointRightIcon = faHandPointRight;
   documentStyle = signal(getComputedStyle(document.documentElement));
   breadcrumbItems: MenuItem[] | undefined;
   breadcrumbHome: MenuItem | undefined;
