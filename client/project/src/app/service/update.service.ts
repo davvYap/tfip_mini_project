@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { MessageResponse, PurchasedStock, Transaction } from '../models';
+import {
+  Categories,
+  MessageResponse,
+  PurchasedStock,
+  Transaction,
+} from '../models';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable({
@@ -29,6 +34,15 @@ export class UpdateService {
       this.http.put<MessageResponse>(
         `http://localhost:8080/api/${userId}/update_transaction`,
         tran
+      )
+    );
+  }
+
+  updateCategory(userId: string, cat: Categories): Promise<MessageResponse> {
+    return lastValueFrom(
+      this.http.put<MessageResponse>(
+        `http://localhost:8080/api/${userId}/update_category`,
+        cat
       )
     );
   }

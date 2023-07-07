@@ -28,6 +28,7 @@ import {
 } from '@fortawesome/free-brands-svg-icons';
 import { AuthenticationComponent } from './component/authentication/authentication.component';
 import { SignUpComponent } from './component/sign-up/sign-up.component';
+import { EditCategoryComponent } from './component/edit-category/edit-category.component';
 
 @Component({
   selector: 'app-root',
@@ -87,7 +88,12 @@ export class AppComponent implements OnInit {
       this.isLogin.set(true);
       if (this.isLogin()) {
         this.isLogin.set(isLogin);
-        this.imgSrc = '/assets/images/puzzle.png';
+        const profileIcon: string | null = localStorage.getItem('profileIcon');
+        if (profileIcon === null || profileIcon === '') {
+          this.imgSrc = '/assets/images/puzzle.png';
+        } else {
+          this.imgSrc = profileIcon;
+        }
       } else {
         this.imgSrc = '';
         this.isLogin.set(false);
@@ -143,8 +149,24 @@ export class AppComponent implements OnInit {
               items: [
                 {
                   label: 'Transaction',
-                  icon: 'pi pi-fw pi-ticket ',
+                  icon: 'pi pi-fw pi-ticket',
                   command: () => this.newTransaction(),
+                },
+                {
+                  label: 'Category',
+                  icon: 'pi pi-fw pi-cart-plus',
+                  routerLink: '/savings',
+                },
+              ],
+            },
+            {
+              label: 'Edit',
+              icon: 'pi pi-fw pi-file-edit',
+              items: [
+                {
+                  label: 'Category',
+                  icon: 'pi pi-fw pi-ticket ',
+                  command: () => this.editCategory(),
                 },
               ],
             },
@@ -314,6 +336,7 @@ export class AppComponent implements OnInit {
     localStorage.removeItem('firstname');
     localStorage.removeItem('lastname');
     localStorage.removeItem('theme');
+    localStorage.removeItem('profileIcon');
     this.router.navigate(['/home']);
     this.ngOnInit();
   }
@@ -393,6 +416,28 @@ export class AppComponent implements OnInit {
       dismissableMask: true,
     });
 
+    this.dialogRef.onClose.subscribe((msg) => {
+      if (msg !== undefined) {
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Successful',
+          detail: msg,
+        });
+        this.ngOnInit();
+      }
+    });
+  }
+
+  editCategory() {
+    this.dialogRef = this.dialogSvc.open(EditCategoryComponent, {
+      header: 'Edit Category',
+      width: '30%',
+      // height: '90%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      dismissableMask: true,
+    });
     this.dialogRef.onClose.subscribe((msg) => {
       if (msg !== undefined) {
         this.messageSvc.add({

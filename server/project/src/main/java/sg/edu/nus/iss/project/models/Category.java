@@ -1,9 +1,15 @@
 package sg.edu.nus.iss.project.models;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonReader;
 
 public class Category {
     private int categoryId;
@@ -47,6 +53,18 @@ public class Category {
                 .add("categoryId", categoryId)
                 .add("categoryName", categoryName)
                 .add("type", type);
+    }
+
+    public static Category convertFromJsonString(String json) throws IOException {
+        Category cat = new Category();
+        try (InputStream is = new ByteArrayInputStream(json.getBytes())) {
+            JsonReader reader = Json.createReader(is);
+            JsonObject jsObj = reader.readObject();
+            cat.setCategoryId(jsObj.getInt("categoryId"));
+            cat.setCategoryName(jsObj.getString("categoryName"));
+            cat.setType(jsObj.getString("type"));
+        }
+        return cat;
     }
 
 }

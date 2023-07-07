@@ -18,7 +18,7 @@ public class User {
     private String email;
     private String firstname;
     private String lastname;
-    private byte[] profilePic;
+    private String profileIcon;
 
     public User() {
     }
@@ -84,12 +84,12 @@ public class User {
         this.lastname = lastname;
     }
 
-    public byte[] getProfilePic() {
-        return profilePic;
+    public String getProfileIcon() {
+        return profileIcon;
     }
 
-    public void setProfilePic(byte[] profilePic) {
-        this.profilePic = profilePic;
+    public void setProfileIcon(String profileIcon) {
+        this.profileIcon = profileIcon;
     }
 
     public static User convertFromResult(SqlRowSet rs) {
@@ -115,6 +115,25 @@ public class User {
             try (InputStream is = new ByteArrayInputStream(js.getBytes())) {
                 JsonReader jr = Json.createReader(is);
                 JsonObject jsObj = jr.readObject();
+                us.setUsername(jsObj.getString("username"));
+                us.setPassword(jsObj.getString("password"));
+                us.setEmail(jsObj.getString("email"));
+                us.setFirstname(jsObj.getString("firstname"));
+                us.setLastname(jsObj.getString("lastname"));
+                is.close();
+            }
+        }
+        return us;
+    }
+
+    public static User convertFromJsonStringGoogleUser(String js) throws IOException {
+        User us = null;
+        if (js != null) {
+            us = new User();
+            try (InputStream is = new ByteArrayInputStream(js.getBytes())) {
+                JsonReader jr = Json.createReader(is);
+                JsonObject jsObj = jr.readObject();
+                us.setUserId(jsObj.getString("userId"));
                 us.setUsername(jsObj.getString("username"));
                 us.setPassword(jsObj.getString("password"));
                 us.setEmail(jsObj.getString("email"));

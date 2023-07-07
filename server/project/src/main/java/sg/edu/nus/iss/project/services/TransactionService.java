@@ -27,6 +27,11 @@ public class TransactionService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public int editCategoryJdbc(String userId, int catId, String catName, String type) {
+        return transRepo.editCategoryJdbc(userId, catId, catName, type);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public List<Transaction> getUserTransactionsJdbc(String userId, int year) {
         return transRepo.getUserTransactionsJdbc(userId, year);
     }

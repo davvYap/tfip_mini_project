@@ -33,6 +33,10 @@ public class TransactionRepository {
         return categories;
     }
 
+    public int editCategoryJdbc(String userId, int catId, String catName, String type) {
+        return jdbcTemplate.update(SQL_EDIT_USER_CATEGORY, catName, type, catId, userId);
+    }
+
     public List<Transaction> getUserTransactionsJdbc(String userId, int year) {
         List<Transaction> transactions = new LinkedList<>();
         SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_USER_TRANSACTIONS_BY_YEAR, userId, year);

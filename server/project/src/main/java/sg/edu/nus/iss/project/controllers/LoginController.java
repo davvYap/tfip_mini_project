@@ -1,5 +1,7 @@
 package sg.edu.nus.iss.project.controllers;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.json.Json;
 import jakarta.servlet.http.HttpSession;
+import sg.edu.nus.iss.project.models.Quote;
 import sg.edu.nus.iss.project.models.User;
 import sg.edu.nus.iss.project.services.LoginService;
 import sg.edu.nus.iss.project.utils.gmail.GMailer;
@@ -41,6 +44,7 @@ public class LoginController {
 							.add("username", "guest")
 							.add("firstname", "guest")
 							.add("lastname", "")
+							.add("profileIcon", "")
 							.build().toString());
 		}
 		session.setAttribute("isLogin", true);
@@ -58,6 +62,12 @@ public class LoginController {
 		// am.app Developer Team
 		// """.formatted(username));
 
+		// GET USER PROFILE ICON
+		String profileIconBase64 = loginSvc.getUserProfileIcon(user.getUserId());
+		if (profileIconBase64 == null) {
+			profileIconBase64 = "";
+		}
+
 		return ResponseEntity.status(HttpStatus.OK)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(Json.createObjectBuilder()
@@ -66,6 +76,7 @@ public class LoginController {
 						.add("username", user.getUsername())
 						.add("firstname", user.getFirstname())
 						.add("lastname", user.getLastname())
+						.add("profileIcon", profileIconBase64)
 						.build().toString());
 	}
 
@@ -112,8 +123,20 @@ public class LoginController {
 
 	@GetMapping(path = "/quote")
 	@ResponseBody
-	public ResponseEntity<String> getQuoteOfTheDay() {
-		return loginSvc.getQuoteOfTheDay();
+	public ResponseEntity<String> getQuoteOfTheDay() throws IOException {
+		String quote = loginSvc.getQuoteOfTheDayRedis();
+		if (quote == null) {
+			System.out.println("Calling quote API...");
+			ResponseEntity<String> responseEntity = loginSvc.getQuoteOfTheDay();
+			String body = responseEntity.getBody();
+			Quote q = Quote.convertFromJsonString(body);
+			// SAVE TO REDIS
+			loginSvc.saveQuoteOfTheDayRedis(q.getQ());
+			return responseEntity;
+		}
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(Json.createArrayBuilder().add(Json.createObjectBuilder().add("q", quote)).build().toString());
 	}
 
 	// EXTRA

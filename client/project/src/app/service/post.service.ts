@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
+  GoogleUser,
   LoginStatus,
   MessageResponse,
   PurchasedStock,
@@ -100,6 +101,15 @@ export class PostService {
         {
           withCredentials: true,
         }
+      )
+    );
+  }
+
+  googleUserSignIn(user: GoogleUser): Promise<MessageResponse> {
+    return lastValueFrom(
+      this.http.post<MessageResponse>(
+        'http://localhost:8080/api/google_user_sign_in',
+        user
       )
     );
   }

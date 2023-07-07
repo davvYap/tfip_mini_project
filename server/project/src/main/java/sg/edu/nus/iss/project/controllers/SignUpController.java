@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -43,7 +44,8 @@ public class SignUpController {
         if (userExists) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "User email exists").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "User email exists").build()
+                            .toString());
         }
 
         String captcha = UUID.randomUUID().toString().substring(0, 6);
@@ -59,21 +61,24 @@ public class SignUpController {
                 """.formatted(username, captcha.toUpperCase()));
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Json.createObjectBuilder().add("message", "Captcha sent to email").build().toString());
+                .body(Json.createObjectBuilder().add("message", "Captcha sent to email").build()
+                        .toString());
     }
 
     @PostMapping(path = "/sign_up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     public ResponseEntity<String> newUserSignUp(@RequestPart String username, @RequestPart String password,
             @RequestPart String firstname, @RequestPart String lastname, @RequestPart String email,
-            @RequestPart MultipartFile file, @RequestPart String captcha, HttpSession session) {
+            @RequestPart MultipartFile file, @RequestPart String captcha, HttpSession session)
+            throws Exception {
 
         String sessionCaptcha = (String) session.getAttribute("captcha");
         if (!sessionCaptcha.equals(captcha)) {
             System.out.println("wrong captcha");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Wrong registration code.").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "Wrong registration code.")
+                            .build().toString());
         }
 
         try {
@@ -82,17 +87,73 @@ public class SignUpController {
             boolean status = signUpSvc.newUserSignUp(user, is);
 
             if (!status) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
-                        .body(Json.createObjectBuilder().add("message", "Sign up unsuccessful.").build().toString());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Json.createObjectBuilder().add("message", "Sign up unsuccessful.")
+                                .build().toString());
             }
 
+            GMailer gMailer = new GMailer();
+            gMailer.sendMail(email, "Welcome to am.app", """
+                    Dear %s,
+
+                    Thank you for signing up with us. Have a great journey ahead.
+
+                    For enquiries, please contact: +612-3456789
+
+                    Best Regards,
+                    am.app Development Team
+                    """.formatted(username));
+
             return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Sign up successful.").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "Sign up successful.").build()
+                            .toString());
 
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Sign up unsuccessful.").build().toString());
+                    .body(Json.createObjectBuilder().add("message", "Sign up unsuccessful.").build()
+                            .toString());
+        }
+    }
+
+    @PostMapping(path = "/google_user_sign_in")
+    @ResponseBody
+    public ResponseEntity<String> googleUserSignIn(@RequestBody String userJson) {
+        try {
+            User googleUser = User.convertFromJsonStringGoogleUser(userJson);
+            boolean googleUserExists = signUpSvc.checkGoogleUserExists(googleUser.getUserId());
+            if (googleUserExists) {
+                return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+                        .body(Json.createObjectBuilder().add("message", "Google user exists")
+                                .build().toString());
+            }
+            boolean userEmailExists = signUpSvc.checkUserExists(googleUser.getEmail());
+            if (userEmailExists) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Json.createObjectBuilder().add("message", "User email exists")
+                                .build().toString());
+            }
+            boolean googleUserSignUp = signUpSvc.newGoogleUserSignUp(googleUser);
+            if (!googleUserSignUp) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Json.createObjectBuilder()
+                                .add("message", "Google user sign up unsuccessful.")
+                                .build()
+                                .toString());
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder()
+                            .add("message", "Google user sign up successful.").build()
+                            .toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder()
+                            .add("message", "Google user sign up unsuccessful.").build()
+                            .toString());
         }
     }
 

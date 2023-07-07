@@ -25,7 +25,6 @@ import org.springframework.stereotype.Repository;
 
 import com.mongodb.client.result.UpdateResult;
 
-import ch.qos.logback.core.joran.conditional.IfAction;
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockPrice;
 import static sg.edu.nus.iss.project.repositories.DBQueries.*;
@@ -65,7 +64,7 @@ public class UserRepository {
         Query query = Query.query(Criteria.where("user_id").is(userId));
         Document d = mongo.findOne(query, Document.class, "user_theme");
         if (d == null) {
-            return "viva-dark";
+            return "mira";
         }
         return d.getString("theme_name");
     }

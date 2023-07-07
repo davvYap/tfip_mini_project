@@ -73,7 +73,26 @@ public class TransactionController {
 				.body(jsArr.build().toString());
 	}
 
+	@PutMapping(path = "/{userId}/update_category")
+	@ResponseBody
+	public ResponseEntity<String> editUserCategoryJdbc(@PathVariable String userId, @RequestBody String catJson)
+			throws IOException {
+		Category cat = Category.convertFromJsonString(catJson);
+		int updatedRow = transSvc.editCategoryJdbc(userId, cat.getCategoryId(), cat.getCategoryName(), cat.getType());
+
+		if (updatedRow > 0) {
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder().add("message", "Update category successfully").build().toString());
+		}
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(Json.createObjectBuilder().add("message", "Update category failed").build()
+						.toString());
+	}
+
 	@GetMapping(path = "/{userId}/transactions")
+
 	@ResponseBody
 	public ResponseEntity<String> getUserTransactionsJdbc(@PathVariable String userId, @RequestParam String year) {
 		int yearInt = Integer.parseInt(year);

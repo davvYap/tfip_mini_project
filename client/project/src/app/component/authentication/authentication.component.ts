@@ -9,6 +9,8 @@ import { SocialAuthService } from '@abacritt/angularx-social-login';
 import { SocialUser } from '@abacritt/angularx-social-login';
 import { GoogleSigninButtonDirective } from '@abacritt/angularx-social-login/public-api';
 import { GoogleSigninButtonModule } from '@abacritt/angularx-social-login/public-api';
+import { PostService } from 'src/app/service/post.service';
+import { GoogleUser } from 'src/app/models';
 
 @Component({
   selector: 'app-authentication',
@@ -31,7 +33,8 @@ export class AuthenticationComponent implements OnInit {
     private router: Router,
     public dialogRef: DynamicDialogRef,
     private dialogSvc: DialogService,
-    private authService: SocialAuthService
+    private authService: SocialAuthService,
+    private postSvc: PostService
   ) {}
 
   ngOnInit(): void {
@@ -74,6 +77,7 @@ export class AuthenticationComponent implements OnInit {
         localStorage.setItem('username', res.username);
         localStorage.setItem('firstname', res.firstname);
         localStorage.setItem('lastname', res.lastname);
+        localStorage.setItem('profileIcon', res.profileIcon);
         this.router.navigate(['/dashboard']);
         this.dialogRef.close(res.username);
       })
@@ -103,18 +107,38 @@ export class AuthenticationComponent implements OnInit {
   }
 
   loginGoogle(): void {
-    this.getSvc.isLogin = true;
-    this.getSvc.userId = this.user.id;
-    this.getSvc.username = this.user.name;
-    this.getSvc.firstname = this.user.firstName;
-    this.getSvc.lastname = this.user.lastName;
-    this.getSvc.isLogin$.next(true);
-    localStorage.setItem('isLogin', 'true');
-    localStorage.setItem('userId', this.user.id);
-    localStorage.setItem('username', this.user.name);
-    localStorage.setItem('firstname', this.user.firstName);
-    localStorage.setItem('lastname', this.user.lastName);
-    this.router.navigate(['/dashboard']);
-    this.dialogRef.close(this.user.name);
+    // console.log(this.user);
+    const googleUser: GoogleUser = {
+      userId: this.user.id,
+      username: this.user.name,
+      password: this.user.id,
+      firstname: this.user.firstName,
+      lastname: this.user.lastName,
+      email: this.user.email,
+    };
+    this.postSvc
+      .googleUserSignIn(googleUser)
+      .then((res) => {
+        this.getSvc.isLogin = true;
+        this.getSvc.userId = this.user.id;
+        this.getSvc.username = this.user.name;
+        this.getSvc.firstname = this.user.firstName;
+        this.getSvc.lastname = this.user.lastName;
+        this.getSvc.isLogin$.next(true);
+        localStorage.setItem('isLogin', 'true');
+        localStorage.setItem('userId', this.user.id);
+        localStorage.setItem('username', this.user.name);
+        localStorage.setItem('firstname', this.user.firstName);
+        localStorage.setItem('lastname', this.user.lastName);
+        localStorage.setItem('profileIcon', this.user.photoUrl);
+        this.router.navigate(['/dashboard']);
+        this.dialogRef.close(this.user.name);
+      })
+      .catch((err) => {
+        console.log(err);
+        this.imgSrc = '/assets/images/user.png';
+        this.imgClass = 'user-img-shake';
+        this.loginTitle = err.error.message;
+      });
   }
 }

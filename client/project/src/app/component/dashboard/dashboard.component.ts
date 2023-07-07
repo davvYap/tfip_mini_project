@@ -24,6 +24,7 @@ import {
   faFaceSmileWink,
   faHandPointRight,
 } from '@fortawesome/free-solid-svg-icons';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-dashboard',
@@ -80,6 +81,8 @@ export class DashboardComponent implements OnInit {
 
   quoteOfTheDay!: string;
 
+  showAddGoal: boolean = true;
+
   // CATEGORIES
   categories: string[] = ['Savings', 'Investments'];
   categoriesRoutes: string[] = ['/savings', '/investment-dashboard', '/crypto'];
@@ -104,7 +107,8 @@ export class DashboardComponent implements OnInit {
     private themeSvc: ThemeService,
     private router: Router,
     private fb: FormBuilder,
-    private title: Title
+    private title: Title,
+    private messageSvc: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -216,9 +220,24 @@ export class DashboardComponent implements OnInit {
       const goal: number = this.goalForm.value.goal;
       console.log(goal);
       console.log(event.key);
-      this.postSvc.updateUserGoal(this.getSvc.userId, goal).then((res) => {
-        console.log(res);
-      });
+      this.postSvc
+        .updateUserGoal(this.getSvc.userId, goal)
+        .then((res) => {
+          // console.log(res);
+          this.showAddGoal = false;
+          this.messageSvc.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: res.message,
+          });
+        })
+        .catch((err) => {
+          this.messageSvc.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.error.message,
+          });
+        });
       this.getSvc.getUserGoalPromise(this.getSvc.userId).then((res) => {
         this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
         this.initiateLineChart();

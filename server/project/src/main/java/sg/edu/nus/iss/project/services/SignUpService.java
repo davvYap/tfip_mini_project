@@ -21,4 +21,12 @@ public class SignUpService {
     public boolean checkUserExists(String email) {
         return signUpRepo.checkUserExists(email);
     }
+
+    public boolean checkGoogleUserExists(String userId) {
+        return signUpRepo.checkGoogleUserExists(userId);
+    }
+
+    public boolean newGoogleUserSignUp(User user) {
+        return signUpRepo.newGoogleUserSignUp(user);
+    }
 }

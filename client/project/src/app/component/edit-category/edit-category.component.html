@@ -1,0 +1,115 @@
+<div class="container">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-12">
+      <div class="d-flex flex-column m-4">
+        <label htmlFor="categoryName">Category</label>
+        <p-dropdown
+          [options]="categoriesItems"
+          optionLabel="label"
+          optionValue="value"
+          [filter]="true"
+          filterBy="label"
+          [showClear]="true"
+          placeholder="Select a Category"
+          [style]="{ width: '100%' }"
+          [(ngModel)]="selectedCategoryString"
+        >
+          <ng-template pTemplate="selectedItem">
+            <div
+              class="flex align-items-center gap-2"
+              *ngIf="selectedCategoryString"
+            >
+              <div class="d-flex align-items-center gap-2">
+                <p-tag
+                  [value]="getSelectedCategoryType() | uppercase"
+                  [severity]="getSeverityType()"
+                >
+                </p-tag>
+                <div>{{ selectedCategoryString }}</div>
+              </div>
+            </div>
+          </ng-template>
+          <ng-template let-category pTemplate="item">
+            <div class="d-flex align-items-center gap-2">
+              <p-tag
+                [value]="category.object.type | uppercase"
+                [severity]="getSeverity(category.object.type)"
+              ></p-tag>
+              <div>{{ category.object.categoryName }}</div>
+            </div>
+          </ng-template>
+        </p-dropdown>
+      </div>
+      <div class="d-flex justify-content-center align-items-center">
+        <button
+          pButton
+          pRipple
+          label="Select"
+          icon="pi pi-angle-double-down"
+          class="p-button-text"
+          (click)="selectCategory(selectedCategoryString)"
+        ></button>
+      </div>
+      <form [formGroup]="form">
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="categoryName">Category Name</label>
+          <input
+            pInputText
+            id="categoryName"
+            formControlName="categoryName"
+            autofocus
+          />
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="categoryType">Category Type</label>
+          <!-- NOTE -->
+          <p-dropdown
+            [options]="typesItems"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            placeholder="Select category type"
+            [style]="{ width: '100%' }"
+            formControlName="categoryType"
+            [(ngModel)]="selectedType"
+          >
+            <ng-template pTemplate="selectedItem">
+              <div class="flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                  <p-tag
+                    [value]="selectedType | uppercase"
+                    [severity]="getTagSeverityType()"
+                  >
+                  </p-tag>
+                </div>
+              </div>
+            </ng-template>
+            <ng-template let-type pTemplate="item">
+              <div class="d-flex align-items-center gap-2">
+                <p-tag
+                  [value]="type.label | uppercase"
+                  [severity]="getSeverity(type.value)"
+                ></p-tag>
+                <div>{{ type.label }}</div>
+              </div>
+            </ng-template>
+          </p-dropdown>
+          <!-- NOTE -->
+        </div>
+        <div class="d-flex flex-row-reverse m-4">
+          <div>
+            <button
+              pButton
+              pRipple
+              label="Save"
+              icon="pi pi-check"
+              class="p-button-text"
+              (click)="updateCategory()"
+              [disabled]="form.invalid"
+            ></button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

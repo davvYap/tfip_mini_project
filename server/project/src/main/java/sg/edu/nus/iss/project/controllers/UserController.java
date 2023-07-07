@@ -43,7 +43,7 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<String> getUserTheme(@RequestParam String userId) {
         String theme = userSvc.retrieveUserTheme(userId);
-
+        System.out.println("User theme >>> " + theme);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("theme", theme).build().toString());

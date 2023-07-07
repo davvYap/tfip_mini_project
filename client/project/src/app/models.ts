@@ -12,6 +12,7 @@ export interface LoginStatus {
   username: string;
   firstname: string;
   lastname: string;
+  profileIcon: string;
 }
 
 export interface Stock {
@@ -147,4 +148,13 @@ export interface quote {
   q: string;
   a: string;
   h: string;
+}
+
+export interface GoogleUser {
+  userId: string;
+  firstname: string;
+  lastname: string;
+  username: string;
+  password: string;
+  email: string;
 }

@@ -36,4 +36,23 @@ public class SignUpRepository {
         }
         return false;
     }
+
+    public boolean checkGoogleUserExists(String googleId) {
+        SqlRowSet rs = jdbc.queryForRowSet(SQL_CHECK_GOOGLE_USER_EXISTS, googleId);
+        while (rs.next()) {
+            System.out.println(rs.getString("user_id"));
+            if (rs.getString("user_id") != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean newGoogleUserSignUp(User user) {
+        int rowAffected = jdbc.update(SQL_NEW_GOOGLE_USER_SIGNUP, user.getUserId(), user.getUsername(),
+                user.getPassword(),
+                user.getEmail(),
+                user.getFirstname(), user.getLastname());
+        return rowAffected > 0;
+    }
 }

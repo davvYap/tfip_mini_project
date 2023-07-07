@@ -29,6 +29,7 @@ import {
   GoogleSigninButtonDirective,
   GoogleSigninButtonModule,
 } from '@abacritt/angularx-social-login';
+import { EditCategoryComponent } from './component/edit-category/edit-category.component';
 
 @NgModule({
   declarations: [
@@ -44,6 +45,7 @@ import {
     TransactionRecordsComponent,
     AuthenticationComponent,
     SignUpComponent,
+    EditCategoryComponent,
   ],
   imports: [
     BrowserModule,
