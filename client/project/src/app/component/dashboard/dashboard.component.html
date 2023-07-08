@@ -7,8 +7,8 @@
       </div>
     </div>
     <section *ngIf="totalValue(); else newUser">
-      <div class="dashboardcard flex justify-content-center">
-        <p-fieldset [toggleable]="true" class="text-center">
+      <div class="dashboardcard mb-5">
+        <p-fieldset [toggleable]="true" [collapsed]="true" class="text-center">
           <ng-template pTemplate="header">
             <div class="d-flex align-items-center">
               <h3>
@@ -74,7 +74,10 @@
         </p-fieldset>
       </div>
 
-      <div class="row justify-content-evenly align-items-center g-2 m-4">
+      <div
+        *ngIf="!skeletonLoading; else skeleton"
+        class="row justify-content-evenly align-items-center g-2 m-4"
+      >
         <!-- DONUT CHART -->
         <div class="col-4 donutbackground">
           <p-chart
@@ -87,23 +90,21 @@
 
         <!-- LINE CHART -->
         <div class="col-7 linebackground">
-          <div *ngIf="!skeletonLoading; else skeleton">
-            <div class="d-flex flex-row-reverse mb-2">
-              <p-button
-                (click)="op.toggle($event)"
-                icon="pi pi-chart-line"
-                label="Set Goal"
-                styleClass="p-button-rounded"
-                pTooltip="Set your goal here"
-              ></p-button>
-            </div>
-            <p-chart
-              type="line"
-              [data]="lineData"
-              [options]="lineOptions"
-              [plugins]="chartPlugin"
-            ></p-chart>
+          <div class="d-flex flex-row-reverse mb-2">
+            <p-button
+              (click)="op.toggle($event)"
+              icon="pi pi-chart-line"
+              label="Set Goal"
+              styleClass="p-button-rounded"
+              pTooltip="Set your goal here"
+            ></p-button>
           </div>
+          <p-chart
+            type="line"
+            [data]="lineData"
+            [options]="lineOptions"
+            [plugins]="chartPlugin"
+          ></p-chart>
         </div>
       </div>
     </section>

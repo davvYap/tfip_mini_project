@@ -18,6 +18,7 @@ import {
   UserSettings,
 } from '../models';
 import { Observable, Subject, lastValueFrom } from 'rxjs';
+import { SocialUser } from '@abacritt/angularx-social-login';
 
 @Injectable({
   providedIn: 'root',
@@ -313,6 +314,36 @@ export class GetService {
   }
 
   // EXTRA
+  initiateLoginProcedure(loginStatus: LoginStatus) {
+    this.userId = loginStatus.userId;
+    this.isLogin = loginStatus.isLogin;
+    this.username = loginStatus.username;
+    this.firstname = loginStatus.firstname;
+    this.lastname = loginStatus.lastname;
+    this.isLogin$.next(true);
+    localStorage.setItem('isLogin', 'true');
+    localStorage.setItem('userId', loginStatus.userId);
+    localStorage.setItem('username', loginStatus.username);
+    localStorage.setItem('firstname', loginStatus.firstname);
+    localStorage.setItem('lastname', loginStatus.lastname);
+    localStorage.setItem('profileIcon', loginStatus.profileIcon);
+  }
+
+  initiateGoogleLoginProcedure(googleUser: SocialUser) {
+    this.isLogin = true;
+    this.userId = googleUser.id;
+    this.username = googleUser.name;
+    this.firstname = googleUser.firstName;
+    this.lastname = googleUser.lastName;
+    this.isLogin$.next(true);
+    localStorage.setItem('isLogin', 'true');
+    localStorage.setItem('userId', googleUser.id);
+    localStorage.setItem('username', googleUser.name);
+    localStorage.setItem('firstname', googleUser.firstName);
+    localStorage.setItem('lastname', googleUser.lastName);
+    localStorage.setItem('profileIcon', googleUser.photoUrl);
+  }
+
   getStartDateOfYear(): string {
     const cuurDate = new Date();
     const currentYear = cuurDate.getFullYear();

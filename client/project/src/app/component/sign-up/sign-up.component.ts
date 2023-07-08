@@ -31,6 +31,7 @@ export class SignUpComponent implements OnInit {
   uploadedFile!: File;
   imageUrl!: string;
   newUser!: SignUp;
+  newUserPassword!: string;
   activeIndex: number = 0;
   form!: FormGroup;
   samePassword: boolean = true;
@@ -149,6 +150,27 @@ export class SignUpComponent implements OnInit {
     this.newUser = newUser;
     this.nextPage();
     this.pStepsReadOnly = false;
+    this.newUserPassword = this.createEncryptedPassword(newUser.password);
+  }
+
+  createEncryptedPassword(password: string): string {
+    let encryptedPassword = '';
+    for (let i = 0; i < password.length; i++) {
+      encryptedPassword += 'x';
+    }
+    return encryptedPassword;
+  }
+
+  togglePassword() {
+    if (
+      this.newUserPassword.match(
+        this.createEncryptedPassword(this.newUser.password)
+      )
+    ) {
+      this.newUserPassword = this.newUser.password;
+    } else {
+      this.newUserPassword = this.createEncryptedPassword(this.newUserPassword);
+    }
   }
 
   readImage(file: File) {

@@ -66,18 +66,7 @@ export class AuthenticationComponent implements OnInit {
     this.getSvc
       .verifyLogin(username, password)
       .then((res) => {
-        this.getSvc.isLogin = res.isLogin;
-        this.getSvc.userId = res.userId;
-        this.getSvc.username = res.username;
-        this.getSvc.firstname = res.firstname;
-        this.getSvc.lastname = res.lastname;
-        this.getSvc.isLogin$.next(true);
-        localStorage.setItem('isLogin', 'true');
-        localStorage.setItem('userId', res.userId);
-        localStorage.setItem('username', res.username);
-        localStorage.setItem('firstname', res.firstname);
-        localStorage.setItem('lastname', res.lastname);
-        localStorage.setItem('profileIcon', res.profileIcon);
+        this.getSvc.initiateLoginProcedure(res);
         this.router.navigate(['/dashboard']);
         this.dialogRef.close(res.username);
       })
@@ -119,18 +108,7 @@ export class AuthenticationComponent implements OnInit {
     this.postSvc
       .googleUserSignIn(googleUser)
       .then((res) => {
-        this.getSvc.isLogin = true;
-        this.getSvc.userId = this.user.id;
-        this.getSvc.username = this.user.name;
-        this.getSvc.firstname = this.user.firstName;
-        this.getSvc.lastname = this.user.lastName;
-        this.getSvc.isLogin$.next(true);
-        localStorage.setItem('isLogin', 'true');
-        localStorage.setItem('userId', this.user.id);
-        localStorage.setItem('username', this.user.name);
-        localStorage.setItem('firstname', this.user.firstName);
-        localStorage.setItem('lastname', this.user.lastName);
-        localStorage.setItem('profileIcon', this.user.photoUrl);
+        this.getSvc.initiateGoogleLoginProcedure(this.user);
         this.router.navigate(['/dashboard']);
         this.dialogRef.close(this.user.name);
       })

@@ -225,8 +225,8 @@
             </tr>
             <tr>
               <td>Password:</td>
-              <td>
-                {{ newUser.password }}
+              <td class="user-password" (click)="togglePassword()">
+                {{ newUserPassword }}
               </td>
             </tr>
             <tr *ngIf="showCaptcha">

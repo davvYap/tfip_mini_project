@@ -9,3 +9,7 @@
 h3 {
   font-family: "Righteous", cursive;
 }
+
+.user-password:hover {
+  cursor: zoom-in;
+}

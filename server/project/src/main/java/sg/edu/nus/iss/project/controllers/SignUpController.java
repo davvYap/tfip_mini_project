@@ -119,7 +119,7 @@ public class SignUpController {
 
     @PostMapping(path = "/google_user_sign_in")
     @ResponseBody
-    public ResponseEntity<String> googleUserSignIn(@RequestBody String userJson) {
+    public ResponseEntity<String> googleUserSignIn(@RequestBody String userJson) throws Exception {
         try {
             User googleUser = User.convertFromJsonStringGoogleUser(userJson);
             boolean googleUserExists = signUpSvc.checkGoogleUserExists(googleUser.getUserId());
@@ -144,6 +144,17 @@ public class SignUpController {
                                 .build()
                                 .toString());
             }
+            GMailer gMailer = new GMailer();
+            gMailer.sendMail(googleUser.getEmail(), "Welcome to am.app", """
+                    Dear %s,
+
+                    Thank you for signing up with us. Have a great journey ahead.
+
+                    For enquiries, please contact: +612-3456789
+
+                    Best Regards,
+                    am.app Development Team
+                    """.formatted(googleUser.getUsername()));
             return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
                     .body(Json.createObjectBuilder()
                             .add("message", "Google user sign up successful.").build()
