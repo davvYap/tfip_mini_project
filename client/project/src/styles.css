@@ -24,6 +24,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+a {
+  text-decoration: none !important;
+}
+
 /*grow vertically*/
 /* .app-root {
   flex: 1 1 auto; 

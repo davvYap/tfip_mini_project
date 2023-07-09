@@ -1,6 +1,7 @@
 .application-name > p {
   margin: 0.5rem;
   font-family: "Righteous", cursive;
+  color: #000;
 }
 
 /* FOOTER */
@@ -65,4 +66,7 @@ footer {
   .footer .row a fa-icon {
     margin: 0% 3%;
   }
+}
+.primary {
+  color: var(--text-color);
 }

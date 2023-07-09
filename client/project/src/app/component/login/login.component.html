@@ -1,39 +1,191 @@
-<div class="container">
-  <section class="product-description">
-    <div class="row justify-content-center align-items-center my-3">
-      <div
-        class="col-10 d-flex justify-content-center align-items-center"
-        [style]="{ height: '50dvh' }"
+<div class="container-fluid">
+  <section
+    class="row justify-content-center align-items-center mb-3"
+    id="header-section"
+  >
+    <div class="col-7 d-flex justify-content-center align-items-center">
+      <ng-lottie
+        [options]="animationOptions1"
+        (animationCreated)="onAnimate($event)"
+        [width]="'40em'"
+        [height]="'40em'"
       >
-        <div class="d-flex flex-column align-items-center">
-          <div>
-            <h3>
-              Product Description Here
-              <fa-icon [icon]="chartIcon" animation="spin-pulse"></fa-icon>
-            </h3>
-          </div>
+      </ng-lottie>
+    </div>
+    <div class="col-5 d-flex justify-content-start align-items-center">
+      <div class="d-flex flex-column align-items-start">
+        <h1>am<span class="grey">.app</span></h1>
+        <p class="fs-5 font-monospace pe-5 me-5">
+          A comprehensive financial application designed to help users manage
+          their investments and track their expenses. We offers a user-friendly
+          interface with robust features for monitoring investments portfolios
+          and savings.
+        </p>
+        <div>
+          <p-button
+            label="Get Started"
+            styleClass="p-button-rounded p-button-help"
+            class="me-2"
+            (onClick)="showLoginDialog()"
+          ></p-button>
+          <p-button
+            label="Share"
+            styleClass="p-button-rounded p-button-outlined p-button-secondary"
+          ></p-button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="container">
+  <section
+    class="row justify-content-center align-items-center my-5 py-5"
+    id="features"
+  >
+    <div class="d-flex justify-content-center align-items-center">
+      <fa-icon [icon]="downIcon" animation="bounce" size="2xl"></fa-icon>
+    </div>
+  </section>
+
+  <section
+    class="row justify-content-center align-items-center my-5 py-5 product-description"
+  >
+    <div class="d-flex justify-content-center align-items-center">
+      <h2>
+        <span class="grey">We offers </span
+        ><span
+          ><a href="#investment-management"
+            ><fa-icon [icon]="investmentIcon"></fa-icon> Investment
+            Management</a
+          ></span
+        >,
+        <span
+          ><a href="#expense-tracker"
+            ><fa-icon [icon]="pieChartIcon"></fa-icon> Expense Tracker</a
+          ></span
+        >,
+        <span
+          ><a href="#mortgage-calculator"
+            ><fa-icon [icon]="calculator"></fa-icon> Mortgage Calculator</a
+          ></span
+        >
+        and etc.
+      </h2>
+    </div>
+  </section>
+
+  <!-- INVESTMENT -->
+  <section
+    class="row justify-content-center align-items-center my-5 py-5"
+    id="investment-management"
+  >
+    <div class="col-5 d-flex justify-content-end align-items-center">
+      <div class="d-flex flex-column align-items-start">
+        <h1>Investment <span class="grey">Management</span></h1>
+        <p class="fs-5 font-monospace">
+          The application enable users to manage and track investment portfolio
+          with up-to-date market data.
+        </p>
+        <p class="fs-5 font-monospace">
+          Charts were integrated and utilized for tracking conviniency to manage
+          multiple tickers at once, and access detailed historical data to
+          analyze trends and make informed investment decisions.
+        </p>
+        <div>
+          <p-button
+            label="Learn more"
+            styleClass="p-button-rounded"
+            class="me-2"
+          ></p-button>
+        </div>
+      </div>
+    </div>
+    <div class="col-7 d-flex justify-content-center align-items-center">
+      <ng-lottie
+        [options]="animationOptions2"
+        (animationCreated)="onAnimate($event)"
+        [width]="'40em'"
+        [height]="'40em'"
+      >
+      </ng-lottie>
+    </div>
+  </section>
+
+  <!-- SAVINGS -->
+  <section
+    class="row justify-content-center align-items-center my-5 py-5"
+    id="expense-tracker"
+  >
+    <div class="col-7 d-flex justify-content-center align-items-center">
+      <ng-lottie
+        [options]="animationOptions3"
+        (animationCreated)="onAnimate($event)"
+        [width]="'40em'"
+        [height]="'40em'"
+      >
+      </ng-lottie>
+    </div>
+    <div class="col-5 d-flex justify-content-start align-items-center">
+      <div class="d-flex flex-column align-items-start">
+        <h1>Expense <span class="grey">Tracker</span></h1>
+        <p class="fs-5 font-monospace">
+          We offers an integrated expense tracking system. Users can record and
+          categorize their expenses, set budgets, and receive personalized
+          insights into their spending habits.
+        </p>
+        <p class="fs-5 font-monospace">
+          The application provides visualizations and reports that help users
+          understand where their money is going, identify potential areas for
+          savings, and maintain financial discipline.
+        </p>
+        <div>
+          <p-button
+            label="Learn more"
+            styleClass="p-button-rounded"
+            class="me-2"
+          ></p-button>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="product-description">
-    <div class="row justify-content-center align-items-center my-3">
-      <div
-        class="col-10 d-flex justify-content-center align-items-center"
-        [style]="{ height: '50dvh' }"
-      >
-        <div class="d-flex flex-column align-items-center">
-          <div>
-            <h3>
-              Product Description Here
-              <fa-icon [icon]="chartIcon" animation="spin-pulse"></fa-icon>
-            </h3>
-          </div>
+  <!-- MORTGAGE -->
+  <section
+    class="row justify-content-center align-items-center my-5 py-5"
+    id="mortgage-calculator"
+  >
+    <div class="col-5 d-flex justify-content-end align-items-center">
+      <div class="d-flex flex-column align-items-start">
+        <h1>Mortgage <span class="grey">Calculator</span></h1>
+        <p class="fs-5 font-monospace">
+          We help users to estimate their monthly mortgage payments based on
+          factors such as loan amount, interest rate, and loan term.
+        </p>
+        <p class="fs-5 font-monospace">
+          Quick and convenient calculations are provided, enabling users to make
+          informed decisions about their potential mortgage options.
+        </p>
+        <div>
+          <p-button
+            label="Learn more"
+            styleClass="p-button-rounded"
+            class="me-2"
+          ></p-button>
         </div>
       </div>
     </div>
+    <div class="col-7 d-flex justify-content-center align-items-center">
+      <ng-lottie
+        [options]="animationOptions4"
+        (animationCreated)="onAnimate($event)"
+        [width]="'40em'"
+        [height]="'40em'"
+      >
+      </ng-lottie>
+    </div>
   </section>
+
   <button
     id="scrollUpBtn"
     *ngIf="displayButton"

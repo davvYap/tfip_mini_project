@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -19,9 +20,9 @@ import { SavingsComponent } from './component/savings/savings.component';
 import { AddTransactionComponent } from './component/add-transaction/add-transaction.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { TransactionRecordsComponent } from './component/transaction-records/transaction-records.component';
-import { DatePipe } from '@angular/common';
 import { AuthenticationComponent } from './component/authentication/authentication.component';
 import { SignUpComponent } from './component/sign-up/sign-up.component';
+import { EditCategoryComponent } from './component/edit-category/edit-category.component';
 import {
   SocialLoginModule,
   SocialAuthServiceConfig,
@@ -29,7 +30,13 @@ import {
   GoogleSigninButtonDirective,
   GoogleSigninButtonModule,
 } from '@abacritt/angularx-social-login';
-import { EditCategoryComponent } from './component/edit-category/edit-category.component';
+import { LottieModule } from 'ngx-lottie';
+import player from 'lottie-web';
+
+// Export this function
+export function playerFactory(): any {
+  return import('lottie-web');
+}
 
 @NgModule({
   declarations: [
@@ -58,6 +65,8 @@ import { EditCategoryComponent } from './component/edit-category/edit-category.c
     FontAwesomeModule,
     SocialLoginModule,
     GoogleSigninButtonModule,
+    CommonModule,
+    LottieModule.forRoot({ player: playerFactory }),
   ],
   providers: [
     MessageService,

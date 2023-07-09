@@ -27,10 +27,11 @@
   </ng-template>
 </p-menubar>
 
+<!-- am.app -->
 <p-menubar *ngIf="!isLogin()" [model]="items" id="applicationMenubar">
   <ng-template pTemplate="start" class="mx-2">
     <div class="application-name fs-2">
-      <p>am.app</p>
+      <p>am<span class="primary">.app</span></p>
     </div>
   </ng-template>
   <ng-template #menuItemTempalte let-item>

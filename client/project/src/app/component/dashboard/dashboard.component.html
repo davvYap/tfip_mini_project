@@ -11,7 +11,7 @@
         <p-fieldset [toggleable]="true" [collapsed]="true" class="text-center">
           <ng-template pTemplate="header">
             <div class="d-flex align-items-center">
-              <h3>
+              <h3 class="total-value-h3">
                 Total Assets Value
                 <span
                   class="pi pi-angle-right"
@@ -79,7 +79,7 @@
         class="row justify-content-evenly align-items-center g-2 m-4"
       >
         <!-- DONUT CHART -->
-        <div class="col-4 donutbackground">
+        <div class="col-3 donutbackground">
           <p-chart
             type="doughnut"
             [data]="donutData"
@@ -87,9 +87,32 @@
             [plugins]="chartPlugin"
           ></p-chart>
         </div>
+        <!-- DONUT CHART -->
+        <div class="col-3 donutbackground">
+          <p-chart
+            type="doughnut"
+            [data]="donutData"
+            [options]="donutOptions"
+            [plugins]="chartPlugin"
+          ></p-chart>
+        </div>
+        <!-- DONUT CHART -->
+        <div class="col-3 donutbackground">
+          <p-chart
+            type="doughnut"
+            [data]="donutData"
+            [options]="donutOptions"
+            [plugins]="chartPlugin"
+          ></p-chart>
+        </div>
+      </div>
 
+      <div
+        *ngIf="!skeletonLoading; else skeleton"
+        class="row justify-content-evenly align-items-center g-2 m-4"
+      >
         <!-- LINE CHART -->
-        <div class="col-7 linebackground">
+        <div class="col-10 linebackground">
           <div class="d-flex flex-row-reverse mb-2">
             <p-button
               (click)="op.toggle($event)"

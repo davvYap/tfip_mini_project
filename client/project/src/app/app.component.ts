@@ -124,18 +124,19 @@ export class AppComponent implements OnInit {
                 },
               ],
             },
+
             {
-              label: 'Portfolio',
-              icon: 'pi pi-fw pi-chart-line',
-              routerLink: '/investment-dashboard',
+              label: 'Update',
+              icon: 'pi pi-fw pi-external-link',
+              command: () => this.triggerUpdateUsersStockValue(),
             },
             {
               separator: true,
             },
             {
-              label: 'Update',
-              icon: 'pi pi-fw pi-external-link',
-              command: () => this.triggerUpdateUsersStockValue(),
+              label: 'Portfolio',
+              icon: 'pi pi-fw pi-chart-line',
+              routerLink: '/investment-dashboard',
             },
           ],
         },
@@ -174,6 +175,9 @@ export class AppComponent implements OnInit {
               label: 'Records',
               icon: 'pi pi-fw pi-history',
               routerLink: '/transaction-records',
+            },
+            {
+              separator: true,
             },
             {
               label: 'Dashboard',
@@ -300,12 +304,12 @@ export class AppComponent implements OnInit {
         {
           label: 'Features',
           icon: 'pi pi-fw pi-table',
-          // routerLink: '/login',
+          command: () => this.scrollToElement('features'),
         },
-        {
-          label: 'Premium',
-          icon: 'pi pi-fw pi-verified',
-        },
+        // {
+        //   label: 'Premium',
+        //   icon: 'pi pi-fw pi-verified',
+        // },
         {
           label: 'Contact Us',
           icon: 'pi pi-fw pi-telegram',
@@ -337,6 +341,7 @@ export class AppComponent implements OnInit {
     localStorage.removeItem('lastname');
     localStorage.removeItem('theme');
     localStorage.removeItem('profileIcon');
+    this.changeTheme(0);
     this.router.navigate(['/home']);
     this.ngOnInit();
   }

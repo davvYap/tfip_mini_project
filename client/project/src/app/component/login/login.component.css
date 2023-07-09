@@ -15,10 +15,15 @@
   margin-top: 2rem;
   max-width: auto;
   background: rgba(255, 255, 255, 0.13);
-  box-shadow: 0 4px 30px rgba(10, 0, 0, 0.9);
+  box-shadow: 5px 10px var(--primary-color);
+  /* box-shadow: 0 4px 30px rgba(10, 0, 0, 0.9); */
 }
 
-h2 {
+h1,
+h2,
+h3,
+h4,
+h5 {
   font-family: "Righteous", cursive;
 }
 
@@ -29,4 +34,23 @@ h2 {
   right: 3rem;
   z-index: 99;
   cursor: pointer;
+}
+
+.grey {
+  color: var(--text-color);
+}
+
+/* a {
+  text-decoration: none;
+  color: var(--text-color);
+} */
+
+h2 > span > a {
+  text-decoration: none;
+  color: var(--text-secondary-color);
+}
+
+#header-section {
+  background-color: var(--primary-color);
+  color: var(--primary-color-text);
 }

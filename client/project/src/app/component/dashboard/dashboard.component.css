@@ -32,6 +32,10 @@ h5 {
   transform: scale(1.03);
 }
 
+.total-value-h3 {
+  margin-bottom: 0;
+}
+
 /* .card {
   padding: 2rem;
   border-radius: 10px;

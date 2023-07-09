@@ -39,7 +39,7 @@ export class AuthenticationComponent implements OnInit {
 
   ngOnInit(): void {
     this.panelSizes.set([90, 10]);
-    this.loginTitle = 'Welcome to am.app';
+    this.loginTitle = 'Sign in to am.app';
     this.form = this.createForm();
 
     this.authService.authState.subscribe((user) => {
