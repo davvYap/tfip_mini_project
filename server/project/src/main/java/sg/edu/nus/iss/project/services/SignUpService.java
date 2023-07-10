@@ -29,4 +29,12 @@ public class SignUpService {
     public boolean newGoogleUserSignUp(User user) {
         return signUpRepo.newGoogleUserSignUp(user);
     }
+
+    public User retrieveUserProfile(String userId) {
+        return signUpRepo.retrieveUserProfile(userId);
+    }
+
+    public boolean editUserProfile(User user, InputStream profileIcon) {
+        return signUpRepo.editUserProfile(user, profileIcon);
+    }
 }

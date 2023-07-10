@@ -1,107 +1,119 @@
 <div class="container">
   <div class="row justify-content-center align-items-center">
     <div class="col-10 text-center my-5 h1card">
-      <h1>Welcome {{ username() | titlecase }}</h1>
+      <h1>{{ userGreeting }} {{ username() | titlecase }}</h1>
       <div *ngIf="quoteOfTheDay" class="mt-3">
-        <p class="mb-0 font-monospace">"{{ quoteOfTheDay }}"</p>
+        <p class="mb-0 font-monospace fs-5">"{{ quoteOfTheDay }}"</p>
       </div>
     </div>
     <section *ngIf="totalValue(); else newUser">
-      <div class="dashboardcard mb-5">
-        <p-fieldset [toggleable]="true" [collapsed]="true" class="text-center">
-          <ng-template pTemplate="header">
-            <div class="d-flex align-items-center">
-              <h3 class="total-value-h3">
-                Total Assets Value
+      <div class="row justify-content-center align-items-center">
+        <div class="dashboardcard mb-5" class="col-10">
+          <p-fieldset
+            [toggleable]="true"
+            [collapsed]="true"
+            class="text-center"
+          >
+            <ng-template pTemplate="header">
+              <div class="d-flex align-items-center">
+                <h3 class="total-value-h3">
+                  Total Assets Value
+                  <span
+                    class="pi pi-angle-right"
+                    style="font-size: 1.5rem"
+                  ></span>
+                  <span *ngIf="!skeletonLoading; else loading">
+                    {{ totalValue() | currency }}
+                    <span
+                      *ngIf="totalValue()"
+                      class="ms-2"
+                      [className]="getColor(stockChangePercentage)"
+                    >
+                      ({{ stockChangePercentage | percent : "1.2-2" }})
+                    </span>
+                  </span>
+                </h3>
+              </div>
+            </ng-template>
+            <div>
+              <h4>
+                Investments
                 <span
                   class="pi pi-angle-right"
                   style="font-size: 1.5rem"
                 ></span>
                 <span *ngIf="!skeletonLoading; else loading">
-                  {{ totalValue() | currency }}
+                  {{ stocksValue() | currency }}
                   <span
-                    *ngIf="totalValue()"
+                    *ngIf="stocksValue()"
                     class="ms-2"
                     [className]="getColor(stockChangePercentage)"
                   >
                     ({{ stockChangePercentage | percent : "1.2-2" }})
                   </span>
                 </span>
-              </h3>
+              </h4>
             </div>
-          </ng-template>
-          <div>
-            <h4>
-              Investments
-              <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-              <span *ngIf="!skeletonLoading; else loading">
-                {{ stocksValue() | currency }}
+            <div>
+              <h4>
+                Savings
                 <span
-                  *ngIf="stocksValue()"
-                  class="ms-2"
-                  [className]="getColor(stockChangePercentage)"
-                >
-                  ({{ stockChangePercentage | percent : "1.2-2" }})
+                  class="pi pi-angle-right"
+                  style="font-size: 1.5rem"
+                ></span>
+                <span *ngIf="!skeletonLoading; else loading">
+                  {{ savingsValue() | currency }}
                 </span>
-              </span>
-            </h4>
-          </div>
-          <div>
-            <h4>
-              Savings
-              <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-              <span *ngIf="!skeletonLoading; else loading">
-                {{ savingsValue() | currency }}
-              </span>
-            </h4>
-          </div>
-          <!-- <div>
-            <h4>
-              Cypto
-              <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
-              <span>
-                {{ cryptoValue() | currency }}
-                <span
-                  *ngIf="cryptoValue()"
-                  class="ms-2"
-                  [className]="getColor(0.09)"
-                >
-                  ({{ 0.09 | percent : "1.2-2" }})
+              </h4>
+            </div>
+            <!-- <div>
+              <h4>
+                Cypto
+                <span class="pi pi-angle-right" style="font-size: 1.5rem"></span>
+                <span>
+                  {{ cryptoValue() | currency }}
+                  <span
+                    *ngIf="cryptoValue()"
+                    class="ms-2"
+                    [className]="getColor(0.09)"
+                  >
+                    ({{ 0.09 | percent : "1.2-2" }})
+                  </span>
                 </span>
-              </span>
-            </h4>
-          </div> -->
-        </p-fieldset>
+              </h4>
+            </div> -->
+          </p-fieldset>
+        </div>
       </div>
 
       <div
         *ngIf="!skeletonLoading; else skeleton"
-        class="row justify-content-evenly align-items-center g-2 m-4"
+        class="row justify-content-evenly align-items-center m-4"
       >
-        <!-- DONUT CHART -->
-        <div class="col-3 donutbackground">
+        <!-- DONUT CHART OVERALL-->
+        <div class="col-4 donutbackground">
           <p-chart
             type="doughnut"
-            [data]="donutData"
-            [options]="donutOptions"
+            [data]="donutDataOverall"
+            [options]="donutOptionsOverall"
             [plugins]="chartPlugin"
           ></p-chart>
         </div>
-        <!-- DONUT CHART -->
-        <div class="col-3 donutbackground">
+        <!-- DONUT CHART INVESTMENT -->
+        <div class="col-4 donutbackground">
           <p-chart
             type="doughnut"
-            [data]="donutData"
-            [options]="donutOptions"
+            [data]="donutDataInvestment"
+            [options]="donutOptionsInvestment"
             [plugins]="chartPlugin"
           ></p-chart>
         </div>
-        <!-- DONUT CHART -->
-        <div class="col-3 donutbackground">
+        <!-- DONUT CHART SAVINGS  -->
+        <div class="col-4 donutbackground">
           <p-chart
             type="doughnut"
-            [data]="donutData"
-            [options]="donutOptions"
+            [data]="donutDataSavings"
+            [options]="donutOptionsSavings"
             [plugins]="chartPlugin"
           ></p-chart>
         </div>
@@ -112,7 +124,7 @@
         class="row justify-content-evenly align-items-center g-2 m-4"
       >
         <!-- LINE CHART -->
-        <div class="col-10 linebackground">
+        <div class="col-12 linebackground">
           <div class="d-flex flex-row-reverse mb-2">
             <p-button
               (click)="op.toggle($event)"
@@ -149,6 +161,8 @@
     </p-overlayPanel>
   </div>
   <p-toast></p-toast>
+  <!-- SCROLL UP BTN -->
+  <p-scrollTop></p-scrollTop>
 </div>
 
 <ng-template #loading>

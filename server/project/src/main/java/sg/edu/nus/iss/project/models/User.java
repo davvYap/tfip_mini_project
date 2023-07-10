@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonReader;
 
 public class User {
@@ -98,6 +99,8 @@ public class User {
         user.setUsername(rs.getString("username"));
         user.setFirstname(rs.getString("firstname"));
         user.setLastname(rs.getString("lastname"));
+        user.setPassword(rs.getString("password"));
+        user.setEmail(rs.getString("email"));
         return user;
     }
 
@@ -143,6 +146,15 @@ public class User {
             }
         }
         return us;
+    }
+
+    public JsonObjectBuilder toJsonBuilder() {
+        return Json.createObjectBuilder()
+                .add("firstname", firstname)
+                .add("lastname", lastname)
+                .add("password", password)
+                .add("email", email)
+                .add("username", username);
     }
 
 }

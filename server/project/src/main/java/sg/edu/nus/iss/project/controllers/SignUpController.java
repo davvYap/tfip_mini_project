@@ -11,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -93,6 +95,14 @@ public class SignUpController {
                                 .build().toString());
             }
 
+            boolean userEmailExists = signUpSvc.checkUserExists(email);
+            if (userEmailExists) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Json.createObjectBuilder().add("message", "User email exists")
+                                .build().toString());
+            }
+
             GMailer gMailer = new GMailer();
             gMailer.sendMail(email, "Welcome to am.app", """
                     Dear %s,
@@ -164,6 +174,82 @@ public class SignUpController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                     .body(Json.createObjectBuilder()
                             .add("message", "Google user sign up unsuccessful.").build()
+                            .toString());
+        }
+    }
+
+    @GetMapping(path = "/{userId}/user_profile")
+    @ResponseBody
+    public ResponseEntity<String> getUserProfile(@PathVariable String userId) {
+        User user = signUpSvc.retrieveUserProfile(userId);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder()
+                            .add("message", "User not found.").build()
+                            .toString());
+        }
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+                .body(user.toJsonBuilder().build().toString());
+    }
+
+    @PutMapping(path = "/{userId}/edit_profile")
+    @ResponseBody
+    public ResponseEntity<String> editUserProfile(@PathVariable String userId, @RequestPart String username,
+            @RequestPart String password,
+            @RequestPart String firstname, @RequestPart String lastname, @RequestPart String email,
+            @RequestPart MultipartFile file)
+            throws Exception {
+
+        boolean userEmailExists;
+        User existingUserProfile = signUpSvc.retrieveUserProfile(userId);
+        if (existingUserProfile.getEmail().equals(email)) {
+            // if user email is similar
+            userEmailExists = false;
+        } else {
+            // if user email is different, we check whether email is duplicate
+            userEmailExists = signUpSvc.checkUserExists(email);
+        }
+        if (userEmailExists) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "User email exists")
+                            .build().toString());
+        }
+
+        try {
+            User user = new User(username, password, email, firstname, lastname);
+            user.setUserId(userId);
+            InputStream is = file.getInputStream();
+            boolean status = signUpSvc.editUserProfile(user, is);
+
+            if (!status) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Json.createObjectBuilder().add("message", "Sign up unsuccessful.")
+                                .build().toString());
+            }
+
+            GMailer gMailer = new GMailer();
+            gMailer.sendMail(email, "Updated user profile", """
+                    Dear %s,
+
+                    We received your request to update your profile.
+                    We are glad to inform that the request was successful, your profile has been updated.
+
+                    For enquiries, please contact: +612-3456789
+
+                    Best Regards,
+                    am.app Development Team
+                    """.formatted(username));
+
+            return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "Update user profile successful.").build()
+                            .toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "Update user profile unsuccessful.").build()
                             .toString());
         }
     }

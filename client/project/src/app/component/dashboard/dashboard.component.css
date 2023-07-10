@@ -22,7 +22,8 @@ h5 {
 .donutbackground,
 .linebackground {
   background: var(--surface-overlay);
-  padding: 1rem;
+  padding: 0.5rem;
+  /* box-shadow: 5px 10px var(--primary-color); */
   border-radius: 10px;
   margin-bottom: 1rem;
 }

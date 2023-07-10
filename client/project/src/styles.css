@@ -39,7 +39,8 @@ a {
   border-radius: 10px;
   margin-bottom: 1rem;
   background: rgba(161, 79, 79, 0.13);
-  box-shadow: 0 4px 30px rgba(10, 0, 0, 0.9);
+  /* box-shadow: 0 4px 30px rgba(10, 0, 0, 0.9); */
+  box-shadow: 5px 10px var(--primary-color);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   font-family: "Press Start 2P", cursive;

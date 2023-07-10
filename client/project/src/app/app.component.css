@@ -70,3 +70,30 @@ footer {
 .primary {
   color: var(--text-color);
 }
+
+#user-avatar:hover {
+  cursor: pointer;
+}
+
+.user-details {
+  font-family: "Righteous", cursive;
+}
+
+.router-h3 > h3:hover {
+  cursor: pointer;
+  transform: scale(1.03);
+}
+
+.user-profile {
+  width: 20px;
+  height: 20px;
+}
+
+.user-summary {
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  background: rgba(161, 79, 79, 0.13);
+  /* box-shadow: 0 4px 30px rgba(10, 0, 0, 0.9); */
+  box-shadow: 5px 10px var(--primary-color);
+}

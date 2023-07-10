@@ -55,4 +55,19 @@ public class SignUpRepository {
                 user.getFirstname(), user.getLastname());
         return rowAffected > 0;
     }
+
+    public User retrieveUserProfile(String userId) {
+        SqlRowSet rs = jdbc.queryForRowSet(SQL_GET_USER_BY_USERID, userId);
+        User user = null;
+        while (rs.next()) {
+            user = User.convertFromResult(rs);
+        }
+        return user;
+    }
+
+    public boolean editUserProfile(User user, InputStream profileIcon) {
+        int rowAffected = jdbc.update(SQL_EDIT_USER_PROFILE, user.getFirstname(), user.getLastname(), user.getEmail(),
+                user.getUsername(), user.getPassword(), profileIcon, user.getUserId());
+        return rowAffected > 0;
+    }
 }

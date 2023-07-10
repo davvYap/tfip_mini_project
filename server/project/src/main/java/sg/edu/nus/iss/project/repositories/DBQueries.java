@@ -10,6 +10,14 @@ public class DBQueries {
 			select profile_pic from users where user_id = ?
 			""";
 
+	public static final String SQL_GET_USER_BY_USERID = """
+			select * from users where user_id = ?;
+			""";
+
+	public static final String SQL_EDIT_USER_PROFILE = """
+			update users set firstname = ?, lastname = ?, email = ?, username = ?, password = ?, profile_pic = ? where user_id = ?;
+			""";
+
 	public static final String SQL_GET_ALL_USERS = """
 			select user_id from users;
 			""";

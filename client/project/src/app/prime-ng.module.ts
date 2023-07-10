@@ -37,6 +37,10 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { StepsModule } from 'primeng/steps';
 import { FileUploadModule } from 'primeng/fileupload';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ScrollTopModule } from 'primeng/scrolltop';
+import { SidebarModule } from 'primeng/sidebar';
+import { ImageModule } from 'primeng/image';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -77,6 +81,10 @@ const primeModules: any[] = [
   SplitButtonModule,
   StepsModule,
   FileUploadModule,
+  ConfirmDialogModule,
+  ScrollTopModule,
+  SidebarModule,
+  ImageModule,
 ];
 
 @NgModule({

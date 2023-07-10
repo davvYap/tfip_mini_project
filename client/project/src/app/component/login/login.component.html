@@ -29,9 +29,12 @@
             (onClick)="showLoginDialog()"
           ></p-button>
           <p-button
-            label="Share"
-            styleClass="p-button-rounded p-button-outlined p-button-secondary"
-          ></p-button>
+            styleClass="p-button-rounded p-button-warning"
+            (onClick)="share()"
+          >
+            <span class="font-bold me-2">Share</span>
+            <fa-icon [icon]="shareIcon"></fa-icon>
+          </p-button>
         </div>
       </div>
     </div>
@@ -186,7 +189,9 @@
     </div>
   </section>
 
-  <button
+  <!-- SCROLL UP BTN -->
+  <p-scrollTop></p-scrollTop>
+  <!-- <button
     id="scrollUpBtn"
     *ngIf="displayButton"
     (click)="topFunction()"
@@ -195,6 +200,6 @@
     class="p-button-info"
   >
     <fa-icon [icon]="pointUpIcon"></fa-icon>
-  </button>
+  </button> -->
   <p-toast></p-toast>
 </div>

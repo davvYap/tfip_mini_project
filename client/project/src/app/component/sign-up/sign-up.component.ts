@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import {
   faEnvelope,
   faKey,
@@ -9,11 +9,16 @@ import {
   faCheck,
 } from '@fortawesome/free-solid-svg-icons';
 import { FileUploadEvent } from 'primeng/fileupload';
-import { MessageResponse, SignUp } from 'src/app/models';
+import { LoginStatus, SignUp } from 'src/app/models';
 import { PostService } from 'src/app/service/post.service';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
+import {
+  DialogService,
+  DynamicDialogConfig,
+  DynamicDialogRef,
+} from 'primeng/dynamicdialog';
 import { GetService } from 'src/app/service/get.service';
 import { Router } from '@angular/router';
+import { UpdateService } from 'src/app/service/update.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -38,6 +43,7 @@ export class SignUpComponent implements OnInit {
   pStepsReadOnly: boolean = true;
   showCaptcha: boolean = false;
   captchaError: string | undefined;
+  isSignUp!: boolean;
 
   @ViewChild('captchaInput', { static: false })
   captchaInput!: ElementRef;
@@ -46,8 +52,11 @@ export class SignUpComponent implements OnInit {
     private fb: FormBuilder,
     private postSvc: PostService,
     public dialogRef: DynamicDialogRef,
+    private dialogConfig: DynamicDialogConfig,
     private getSvc: GetService,
-    private router: Router
+    private router: Router,
+    private updateSvc: UpdateService,
+    private messageSvc: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -66,20 +75,39 @@ export class SignUpComponent implements OnInit {
       },
     ];
 
-    this.form = this.createForm();
+    const user: SignUp = this.dialogConfig.data.signUp;
+    // console.log(this.dialogConfig.data.signUp);
+    this.form = this.createForm(user);
+    if (user === null) {
+      this.isSignUp = true;
+    } else {
+      this.isSignUp = false;
+    }
   }
 
-  createForm(): FormGroup {
+  createForm(user: SignUp | null): FormGroup {
     return this.fb.group({
-      firstname: this.fb.control('', Validators.required),
-      lastname: this.fb.control('', Validators.required),
-      username: this.fb.control('', [
+      firstname: this.fb.control(
+        !!user ? user.firstname : '',
+        Validators.required
+      ),
+      lastname: this.fb.control(
+        !!user ? user.lastname : '',
+        Validators.required
+      ),
+      username: this.fb.control(!!user ? user.username : '', [
         Validators.required,
         Validators.minLength(4),
         Validators.maxLength(20),
       ]),
-      email: this.fb.control('', [Validators.required, Validators.email]),
-      password: this.fb.control('', Validators.required),
+      email: this.fb.control(!!user ? user.email : '', [
+        Validators.required,
+        Validators.email,
+      ]),
+      password: this.fb.control(
+        !!user ? user.password : '',
+        Validators.required
+      ),
       confirmPassword: this.fb.control('', Validators.required),
     });
   }
@@ -215,18 +243,8 @@ export class SignUpComponent implements OnInit {
         // console.log(res.message);
         this.getSvc
           .verifyLogin(newUser.username, newUser.password)
-          .then((res) => {
-            this.getSvc.isLogin = res.isLogin;
-            this.getSvc.userId = res.userId;
-            this.getSvc.username = res.username;
-            this.getSvc.firstname = res.firstname;
-            this.getSvc.lastname = res.lastname;
-            this.getSvc.isLogin$.next(true);
-            localStorage.setItem('isLogin', 'true');
-            localStorage.setItem('userId', res.userId);
-            localStorage.setItem('username', res.username);
-            localStorage.setItem('firstname', res.firstname);
-            localStorage.setItem('lastname', res.lastname);
+          .then((res: LoginStatus) => {
+            this.getSvc.initiateLoginProcedure(res);
             this.router.navigate(['/dashboard']);
             this.dialogRef.close(res.username);
           })
@@ -237,6 +255,44 @@ export class SignUpComponent implements OnInit {
       .catch((err) => {
         // console.log(err.error.message);
         this.captchaError = err.error.message;
+      });
+  }
+
+  updateUserProfile() {
+    const newUser = this.form.value as SignUp;
+    this.newUser = newUser;
+    const formData = new FormData();
+    formData.append('firstname', newUser.firstname);
+    formData.append('lastname', newUser.lastname);
+    formData.append('username', newUser.username);
+    formData.append('password', newUser.password);
+    formData.append('email', newUser.email);
+    formData.append('file', this.uploadedFile);
+    this.updateSvc
+      .updateUserProfile(this.getSvc.userId, formData)
+      .then((msg) => {
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: msg.message,
+        });
+        this.dialogRef.close();
+        this.getSvc
+          .verifyLogin(newUser.username, newUser.password)
+          .then((res: LoginStatus) => {
+            this.getSvc.initiateLoginProcedure(res);
+            this.dialogRef.close(res.username);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })
+      .catch((err) => {
+        this.messageSvc.add({
+          severity: 'error',
+          summary: 'Failed',
+          detail: err.error.message,
+        });
       });
   }
 }

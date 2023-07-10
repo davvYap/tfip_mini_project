@@ -4,21 +4,29 @@ import {
   OnInit,
   Renderer2,
   WritableSignal,
+  computed,
   signal,
 } from '@angular/core';
-import { MenuItem, MessageService, PrimeNGConfig } from 'primeng/api';
+import {
+  ConfirmationService,
+  MenuItem,
+  MessageService,
+  PrimeNGConfig,
+} from 'primeng/api';
 import { ThemeService } from './service/theme.service';
 import { GetService } from './service/get.service';
 import { Router } from '@angular/router';
-import { LoginStatus } from './models';
+import { LoginStatus, MessageResponse, SignUp, Transaction } from './models';
 import { PostService } from './service/post.service';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription, forkJoin, map, of, switchMap } from 'rxjs';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AddTransactionComponent } from './component/add-transaction/add-transaction.component';
 import {
   faRightToBracket,
   faGem,
   IconDefinition,
+  faRightFromBracket,
+  faGear,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faFacebookF,
@@ -41,12 +49,26 @@ export class AppComponent implements OnInit {
   youtubeIcon = faYoutube;
   twitterIcon = faTwitter;
   loginIcon = faRightToBracket;
+  rightIcon = faRightFromBracket;
+  gearIcon = faGear;
   premiumIcon: IconDefinition = faGem;
   items!: MenuItem[];
   imgSrc!: string;
   updateUsersStockValue$!: Subscription;
   dialogRef!: DynamicDialogRef;
   isLogin: WritableSignal<boolean> = signal(false);
+  sidebarVisible: boolean = false;
+  userFullname!: string;
+  currTime!: string;
+
+  thisYear = signal(new Date().getFullYear());
+  savingsValue = signal(0);
+  stocksValue = signal(0);
+  stockChangePercentage!: number;
+  cryptoValue = signal(0);
+  totalValue = computed(() => {
+    return this.stocksValue() + this.savingsValue() + this.cryptoValue();
+  });
 
   themes: string[] = [
     'mira',
@@ -68,7 +90,8 @@ export class AppComponent implements OnInit {
     private messageSvc: MessageService,
     private dialogSvc: DialogService,
     private renderer: Renderer2,
-    private el: ElementRef
+    private el: ElementRef,
+    private confirmationSvc: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -94,11 +117,16 @@ export class AppComponent implements OnInit {
         } else {
           this.imgSrc = profileIcon;
         }
+        this.userFullname = `${localStorage.getItem(
+          'firstname'
+        )} ${localStorage.getItem('lastname')}`;
       } else {
         this.imgSrc = '';
         this.isLogin.set(false);
       }
     });
+
+    this.currTime = new Date().toDateString();
   }
 
   getMenuItem(isLogin: boolean): MenuItem[] {
@@ -106,7 +134,7 @@ export class AppComponent implements OnInit {
       return [
         {
           label: 'Investment',
-          icon: 'pi pi-fw pi-dollar',
+          icon: 'pi pi-fw pi-chart-bar',
           items: [
             {
               label: 'New',
@@ -328,6 +356,19 @@ export class AppComponent implements OnInit {
     localStorage.setItem('theme', theme);
   }
 
+  logoutConfirmation() {
+    this.confirmationSvc.confirm({
+      message: 'Are you sure you want to leave?',
+      header: 'Logout Confirmation',
+      icon: 'pi pi-info-circle',
+      accept: () => {
+        this.sidebarVisible = false;
+        this.logout();
+      },
+      reject: () => {},
+    });
+  }
+
   logout() {
     this.getSvc.isLogin = false;
     this.getSvc.isLogout = true;
@@ -341,7 +382,7 @@ export class AppComponent implements OnInit {
     localStorage.removeItem('lastname');
     localStorage.removeItem('theme');
     localStorage.removeItem('profileIcon');
-    this.changeTheme(0);
+    this.themeSvc.switchTheme('mira');
     this.router.navigate(['/home']);
     this.ngOnInit();
   }
@@ -381,9 +422,38 @@ export class AppComponent implements OnInit {
       baseZIndex: 10000,
       maximizable: true,
       dismissableMask: true,
+      data: { signUp: null },
     });
 
     this.dialogRef.onClose.subscribe();
+  }
+
+  showUserSettingDialog() {
+    this.getSvc
+      .getUserProfile(this.getSvc.userId)
+      .then((res) => {
+        const user: SignUp = res;
+        this.dialogRef = this.dialogSvc.open(SignUpComponent, {
+          // header: 'Login',
+          width: '50%',
+          // height: '90%',
+          contentStyle: { overflow: 'auto' },
+          baseZIndex: 10000,
+          maximizable: true,
+          dismissableMask: true,
+          data: { signUp: user },
+        });
+        this.dialogRef.onClose.subscribe(() => {
+          this.sidebarVisible = false;
+        });
+      })
+      .catch((err) => {
+        this.messageSvc.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'User not found',
+        });
+      });
   }
 
   triggerUpdateUsersStockValue() {
@@ -464,5 +534,70 @@ export class AppComponent implements OnInit {
         element.offsetTop
       );
     }
+  }
+
+  showUserDetail() {
+    this.sidebarVisible = true;
+    this.getUserAssetsValue();
+  }
+
+  navigateTo(route: string): void {
+    this.sidebarVisible = false;
+    this.router.navigate([route]);
+  }
+
+  getUserAssetsValue() {
+    this.stockChangePercentage = 0.0;
+    this.getSvc
+      .getUserTotalStockValue(this.getSvc.userId)
+      .pipe(
+        switchMap((res) => {
+          this.stocksValue.set(res.value);
+          return of(res);
+        }),
+        switchMap((res) => {
+          let observables: Observable<MessageResponse>[] = [];
+          const observable = this.getSvc.getUserYesterdayTotalStockValue(
+            this.getSvc.userId
+          );
+          observables.push(observable);
+          return forkJoin(observables).pipe(
+            map((res2: MessageResponse[]) => {
+              const msgRes: MessageResponse = res2[0];
+              const yesterdayValue = msgRes.value;
+              if (yesterdayValue === 0) {
+                this.stockChangePercentage = 0;
+              } else {
+                this.stockChangePercentage =
+                  (this.stocksValue() - yesterdayValue) / yesterdayValue;
+              }
+              return res;
+            })
+          );
+        })
+      )
+      .subscribe(() => {
+        console.log(this.stocksValue());
+      });
+    this.getSvc
+      .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
+      .pipe(
+        switchMap((trans: Transaction[]) => {
+          let totalIncome = 0;
+          let totalExpense = 0;
+          trans.map((tran) => {
+            if (tran.type === 'income') {
+              totalIncome += tran.amount;
+            } else {
+              totalExpense += tran.amount;
+            }
+          });
+          this.savingsValue.set(totalIncome - totalExpense);
+          return of(trans);
+        })
+      )
+      .subscribe(() => {
+        console.log(this.stocksValue());
+      });
   }
 }

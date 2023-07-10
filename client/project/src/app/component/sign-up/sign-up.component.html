@@ -249,8 +249,8 @@
           </table>
         </div>
       </div>
-
-      <div class="d-flex flex-row-reverse align-items-center">
+      <!-- SIGN UP -->
+      <div *ngIf="isSignUp" class="d-flex flex-row-reverse align-items-center">
         <p-button
           *ngIf="!showCaptcha"
           styleClass=" p-button-text"
@@ -266,6 +266,13 @@
         >
           <fa-icon [icon]="loginIcon"></fa-icon>
           <span class="ms-2 fw-bolder">Sign Up</span>
+        </p-button>
+      </div>
+      <!-- USER SETTING -->
+      <div *ngIf="!isSignUp" class="d-flex flex-row-reverse align-items-center">
+        <p-button styleClass=" p-button-text" (onClick)="updateUserProfile()">
+          <fa-icon [icon]="loginIcon"></fa-icon>
+          <span class="ms-2 fw-bolder">Update</span>
         </p-button>
       </div>
     </section>

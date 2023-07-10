@@ -7,6 +7,7 @@ import {
   PurchasedStock,
   PurchasedStocksCount,
   quote,
+  SignUp,
   SoldStock,
   Stock,
   StockLogo,
@@ -313,6 +314,12 @@ export class GetService {
     );
   }
 
+  getUserProfile(userId: string): Promise<SignUp> {
+    return lastValueFrom(
+      this.http.get<SignUp>(`http://localhost:8080/api/${userId}/user_profile`)
+    );
+  }
+
   // EXTRA
   initiateLoginProcedure(loginStatus: LoginStatus) {
     this.userId = loginStatus.userId;
@@ -403,6 +410,19 @@ export class GetService {
       }
     }
     return ''; // No suitable date found (unlikely scenario)
+  }
+
+  getCurrentTime(): string {
+    const currTime = new Date();
+    const hours = currTime.getHours();
+    // console.log('curr hour', hours);
+    if (hours < 12) {
+      return 'Good Morning';
+    } else if (hours >= 12 && hours < 18) {
+      return 'Good Afternoon';
+    } else {
+      return 'Good Evening';
+    }
   }
 
   getColors(index: number): string {

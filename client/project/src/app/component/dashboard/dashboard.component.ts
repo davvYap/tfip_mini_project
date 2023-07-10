@@ -4,14 +4,18 @@ import {
   signal,
   WritableSignal,
   computed,
+  Signal,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Params, Router } from '@angular/router';
 import { Chart } from 'chart.js';
-import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
+import { Observable, Subscription, forkJoin, map, of, switchMap } from 'rxjs';
 import {
   LoginStatus,
   MessageResponse,
+  PurchasedStocksCount,
+  StockLogo,
+  StonkStockPrice,
   Transaction,
   UserSettings,
   quote,
@@ -37,8 +41,6 @@ export class DashboardComponent implements OnInit {
   thisYear = signal(new Date().getFullYear());
   documentStyle = signal(getComputedStyle(document.documentElement));
   username: WritableSignal<string | null> = signal('visitor');
-  donutData!: any;
-  donutOptions!: any;
   chartPlugin: {
     id: string;
     beforeDraw: (chart: any, args: any, options: any) => void;
@@ -57,8 +59,37 @@ export class DashboardComponent implements OnInit {
       },
     },
   ];
+  userGreeting!: string;
 
-  lineData!: any;
+  donutDataOverall!: any;
+  donutOptionsOverall!: any;
+  donutDataInvestment!: any;
+  donutOptionsInvestment!: any;
+  donutDataSavings!: any;
+  donutOptionsSavings!: any;
+
+  stockCountDonutSymbol!: string[];
+  stockCountDonutData: WritableSignal<number[]> = signal([]);
+  categoriesColor!: string[];
+  stocksCount!: PurchasedStocksCount[];
+  stocksCount$!: Subscription;
+
+  categoriesData = signal<number[]>([]);
+  transactions!: Transaction[];
+  transactions$!: Subscription;
+  totalIncome: WritableSignal<number> = signal(0);
+  totalExpense: WritableSignal<number> = signal(0);
+  totalBalance: Signal<number> = computed(() => {
+    return this.totalIncome() - this.totalExpense();
+  });
+
+  private _lineData!: any;
+  public get lineData(): any {
+    return this._lineData;
+  }
+  public set lineData(value: any) {
+    this._lineData = value;
+  }
   lineOptions!: any;
   guideLineDataForYearlyGoal!: number[];
   portfolioPerformanceData!: number[];
@@ -84,8 +115,16 @@ export class DashboardComponent implements OnInit {
   showAddGoal: boolean = true;
 
   // CATEGORIES
-  categories: string[] = ['Savings', 'Investments'];
-  categoriesRoutes: string[] = ['/savings', '/investment-dashboard', '/crypto'];
+  generalCategories: string[] = ['Savings', 'Investments'];
+  generalCategoriesRoutes: string[] = [
+    '/savings',
+    '/investment-dashboard',
+    '/crypto',
+  ];
+
+  savingsCategories: string[] = ['Income', 'Expense'];
+  savingsCategoriesRoutes: string[] = ['income', 'expense'];
+
   monthsStr: string[] = [
     '1',
     '2',
@@ -127,8 +166,15 @@ export class DashboardComponent implements OnInit {
 
     this.themeSvc.switchTheme$.subscribe((res) => {
       console.log('change theme', res);
-      if (res) this.initiateChartsData();
+      if (res) {
+        this.initiateChartsData();
+        this.initiateStockCount();
+        this.initiateDonutChartData();
+      }
     });
+
+    // GET Greetings
+    this.userGreeting = this.getSvc.getCurrentTime();
 
     // GET Quote of the day
     this.getSvc.getQuoteOfTheDay().then((res: quote[]) => {
@@ -191,14 +237,17 @@ export class DashboardComponent implements OnInit {
       )
       .subscribe();
 
-    // this.stocksValue = 8000;
-    // this.cryptoValue = 1200;
-    this.investmentsValue = 6900 + 8000 + 1200;
-    // this.totalValue =
-    // this.savingsValue +
-    // this.investmentsValue +
-    // this.propertiesValue +
-    // this.miscValue;
+    // INVESTMENT DONUT CHART
+    this.stockCountDonutSymbol = [];
+    this.categoriesColor = [];
+    this.stocksCount = [];
+    this.initiateStockCount();
+
+    // SAVINGS DONUT CHART
+    this.transactions = [];
+    setTimeout(() => {
+      this.initiateDonutChartData();
+    }, 200);
 
     // LINE CHART
     this.initiateChartsData();
@@ -331,16 +380,16 @@ export class DashboardComponent implements OnInit {
         // console.log('line chart');
         console.log('final', this.portfolioPerformanceDataFinal());
         this.skeletonLoading = false;
-        this.initiateDonutChart();
+        this.initiateDonutChartOverall();
       });
   }
 
-  initiateDonutChart() {
+  initiateDonutChartOverall() {
     // const documentStyle = getComputedStyle(document.documentElement);
     const textColor = this.documentStyle().getPropertyValue('--text-color');
 
-    this.donutData = {
-      labels: this.categories,
+    this.donutDataOverall = {
+      labels: this.generalCategories,
       datasets: [
         {
           data: [this.savingsValue(), this.stocksValue(), this.cryptoValue()],
@@ -361,7 +410,7 @@ export class DashboardComponent implements OnInit {
       doughnutlabel: [],
     };
 
-    this.donutOptions = {
+    this.donutOptionsOverall = {
       cutout: '60%',
       hoverOffset: 10,
       plugins: {
@@ -374,7 +423,7 @@ export class DashboardComponent implements OnInit {
         },
         title: {
           display: true,
-          text: 'Categories',
+          text: 'Overall',
           position: 'bottom',
           padding: {
             top: 20,
@@ -392,7 +441,241 @@ export class DashboardComponent implements OnInit {
         if (activeElements.length > 0) {
           const index = activeElements[0].index;
           // console.log(index);
-          this.router.navigate([this.categoriesRoutes[index]]);
+          this.router.navigate([this.generalCategoriesRoutes[index]]);
+        }
+      },
+    };
+  }
+
+  initiateStockCount() {
+    this.stocksCount$ = this.getSvc
+      .getUserStocksCount(this.getSvc.userId)
+      .pipe(
+        // get market price and performance
+        switchMap((stockCounts: PurchasedStocksCount[]) => {
+          let observables: Observable<StonkStockPrice>[] = [];
+          stockCounts.map((stockCount) => {
+            const observable = this.getSvc.getStonkStockPrice(
+              stockCount.symbol
+            );
+            observables.push(observable);
+          });
+          return forkJoin(observables).pipe(
+            map((results: StonkStockPrice[]) => {
+              for (let i = 0; i < results.length; i++) {
+                const stock = stockCounts[i];
+                stock.marketPrice = results[i].price * stock.quantity;
+                stock.performance =
+                  (stock.marketPrice - stock.cost) / stock.cost;
+              }
+              return stockCounts;
+            })
+          );
+        }),
+        // get logo
+        switchMap((stockCounts: PurchasedStocksCount[]) => {
+          let observables: Observable<StockLogo>[] = [];
+          stockCounts.map((stockCount) => {
+            const observable = this.getSvc.getStockLogo(stockCount.symbol);
+            observables.push(observable);
+          });
+          return forkJoin(observables).pipe(
+            map((results: StockLogo[]) => {
+              for (let i = 0; i < results.length; i++) {
+                stockCounts[i].logo = results[i].url;
+              }
+              return stockCounts;
+            })
+          );
+        })
+      )
+      .subscribe((stockCounts) => {
+        this.stocksCount = this.sortStockByMarketPrice(stockCounts);
+        // this.totalStockMarketValue =
+        //   this.calculateUserTotalStockMarketValue(stockCounts);
+        // this.unrealizedProfit = this.calculateUnrealizedProfit(stockCounts);
+
+        this.stockCountDonutSymbol = [];
+        this.stockCountDonutData.set([]);
+        // for stock donut chart
+        this.stocksCount.map((sc) => {
+          this.stockCountDonutSymbol.push(sc.symbol);
+          this.stockCountDonutData.mutate((scData) => {
+            scData.push(sc.marketPrice);
+          });
+          const latestIndex = this.stockCountDonutSymbol.length;
+          this.categoriesColor.push(this.getSvc.getColors(latestIndex));
+        });
+        this.initiateDonutChartInvestment();
+      });
+  }
+
+  sortStockByMarketPrice(
+    PurchasedStocks: PurchasedStocksCount[]
+  ): PurchasedStocksCount[] {
+    const sorted = PurchasedStocks.sort((a, b) => {
+      return b.marketPrice - a.marketPrice;
+    });
+    return sorted;
+  }
+
+  initiateDonutChartInvestment() {
+    // const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = this.documentStyle().getPropertyValue('--text-color');
+
+    this.donutDataInvestment = {
+      labels: this.stockCountDonutSymbol,
+      datasets: [
+        {
+          data: this.stockCountDonutData(),
+          backgroundColor: this.categoriesColor,
+          hoverBackgroundColor: this.categoriesColor,
+        },
+      ],
+      doughnutlabel: [],
+    };
+
+    this.donutOptionsInvestment = {
+      cutout: '60%',
+      hoverOffset: 10,
+      plugins: {
+        legend: {
+          labels: {
+            color: textColor,
+            // color: '#fff',
+            padding: 5,
+          },
+        },
+        title: {
+          display: true,
+          text: 'Investment',
+          position: 'bottom',
+          padding: {
+            top: 20,
+            bottom: 0,
+          },
+          // color: '#fff',
+          color: textColor,
+        },
+        customCanvasBackgroundColor: {
+          color: this.documentStyle().getPropertyValue('--surface-ground'),
+        },
+      },
+    };
+  }
+
+  initiateDonutChartData() {
+    this.transactions$ = this.getSvc
+      .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
+      .pipe(
+        map((trans: Transaction[]) => {
+          trans.map((tran) => {
+            // console.log(tran);
+            this.transactions.push(tran);
+          });
+          return trans;
+        }),
+        map((trans: Transaction[]) => {
+          let totalIncome: number = 0.0;
+          let totalExpense: number = 0.0;
+
+          trans.map((tran) => {
+            if (tran.type === 'income') {
+              totalIncome += tran.amount;
+            } else {
+              totalExpense += tran.amount;
+            }
+          });
+          this.totalIncome.set(totalIncome);
+          this.totalExpense.set(totalExpense);
+          this.categoriesData.set([totalIncome, totalExpense]);
+        })
+      )
+      .subscribe(() => {
+        let transArr = [...this.transactions];
+        //  reason of doing that is because the paginator for p-table unable to track the entries if we insert the transaction one by one
+        // we have to assign the transactions one shot
+        this.transactions = this.sortTransactionByDate(transArr);
+        this.initiateDonutChartSavings();
+      });
+  }
+
+  sortTransactionByDate(trans: Transaction[]): Transaction[] {
+    trans.map((tran) => {
+      const dateStr = tran.date;
+      const dateNum = new Date(dateStr);
+      const timestamp = dateNum.getTime();
+      tran.dateNum = timestamp;
+    });
+    const sorted = trans.sort((a, b) => {
+      return b.dateNum - a.dateNum;
+    });
+    return sorted;
+  }
+
+  initiateDonutChartSavings() {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = this.documentStyle().getPropertyValue('--text-color');
+
+    this.donutDataSavings = {
+      labels: this.savingsCategories,
+      datasets: [
+        {
+          data: this.categoriesData(),
+          // backgroundColor: this.categoriesColor,
+          // hoverBackgroundColor: this.categoriesColor,
+          backgroundColor: [
+            documentStyle.getPropertyValue('--green-400'),
+            documentStyle.getPropertyValue('--red-400'),
+            // documentStyle.getPropertyValue('--purple-500'),
+            // documentStyle.getPropertyValue('--yellow-500'),
+          ],
+          hoverBackgroundColor: [
+            documentStyle.getPropertyValue('--green-300'),
+            documentStyle.getPropertyValue('--red-300'),
+            // documentStyle.getPropertyValue('--purple-400'),
+            // documentStyle.getPropertyValue('--yellow-400'),
+          ],
+        },
+      ],
+      doughnutlabel: [],
+    };
+
+    this.donutOptionsSavings = {
+      cutout: '60%',
+      hoverOffset: 10,
+      plugins: {
+        legend: {
+          labels: {
+            color: textColor,
+            // color: '#fff',
+            padding: 10,
+          },
+        },
+        title: {
+          display: true,
+          text: 'Transactions',
+          position: 'bottom',
+          padding: {
+            top: 20,
+            bottom: 0,
+          },
+          // color: '#fff',
+          color: textColor,
+        },
+        customCanvasBackgroundColor: {
+          color: documentStyle.getPropertyValue('--surface-ground'),
+        },
+      },
+      onClick: (event: any, activeElements: any) => {
+        if (activeElements.length > 0) {
+          const index = activeElements[0].index;
+          console.log(index);
+          const qp: Params = {
+            type: this.savingsCategoriesRoutes[index],
+            year: this.thisYear(),
+          };
+          this.router.navigate(['/transaction-records'], { queryParams: qp });
         }
       },
     };

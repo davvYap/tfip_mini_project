@@ -19,6 +19,7 @@ import {
   faChartSimple,
   faHandPointUp,
   faPieChart,
+  faShareFromSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import { AnimationOptions } from 'ngx-lottie';
 import { AnimationItem } from 'lottie-web';
@@ -36,6 +37,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   calculator = faCalculator;
   pieChartIcon = faPieChart;
   chartIcon = faChartSimple;
+  shareIcon = faShareFromSquare;
   pointUpIcon = faHandPointUp;
   displayButton = false;
   form!: FormGroup;
@@ -177,5 +179,19 @@ export class LoginComponent implements OnInit, AfterViewInit {
     });
 
     this.dialogRef.onClose.subscribe();
+  }
+
+  share() {
+    const data: any = {
+      title: 'Welcome to am.app',
+      text: `${this.getSvc.firstname} ${this.getSvc.lastname} invites you to join am.app ! Manage all your assets in single application for free.`,
+      url: 'http://localhost:8080',
+    };
+    navigator
+      .share(data)
+      .then(() => {
+        console.log('Shared');
+      })
+      .catch((error) => alert(`Error: ${error.message}`));
   }
 }

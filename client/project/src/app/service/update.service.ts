@@ -46,4 +46,16 @@ export class UpdateService {
       )
     );
   }
+
+  updateUserProfile(
+    userId: string,
+    formData: FormData
+  ): Promise<MessageResponse> {
+    return lastValueFrom(
+      this.http.put<MessageResponse>(
+        `http://localhost:8080/api/${userId}/edit_profile`,
+        formData
+      )
+    );
+  }
 }
