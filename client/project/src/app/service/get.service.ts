@@ -4,6 +4,8 @@ import {
   Categories,
   LoginStatus,
   MessageResponse,
+  MortgageAmortizationTable,
+  MortgageLoan,
   PurchasedStock,
   PurchasedStocksCount,
   quote,
@@ -317,6 +319,44 @@ export class GetService {
   getUserProfile(userId: string): Promise<SignUp> {
     return lastValueFrom(
       this.http.get<SignUp>(`http://localhost:8080/api/${userId}/user_profile`)
+    );
+  }
+
+  getMortgageLoanData(
+    amount: number,
+    term: number,
+    interest: number,
+    typeOfTerm: string
+  ): Promise<MortgageLoan> {
+    const qp = new HttpParams()
+      .set('amount', amount)
+      .append('term', term)
+      .append('interest', interest)
+      .append('typeOfTerm', typeOfTerm);
+    return lastValueFrom(
+      this.http.get<MortgageLoan>(
+        'http://localhost:8080/api/calculate_mortgage',
+        { params: qp }
+      )
+    );
+  }
+
+  getMortgageAmortizationTable(
+    amount: number,
+    term: number,
+    interest: number,
+    typeOfTerm: string
+  ): Promise<MortgageAmortizationTable[]> {
+    const qp = new HttpParams()
+      .set('amount', amount)
+      .append('term', term)
+      .append('interest', interest)
+      .append('typeOfTerm', typeOfTerm);
+    return lastValueFrom(
+      this.http.get<MortgageAmortizationTable[]>(
+        'http://localhost:8080/api/amortization_mortgage',
+        { params: qp }
+      )
     );
   }
 

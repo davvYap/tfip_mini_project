@@ -41,6 +41,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ScrollTopModule } from 'primeng/scrolltop';
 import { SidebarModule } from 'primeng/sidebar';
 import { ImageModule } from 'primeng/image';
+import { SliderModule } from 'primeng/slider';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -85,6 +86,7 @@ const primeModules: any[] = [
   ScrollTopModule,
   SidebarModule,
   ImageModule,
+  SliderModule,
 ];
 
 @NgModule({

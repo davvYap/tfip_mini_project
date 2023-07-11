@@ -87,7 +87,7 @@
         <p class="fs-4">Savings: {{ savingsValue() | currency }}</p>
       </div>
       <div class="router-h3 mt-3">
-        <h3 (click)="showUserSettingDialog()">
+        <h3 *ngIf="!isGoogleUser()" (click)="showUserSettingDialog()">
           <fa-icon [icon]="gearIcon"></fa-icon> Setting
         </h3>
         <h3 (click)="navigateTo('/investment-dashboard')">

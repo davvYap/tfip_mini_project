@@ -42,7 +42,10 @@ export class AddTransactionComponent implements OnInit {
       .getUserCategories(this.getSvc.userId)
       .pipe(
         map((cats) => {
-          cats.map((cat) => {
+          const sortedCats = cats.sort((a, b) =>
+            a.categoryName.localeCompare(b.categoryName)
+          );
+          sortedCats.map((cat) => {
             const catName: string = cat.categoryName;
             this.categoriesItems.push({
               label: catName,

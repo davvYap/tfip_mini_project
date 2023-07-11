@@ -32,6 +32,7 @@ import {
 } from '@abacritt/angularx-social-login';
 import { LottieModule } from 'ngx-lottie';
 import player from 'lottie-web';
+import { MortgageComponent } from './component/mortgage/mortgage.component';
 
 // Export this function
 export function playerFactory(): any {
@@ -53,6 +54,7 @@ export function playerFactory(): any {
     AuthenticationComponent,
     SignUpComponent,
     EditCategoryComponent,
+    MortgageComponent,
   ],
   imports: [
     BrowserModule,

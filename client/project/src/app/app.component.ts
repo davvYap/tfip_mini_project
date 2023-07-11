@@ -428,6 +428,14 @@ export class AppComponent implements OnInit {
     this.dialogRef.onClose.subscribe();
   }
 
+  isGoogleUser(): boolean {
+    if (this.getSvc.userId.length > 8) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   showUserSettingDialog() {
     this.getSvc
       .getUserProfile(this.getSvc.userId)

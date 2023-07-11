@@ -1,0 +1,52 @@
+package sg.edu.nus.iss.project.controllers;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import sg.edu.nus.iss.project.models.Mortgage;
+import sg.edu.nus.iss.project.models.MortgageTableMonth;
+import sg.edu.nus.iss.project.services.MortgageService;
+
+@Controller
+@CrossOrigin(origins = { "http://localhost:4200" }, allowCredentials = "true", allowedHeaders = "*")
+@RequestMapping(path = "/api")
+public class MortgageController {
+    @Autowired
+    private MortgageService mortgageSvc;
+
+    @GetMapping(path = "/calculate_mortgage")
+    @ResponseBody
+    public ResponseEntity<String> calculateMortgageLoan(@RequestParam double amount, @RequestParam double interest,
+            @RequestParam int term, @RequestParam String typeOfTerm) {
+        Mortgage mortgage = mortgageSvc.calculateMortgageRepayment(amount, term, interest, typeOfTerm);
+
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+                .body(mortgage.toJsonObjectBuilder().build().toString());
+    }
+
+    @GetMapping(path = "/amortization_mortgage")
+    @ResponseBody
+    public ResponseEntity<String> amortizationMortgageTable(@RequestParam double amount, @RequestParam double interest,
+            @RequestParam int term, @RequestParam String typeOfTerm) {
+        List<MortgageTableMonth> mtmList = mortgageSvc.getAmorTizationTable(amount, term, interest, typeOfTerm);
+
+        JsonArrayBuilder jsArr = Json.createArrayBuilder();
+
+        mtmList.forEach(m -> jsArr.add(m.toJsonObjectBuilder()));
+
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+                .body(jsArr.build().toString());
+    }
+}

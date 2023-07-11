@@ -158,3 +158,18 @@ export interface GoogleUser {
   password: string;
   email: string;
 }
+
+export interface MortgageLoan {
+  principal: number;
+  totalInterest: number;
+  monthlyRepayment: number;
+}
+
+export interface MortgageAmortizationTable {
+  year: number;
+  principal: number;
+  interest: number;
+  repayment: number;
+  totalInterestPaid: number;
+  balanceRemaining: number;
+}

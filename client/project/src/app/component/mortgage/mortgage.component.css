@@ -1,0 +1,59 @@
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: "Righteous", cursive;
+}
+
+.form-card {
+  background: rgba(161, 79, 79, 0.13);
+  border-radius: 10px;
+  box-shadow: 5px 10px var(--primary-color);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  font-family: monospace;
+  color: var(--text-color);
+}
+
+.mortgage-data {
+  color: var(--text-color);
+}
+
+.monthlyRepayment-color {
+  color: var(--primary-color);
+}
+
+.principal-color {
+  color: var(--teal-400);
+}
+
+.interest-color {
+  color: var(--blue-400);
+}
+
+.trans-card {
+  background: var(--surface-card);
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+
+  color: var(--text-color);
+  /* border: 1px solid rgba(255, 255, 255, 0.31);
+    border-radius: 16px; */
+}
+
+td,
+th {
+  text-align: center !important;
+}
+
+.mortgage-card {
+  /* background: var(--surface-card); */
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+.export-buttons {
+  margin-right: 1rem;
+}

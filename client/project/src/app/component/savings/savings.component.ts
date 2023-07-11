@@ -111,6 +111,10 @@ export class SavingsComponent implements OnInit, OnDestroy {
   categoriesItems!: categoryOptionItem[];
   typesItems!: SelectItem[];
   clonedTransactions: { [s: string]: Transaction } = {};
+  typeOptions: any[] = [
+    { label: 'Expense', value: 'expense' },
+    { label: 'Income', value: 'income' },
+  ];
 
   transactions!: Transaction[];
   transactions$!: Subscription;
@@ -249,38 +253,32 @@ export class SavingsComponent implements OnInit, OnDestroy {
     });
   }
 
-  addCategory(event: any) {
-    if (event.key === 'Enter') {
-      let category: string = this.categoryForm.get('category')?.value;
-      let type: string =
-        this.categoryForm.get('type')?.value === 'expense'
-          ? 'expense'
-          : 'income';
-      console.log(category, type);
-      this.postCategory$ = this.postSvc
-        .addCategory(this.getSvc.userId, category, type)
-        .subscribe({
-          next: (message) => {
-            this.messageSvc.add({
-              severity: 'success',
-              summary: 'Success',
-              detail: message.message,
-            });
-            // this.categories = [];
-            this.ngOnInit();
-          },
-          error: (error) => {
-            this.messageSvc.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: error.message,
-            });
-          },
-          complete: () => {
-            this.postCategory$.unsubscribe();
-          },
-        });
-    }
+  addCategory() {
+    const category: string = this.categoryForm.get('category')?.value;
+    const type: string = this.categoryForm.get('type')?.value;
+    this.postCategory$ = this.postSvc
+      .addCategory(this.getSvc.userId, category, type)
+      .subscribe({
+        next: (message) => {
+          this.messageSvc.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: message.message,
+          });
+          // this.categories = [];
+          this.ngOnInit();
+        },
+        error: (error) => {
+          this.messageSvc.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error.message,
+          });
+        },
+        complete: () => {
+          this.postCategory$.unsubscribe();
+        },
+      });
   }
 
   sortCategoryByDate(categories: Categories[]): Categories[] {

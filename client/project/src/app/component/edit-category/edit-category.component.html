@@ -13,6 +13,7 @@
           placeholder="Select a Category"
           [style]="{ width: '100%' }"
           [(ngModel)]="selectedCategoryString"
+          (onChange)="selectCategory(selectedCategoryString)"
         >
           <ng-template pTemplate="selectedItem">
             <div
@@ -41,14 +42,10 @@
         </p-dropdown>
       </div>
       <div class="d-flex justify-content-center align-items-center">
-        <button
-          pButton
-          pRipple
-          label="Select"
-          icon="pi pi-angle-double-down"
-          class="p-button-text"
-          (click)="selectCategory(selectedCategoryString)"
-        ></button>
+        <i
+          class="pi pi-angle-double-down"
+          [style]="{ color: 'var(--primary-color)' }"
+        ></i>
       </div>
       <form [formGroup]="form">
         <div class="d-flex flex-column m-4">

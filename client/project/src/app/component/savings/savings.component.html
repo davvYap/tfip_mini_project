@@ -150,15 +150,25 @@
               <input
                 pInputText
                 class="p-inputtext-sm"
-                placeholder="Press 'Enter' to submit"
+                placeholder="Category name"
                 formControlName="category"
-                (keypress)="addCategory($event)"
               />
-              <p-toggleButton
+              <!-- <p-toggleButton
                 formControlName="type"
                 onLabel="Expense"
                 offLabel="Income"
-              ></p-toggleButton>
+              ></p-toggleButton> -->
+              <p-selectButton
+                [options]="typeOptions"
+                formControlName="type"
+                optionLabel="label"
+                optionValue="value"
+              ></p-selectButton>
+              <p-button
+                label="Add"
+                styleClass="p-button-text"
+                (onClick)="addCategory()"
+              ></p-button>
             </form>
           </ng-template>
         </p-overlayPanel>
@@ -509,15 +519,20 @@
                   <input
                     pInputText
                     class="p-inputtext-sm"
-                    placeholder="Press 'Enter' to submit"
+                    placeholder="Category name"
                     formControlName="category"
-                    (keypress)="addCategory($event)"
                   />
-                  <p-toggleButton
+                  <p-selectButton
+                    [options]="typeOptions"
                     formControlName="type"
-                    onLabel="Expense"
-                    offLabel="Income"
-                  ></p-toggleButton>
+                    optionLabel="label"
+                    optionValue="value"
+                  ></p-selectButton>
+                  <p-button
+                    label="Add"
+                    styleClass="p-button-text"
+                    (onClick)="addCategory()"
+                  ></p-button>
                 </form>
               </ng-template>
             </p-overlayPanel>
