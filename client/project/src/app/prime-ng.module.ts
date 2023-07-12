@@ -43,6 +43,8 @@ import { SidebarModule } from 'primeng/sidebar';
 import { ImageModule } from 'primeng/image';
 import { SliderModule } from 'primeng/slider';
 import { InputSwitchModule } from 'primeng/inputswitch';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { BadgeModule } from 'primeng/badge';
 
 const primeModules: any[] = [
   ButtonModule,
@@ -89,6 +91,8 @@ const primeModules: any[] = [
   ImageModule,
   SliderModule,
   InputSwitchModule,
+  ProgressBarModule,
+  BadgeModule,
 ];
 
 @NgModule({

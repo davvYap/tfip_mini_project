@@ -57,6 +57,12 @@ th {
   border-radius: 10px;
 }
 
+.mortgage-line-card {
+  background: var(--surface-card);
+  padding: 1rem;
+  border-radius: 10px;
+}
+
 .export-buttons {
   margin-right: 1rem;
 }

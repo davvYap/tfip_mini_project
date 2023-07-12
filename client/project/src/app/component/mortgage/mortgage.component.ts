@@ -1,16 +1,23 @@
 import { Component, OnInit, ViewChild, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { MenuItem, TreeNode } from 'primeng/api';
+import { MenuItem, MessageService, TreeNode } from 'primeng/api';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { TreeTable } from 'primeng/treetable';
 import {
   Column,
   ExportColumn,
   MortgageAmortizationTable,
   MortgageLoan,
+  MortgagePortfolio,
+  Transaction,
 } from 'src/app/models';
 import { ExportService } from 'src/app/service/export.service';
 import { GetService } from 'src/app/service/get.service';
 import { ThemeService } from 'src/app/service/theme.service';
+import { AddTransactionComponent } from '../add-transaction/add-transaction.component';
+import { AddMortgageComponent } from '../add-mortgage/add-mortgage.component';
+import { ActivatedRoute } from '@angular/router';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-mortgage',
@@ -75,6 +82,11 @@ export class MortgageComponent implements OnInit {
   mortgageTreeTableExportCols!: ExportColumn[];
   mortgageExportBtnItems!: MenuItem[];
 
+  dialogRef!: DynamicDialogRef;
+
+  userMortgagePortfolios!: MortgagePortfolio[];
+  selectedMortgageId!: string;
+
   months: string[] = [
     'Jan',
     'Feb',
@@ -96,21 +108,26 @@ export class MortgageComponent implements OnInit {
     private themeSvc: ThemeService,
     private title: Title,
     private getSvc: GetService,
-    private exportSvc: ExportService
+    private exportSvc: ExportService,
+    private dialogSvc: DialogService,
+    private messageSvc: MessageService,
+    private activatedRoute: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.breadcrumbItems = [
       { label: 'Dashboard', routerLink: '/' },
-      { label: 'Mortgage', routerLink: '/mortgage' },
+      { label: 'Mortgage', routerLink: '/mortgage-dashboard' },
+      { label: 'Calculator', routerLink: '/mortgage' },
     ];
     this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
-    this.title.setTitle(`${this.getSvc.applicationName} | Mortgage`);
+    this.title.setTitle(`${this.getSvc.applicationName} | Calculator`);
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.themeSvc.switchTheme$.subscribe((res) => {
       if (res) {
         setTimeout(() => {
           this.initiateDonutChart();
+          this.initiateLineChart();
         }, 200);
       }
     });
@@ -131,6 +148,36 @@ export class MortgageComponent implements OnInit {
         this.initiateDonutChart();
       });
 
+    // USER MORTGAGE PORTFOLIO
+    console.log(this.activatedRoute.snapshot.queryParams['mortgageId']);
+    if (this.activatedRoute.snapshot.queryParams['mortgageId']) {
+      this.selectedMortgageId =
+        this.activatedRoute.snapshot.queryParams['mortgageId'];
+    }
+    this.userMortgagePortfolios = [];
+    this.getSvc
+      .getUserMortgagePortfolio(this.getSvc.userId)
+      .pipe(
+        map((res) => {
+          res.map((mort) => {
+            if (mort.id === this.selectedMortgageId) {
+              this.loanTerm = mort.totalPeriod;
+              this.loanAmount = mort.loanAmount;
+              this.interestRate = mort.interest;
+              this.typeOfLoanTerm = 'month';
+              setTimeout(() => {
+                this.getAmortizationTable();
+              }, 500);
+            }
+          });
+          return res;
+        })
+      )
+      .subscribe((res) => {
+        this.userMortgagePortfolios = res;
+      });
+
+    // EXPORT SVC
     this.mortgageTreeTableCols = [
       {
         header: 'Date',
@@ -349,15 +396,10 @@ export class MortgageComponent implements OnInit {
         totalPrincipalPerYear = 0;
         totalInterestPerYear = 0;
         totalPaymentPerYear = 0;
-        console.log('total months > ', totalMonths);
+        // console.log('total months > ', totalMonths);
         const remainingMonths = totalMonths % 12;
-        console.log('remaining month > ', remainingMonths); // if remaining 2 months
-        console.log('resuslt', res);
-        console.log(
-          totalPrincipalPerYear,
-          totalInterestPerYear,
-          totalPaymentPerYear
-        );
+        // console.log('remaining month > ', remainingMonths);
+        // console.log('resuslt', res);
         if (remainingMonths !== 0) {
           for (let i = totalMonths - remainingMonths; i < totalMonths; i++) {
             if (i === totalMonths - 1) {
@@ -589,5 +631,45 @@ export class MortgageComponent implements OnInit {
         mode: 'index',
       },
     };
+  }
+
+  addToPortfolio() {
+    let totalMonths: number = this.loanTerm;
+    if (this.typeOfLoanTerm === 'year') {
+      totalMonths *= 12;
+    }
+    const mortPortfolio: MortgagePortfolio = {
+      id: '#',
+      loanAmount: this.loanAmount,
+      monthlyRepayment: this.monthlyRepayment(),
+      totalPeriod: totalMonths,
+      interest: this.interestRate,
+      totalRepayment:
+        this.repaymentAmountData()[0] + this.repaymentAmountData()[1],
+
+      imgString: '',
+    };
+
+    this.dialogRef = this.dialogSvc.open(AddMortgageComponent, {
+      header: 'New mortgage portfolio',
+      width: '30%',
+      // height: '90%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      dismissableMask: true,
+      data: { mortgagePortfolio: mortPortfolio },
+    });
+
+    this.dialogRef.onClose.subscribe((msg) => {
+      if (msg !== undefined) {
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Successful',
+          detail: msg,
+        });
+        this.ngOnInit();
+      }
+    });
   }
 }

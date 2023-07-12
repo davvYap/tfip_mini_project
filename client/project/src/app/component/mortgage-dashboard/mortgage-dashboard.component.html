@@ -1,0 +1,86 @@
+<div class="container">
+  <p-breadcrumb
+    class="max-w-full m-2"
+    [model]="breadcrumbItems"
+    [home]="breadcrumbHome"
+  ></p-breadcrumb>
+  <div class="row justify-content-center align-items-center">
+    <div class="col-8 text-center my-3 h1card">
+      <h1>Mortgage Portfolio</h1>
+    </div>
+  </div>
+  <div
+    *ngIf="mortgagePortfolios.length > 0; else emptyMortgagePortfolio"
+    class="row justify-content-center align-items-center my-5 mortgage-cards"
+  >
+    <div
+      class="col-4"
+      *ngFor="let mortgage of mortgagePortfolios; let i = index"
+    >
+      <p-card
+        [header]="mortgage.id"
+        [subheader]="(mortgage.totalRepayment | currency)?.toString()"
+        [style]="{ width: '360px' }"
+      >
+        <ng-template pTemplate="header">
+          <img
+            alt="Card"
+            [src]="mortgage.imgString"
+            class="mortgage-images"
+            (click)="navigateTo(i)"
+          />
+        </ng-template>
+        <p>Loan Amount: {{ mortgage.loanAmount | currency }}</p>
+        <p>Interest Rate: {{ mortgage.interest / 100 | percent : "1.2-2" }}</p>
+        <p>Monthly Payment: {{ mortgage.monthlyRepayment | currency }}</p>
+        <ng-template pTemplate="footer">
+          <p-button
+            label="Transaction"
+            icon="pi pi-plus"
+            (onClick)="addToTransaction(i)"
+          ></p-button>
+          <p-button
+            label="Remove"
+            icon="pi pi-trash"
+            styleClass="p-button-secondary"
+            [style]="{ 'margin-left': '.5em' }"
+            (onClick)="confirmRemoveMortgage(i)"
+          ></p-button>
+        </ng-template>
+      </p-card>
+    </div>
+  </div>
+  <p-toast></p-toast>
+  <p-scrollTop></p-scrollTop>
+</div>
+
+<ng-template #emptyMortgagePortfolio>
+  <div class="row justify-content-center align-items-center my-3">
+    <div
+      class="col-10 d-flex justify-content-center align-items-center h1card"
+      [style]="{ height: '50dvh' }"
+    >
+      <div class="d-flex flex-column align-items-center">
+        <div>
+          <h3>
+            Oh Snap! Empty Records
+            <fa-icon [icon]="emptyIcon" animation="spin-pulse"></fa-icon>
+          </h3>
+        </div>
+
+        <div class="my-5 d-flex flex-column justify-content-evenly">
+          <div
+            class="mt-2"
+            class="to-calculator"
+            (click)="toMortgageCalculator()"
+          >
+            <h5>
+              <fa-icon [icon]="pointRightIcon"></fa-icon>
+              Go to Mortgage Calculator
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

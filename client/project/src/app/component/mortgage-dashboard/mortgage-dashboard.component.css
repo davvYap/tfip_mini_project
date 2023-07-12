@@ -1,0 +1,20 @@
+.mortgage-images {
+  height: 20rem;
+}
+
+.mortgage-cards {
+  font-family: "Righteous", cursive !important;
+}
+
+.to-calculator {
+  font-family: "Righteous", cursive;
+}
+
+.to-calculator:hover {
+  cursor: pointer;
+  transform: scale(1.03);
+}
+
+.mortgage-images:hover {
+  cursor: pointer;
+}

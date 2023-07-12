@@ -20,8 +20,19 @@
 
   <ng-template pTemplate="end">
     <!-- <input type="text" pInputText placeholder="Search" class="w-full" /> -->
-    <div class="application-name fs-2" [routerLink]="'/dashboard'">
-      <p>am<span class="primary">.app</span></p>
+    <div class="d-flex justify-content-evenly align-items-center">
+      <div class="me-2">
+        <i
+          class="pi pi-bell mr-4 p-text-secondary"
+          pBadge
+          style="font-size: 2rem"
+          value="2"
+          severity="danger"
+        ></i>
+      </div>
+      <div class="application-name fs-2" [routerLink]="'/dashboard'">
+        <p>am<span class="primary">.app</span></p>
+      </div>
     </div>
   </ng-template>
 </p-menubar>

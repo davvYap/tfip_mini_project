@@ -5,7 +5,7 @@
     [home]="breadcrumbHome"
   ></p-breadcrumb>
   <div class="row justify-content-center align-items-center">
-    <div class="col-8 text-center my-5 h1card">
+    <div class="col-8 text-center mt-3 mb-5 h1card">
       <h1>Mortgage Calculator</h1>
     </div>
   </div>
@@ -29,6 +29,7 @@
           [max]="2000000"
           [step]="50000"
           (onSlideEnd)="calculate()"
+          (onChange)="calculate()"
           class="mt-2"
         ></p-slider>
       </div>
@@ -60,6 +61,7 @@
           [max]="maxLoanTerm"
           (onSlideEnd)="calculate()"
           class="mt-2"
+          (onChange)="calculate()"
         ></p-slider>
       </div>
       <div class="d-flex flex-column m-4">
@@ -81,32 +83,34 @@
           [max]="100"
           (onSlideEnd)="calculate()"
           class="mt-2"
+          (onChange)="calculate()"
         ></p-slider>
       </div>
 
       <div class="d-flex justify-content-evenly align-items-center mt-3 mb-4">
-        <div class="text-center">
-          <p-button
-            label="Add to Regular Expense"
-            styleClass="p-button-rounded p-button-secondary"
-            (onClick)="getAmortizationTable()"
-          ></p-button>
-        </div>
+        <span class="p-buttonset">
+          <button
+            pButton
+            pRipple
+            label="Portfolio"
+            icon="pi pi-plus"
+            (click)="addToPortfolio()"
+          ></button>
 
-        <div class="text-center">
-          <p-button
-            label="Amortization Table"
-            styleClass="p-button-rounded"
-            (onClick)="getAmortizationTable()"
-          ></p-button>
-        </div>
+          <button
+            pButton
+            label="Amortization"
+            icon="pi pi-table"
+            (click)="getAmortizationTable()"
+          ></button>
+        </span>
       </div>
     </div>
 
     <div class="col-4 trans-card">
       <div class="mortgage-data">
         <p class="font-monospace fw-bolder fs-3">
-          Monthly Repayment:
+          Monthly Payment:
           <span class="monthlyRepayment-color">{{
             monthlyRepayment() | currency
           }}</span>
@@ -140,7 +144,7 @@
     *ngIf="showAmortizationChart"
     class="row justify-content-center align-items-center my-5"
   >
-    <div class="col-10 mortgage-card">
+    <div class="col-10 mortgage-line-card">
       <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
     </div>
   </div>

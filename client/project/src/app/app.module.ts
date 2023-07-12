@@ -33,6 +33,8 @@ import {
 import { LottieModule } from 'ngx-lottie';
 import player from 'lottie-web';
 import { MortgageComponent } from './component/mortgage/mortgage.component';
+import { AddMortgageComponent } from './component/add-mortgage/add-mortgage.component';
+import { MortgageDashboardComponent } from './component/mortgage-dashboard/mortgage-dashboard.component';
 
 // Export this function
 export function playerFactory(): any {
@@ -55,6 +57,8 @@ export function playerFactory(): any {
     SignUpComponent,
     EditCategoryComponent,
     MortgageComponent,
+    AddMortgageComponent,
+    MortgageDashboardComponent,
   ],
   imports: [
     BrowserModule,

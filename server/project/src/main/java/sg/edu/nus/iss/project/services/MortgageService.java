@@ -4,13 +4,19 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import sg.edu.nus.iss.project.models.Mortgage;
+import sg.edu.nus.iss.project.models.MortgagePortfolio;
 import sg.edu.nus.iss.project.models.MortgageTableMonth;
+import sg.edu.nus.iss.project.repositories.MortgageRepository;
 
 @Service
 public class MortgageService {
+
+    @Autowired
+    private MortgageRepository mortgageRepo;
 
     public Mortgage calculateMortgageRepayment(double loanAmount, int term, double interest, String typeOfTerm) {
 
@@ -60,5 +66,17 @@ public class MortgageService {
         }
 
         return mortgageList;
+    }
+
+    public Boolean upsertUserMortgagePortfolioMongo(String userId, MortgagePortfolio mp) {
+        return mortgageRepo.upsertUserMortgagePortfolioMongo(userId, mp);
+    }
+
+    public List<MortgagePortfolio> retrieveUserMortgagePortfolioMongo(String userId) {
+        return mortgageRepo.retrieveUserMortgagePortfolioMongo(userId);
+    }
+
+    public boolean deleteUserMortgagePortfolioMongo(String userId, String mortgageId) {
+        return mortgageRepo.deleteUserMortgagePortfolioMongo(userId, mortgageId);
     }
 }

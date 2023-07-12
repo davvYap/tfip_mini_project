@@ -1,7 +1,11 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MenuItem, MessageService, SelectItem } from 'primeng/api';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import {
+  DialogService,
+  DynamicDialogConfig,
+  DynamicDialogRef,
+} from 'primeng/dynamicdialog';
 import { switchMap, forkJoin, Observable, map, tap } from 'rxjs';
 import { Categories, Transaction, categoryOptionItem } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
@@ -30,12 +34,12 @@ export class AddTransactionComponent implements OnInit {
     private getSvc: GetService,
     private postSvc: PostService,
     public dialogRef: DynamicDialogRef,
-    private messageSvc: MessageService
+    private messageSvc: MessageService,
+    private dialogConfig: DynamicDialogConfig
   ) {}
 
   ngOnInit(): void {
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
-    this.form = this.createForm();
 
     this.categoriesItems = [];
     this.getSvc
@@ -56,15 +60,27 @@ export class AddTransactionComponent implements OnInit {
         })
       )
       .subscribe();
+
+    // FROM MORTGAGE COMPONENT
+    const mortgageMonthlyPayment: Transaction =
+      this.dialogConfig.data.mortgageMonthlyPayment;
+
+    this.form = this.createForm(mortgageMonthlyPayment);
   }
 
-  createForm(): FormGroup {
+  createForm(tran: Transaction | null): FormGroup {
     return this.fb.group({
-      date: this.fb.control('', Validators.required),
-      transactionName: this.fb.control('', Validators.required),
-      amount: this.fb.control('', Validators.required),
-      categoryName: this.fb.control('', Validators.required),
-      remarks: this.fb.control(''),
+      date: this.fb.control(!!tran ? tran.date : '', Validators.required),
+      transactionName: this.fb.control(
+        !!tran ? tran.transactionName : '',
+        Validators.required
+      ),
+      amount: this.fb.control(!!tran ? tran.amount : '', Validators.required),
+      categoryName: this.fb.control(
+        !!tran ? tran.categoryName : '',
+        Validators.required
+      ),
+      remarks: this.fb.control(!!tran ? tran.remarks : ''),
     });
   }
 

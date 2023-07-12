@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { MessageResponse } from '../models';
+import { MessageResponse, MortgagePortfolio } from '../models';
 import { lastValueFrom } from 'rxjs';
 import { Transaction } from '../models';
 
@@ -46,6 +46,19 @@ export class DeleteService {
     return lastValueFrom(
       this.http.delete<MessageResponse>(
         `http://localhost:8080/api/${userId}/delete_transaction`,
+        { params: qp }
+      )
+    );
+  }
+
+  deleteMortgagePortfolio(
+    userId: string,
+    mortgageId: string
+  ): Promise<MessageResponse> {
+    const qp = new HttpParams().set('mortgageId', mortgageId);
+    return lastValueFrom(
+      this.http.delete<MessageResponse>(
+        `http://localhost:8080/api/${userId}/delete_mortgage_portfolio`,
         { params: qp }
       )
     );

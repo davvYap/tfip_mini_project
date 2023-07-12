@@ -1,0 +1,94 @@
+<div class="container">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-12">
+      <form [formGroup]="form">
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="id">Mortgage ID</label>
+          <input
+            pInputText
+            id="id"
+            formControlName="id"
+            placeholder="Always start with '#' (i.e. #mortgage-1)"
+            autofocus
+          />
+        </div>
+        <div *ngIf="invalidMortgageId()" class="d-flex flex-column m-4">
+          <code>Invalid format of Mortgage ID</code>
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="loanAmount">Loan Amount</label>
+          <p-inputNumber
+            mode="currency"
+            currency="USD"
+            id="loanAmount"
+            [style]="{ width: '100%' }"
+            [inputStyle]="{ width: '100%' }"
+            formControlName="loanAmount"
+          >
+          </p-inputNumber>
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="totalPeriod">Total Period </label>
+          <p-inputNumber
+            suffix=" months"
+            inputId="integeronly"
+            [style]="{ width: '100%' }"
+            [inputStyle]="{ width: '100%' }"
+            formControlName="totalPeriod"
+          >
+          </p-inputNumber>
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="interest">Interest Rate</label>
+          <p-inputNumber
+            suffix=" %"
+            mode="decimal"
+            [minFractionDigits]="2"
+            [maxFractionDigits]="2"
+            [style]="{ width: '100%' }"
+            [inputStyle]="{ width: '100%' }"
+            formControlName="interest"
+          >
+          </p-inputNumber>
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="monthlyRepayment">Monthly Repayment</label>
+          <p-inputNumber
+            mode="currency"
+            currency="USD"
+            id="monthlyRepayment"
+            [style]="{ width: '100%' }"
+            [inputStyle]="{ width: '100%' }"
+            formControlName="monthlyRepayment"
+          >
+          </p-inputNumber>
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="totalRepayment">Total Repayment</label>
+          <p-inputNumber
+            mode="currency"
+            currency="USD"
+            id="totalRepayment"
+            [style]="{ width: '100%' }"
+            [inputStyle]="{ width: '100%' }"
+            formControlName="totalRepayment"
+          >
+          </p-inputNumber>
+        </div>
+        <div class="d-flex flex-row-reverse m-4">
+          <div>
+            <button
+              pButton
+              pRipple
+              label="Save"
+              icon="pi pi-check"
+              class="p-button-text"
+              (click)="addMortgagePortfolio()"
+              [disabled]="invalidForm()"
+            ></button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

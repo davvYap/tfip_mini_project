@@ -4,6 +4,7 @@ import {
   GoogleUser,
   LoginStatus,
   MessageResponse,
+  MortgagePortfolio,
   PurchasedStock,
   SignUp,
   Transaction,
@@ -110,6 +111,18 @@ export class PostService {
       this.http.post<MessageResponse>(
         'http://localhost:8080/api/google_user_sign_in',
         user
+      )
+    );
+  }
+
+  addUserMortgagePortfolio(
+    userId: string,
+    mort: MortgagePortfolio
+  ): Promise<MessageResponse> {
+    return lastValueFrom(
+      this.http.post<MessageResponse>(
+        `http://localhost:8080/api/${userId}/add_mortgage_profile`,
+        mort
       )
     );
   }

@@ -781,6 +781,11 @@ export class DashboardComponent implements OnInit {
         //   },
         // },
       },
+      hoverRadius: 15,
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
     };
   }
 }

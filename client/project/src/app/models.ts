@@ -173,3 +173,13 @@ export interface MortgageAmortizationTable {
   totalInterestPaid: number;
   balanceRemaining: number;
 }
+
+export interface MortgagePortfolio {
+  id: string;
+  loanAmount: number;
+  interest: number;
+  totalRepayment: number;
+  monthlyRepayment: number;
+  totalPeriod: number;
+  imgString: string;
+}

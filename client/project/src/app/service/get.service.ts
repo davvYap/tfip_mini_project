@@ -6,6 +6,7 @@ import {
   MessageResponse,
   MortgageAmortizationTable,
   MortgageLoan,
+  MortgagePortfolio,
   PurchasedStock,
   PurchasedStocksCount,
   quote,
@@ -357,6 +358,12 @@ export class GetService {
         'http://localhost:8080/api/amortization_mortgage',
         { params: qp }
       )
+    );
+  }
+
+  getUserMortgagePortfolio(userId: string): Observable<MortgagePortfolio[]> {
+    return this.http.get<MortgagePortfolio[]>(
+      `http://localhost:8080/api/${userId}/mortgage_portfolio`
     );
   }
 

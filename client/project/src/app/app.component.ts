@@ -216,8 +216,22 @@ export class AppComponent implements OnInit {
         },
         {
           label: 'Mortgage',
-          icon: 'pi pi-fw pi-calculator',
-          routerLink: '/mortgage',
+          icon: 'pi pi-fw pi-home',
+          items: [
+            {
+              label: 'Calculator',
+              icon: 'pi pi-fw pi-calculator',
+              routerLink: '/mortgage',
+            },
+            {
+              separator: true,
+            },
+            {
+              label: 'Dashboard',
+              icon: 'pi pi-fw pi-chart-line',
+              routerLink: '/mortgage-dashboard',
+            },
+          ],
         },
         {
           label: 'Users',
@@ -467,6 +481,7 @@ export class AppComponent implements OnInit {
       baseZIndex: 10000,
       maximizable: true,
       dismissableMask: true,
+      data: { mortgageMonthlyPayment: null },
     });
 
     this.dialogRef.onClose.subscribe((msg) => {
@@ -557,6 +572,7 @@ export class AppComponent implements OnInit {
       .subscribe(() => {
         console.log(this.stocksValue());
       });
+
     this.getSvc
       .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
       .pipe(
