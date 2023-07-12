@@ -215,6 +215,11 @@ export class AppComponent implements OnInit {
           ],
         },
         {
+          label: 'Mortgage',
+          icon: 'pi pi-fw pi-calculator',
+          routerLink: '/mortgage',
+        },
+        {
           label: 'Users',
           icon: 'pi pi-fw pi-user',
           items: [
@@ -290,41 +295,6 @@ export class AppComponent implements OnInit {
               ],
             },
           ],
-        },
-        {
-          label: 'Events',
-          icon: 'pi pi-fw pi-calendar',
-          items: [
-            {
-              label: 'Edit',
-              icon: 'pi pi-fw pi-pencil',
-              items: [
-                {
-                  label: 'Save',
-                  icon: 'pi pi-fw pi-calendar-plus',
-                },
-                {
-                  label: 'Delete',
-                  icon: 'pi pi-fw pi-calendar-minus',
-                },
-              ],
-            },
-            {
-              label: 'Archieve',
-              icon: 'pi pi-fw pi-calendar-times',
-              items: [
-                {
-                  label: 'Remove',
-                  icon: 'pi pi-fw pi-calendar-minus',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: 'Dashboard',
-          icon: 'pi pi-fw pi-desktop',
-          routerLink: '/dashboard',
         },
       ];
     } else {

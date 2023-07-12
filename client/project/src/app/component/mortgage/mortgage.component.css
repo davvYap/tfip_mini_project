@@ -32,12 +32,15 @@ h5 {
   color: var(--blue-400);
 }
 
+.p-highlight {
+  color: var(--primary-color);
+}
+
 .trans-card {
   background: var(--surface-card);
-  padding: 2rem;
+  padding: 1rem;
   border-radius: 10px;
   margin-bottom: 1rem;
-
   color: var(--text-color);
   /* border: 1px solid rgba(255, 255, 255, 0.31);
     border-radius: 16px; */
@@ -49,8 +52,8 @@ th {
 }
 
 .mortgage-card {
-  /* background: var(--surface-card); */
-  padding: 1rem;
+  background: var(--surface-card);
+  /* padding: 1rem; */
   border-radius: 10px;
 }
 

@@ -1,11 +1,14 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { MenuItem, TreeNode } from 'primeng/api';
+import { TreeTable } from 'primeng/treetable';
 import {
   Column,
+  ExportColumn,
   MortgageAmortizationTable,
   MortgageLoan,
 } from 'src/app/models';
+import { ExportService } from 'src/app/service/export.service';
 import { GetService } from 'src/app/service/get.service';
 import { ThemeService } from 'src/app/service/theme.service';
 
@@ -55,14 +58,45 @@ export class MortgageComponent implements OnInit {
   repaymentAmountData = signal<number[]>([]);
   monthlyRepayment = signal<number>(0);
 
+  lineData!: any;
+  lineOptions!: any;
+  mortgageLabels!: number[];
+  principalLineData!: number[];
+  interestLineData!: number[];
+  monthlyPaymentLineData!: number[];
+  showAmortizationChart: boolean = false;
+
   showAmortizationTable: boolean = false;
+  mortgageData!: MortgageAmortizationTable[];
   mortgageRepaymentData!: TreeNode[];
+  expandTreeTable: boolean = false;
+  showSkeleton: boolean = false;
   mortgageTreeTableCols!: Column[];
+  mortgageTreeTableExportCols!: ExportColumn[];
+  mortgageExportBtnItems!: MenuItem[];
+
+  months: string[] = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  @ViewChild('mortgagett') treeTable!: TreeTable;
 
   constructor(
     private themeSvc: ThemeService,
     private title: Title,
-    private getSvc: GetService
+    private getSvc: GetService,
+    private exportSvc: ExportService
   ) {}
 
   ngOnInit(): void {
@@ -100,7 +134,7 @@ export class MortgageComponent implements OnInit {
     this.mortgageTreeTableCols = [
       {
         header: 'Date',
-        field: 'date',
+        field: 'year',
       },
       {
         header: 'Principal',
@@ -114,7 +148,7 @@ export class MortgageComponent implements OnInit {
 
       {
         header: 'Payment',
-        field: 'payment',
+        field: 'repayment',
       },
       {
         header: 'Total Interest Paid',
@@ -123,6 +157,19 @@ export class MortgageComponent implements OnInit {
       {
         header: 'Total Remaining Balance',
         field: 'balanceRemaining',
+      },
+    ];
+    this.mortgageTreeTableExportCols = this.mortgageTreeTableCols.map(
+      (col) => ({
+        title: col.header,
+        dataKey: col.field,
+      })
+    );
+    this.mortgageExportBtnItems = [
+      {
+        label: 'Excel',
+        icon: 'pi pi-file-excel',
+        command: () => this.exportExcelMortgageTable(),
       },
     ];
   }
@@ -152,6 +199,9 @@ export class MortgageComponent implements OnInit {
       })
       .then(() => {
         this.initiateDonutChart();
+        if (this.showAmortizationTable) {
+          this.getAmortizationTable();
+        }
       });
   }
 
@@ -204,7 +254,14 @@ export class MortgageComponent implements OnInit {
 
   getAmortizationTable() {
     const interest = this.interestRate / 100;
+    this.showAmortizationTable = false;
+    this.showSkeleton = true;
     this.mortgageRepaymentData = [];
+    this.principalLineData = [];
+    this.interestLineData = [];
+    this.monthlyPaymentLineData = [];
+    this.mortgageLabels = [];
+
     this.getSvc
       .getMortgageAmortizationTable(
         this.loanAmount,
@@ -213,7 +270,9 @@ export class MortgageComponent implements OnInit {
         this.typeOfLoanTerm
       )
       .then((res: MortgageAmortizationTable[]) => {
-        this.showAmortizationTable = true;
+        // FOR EXPORT PDF
+        this.mortgageData = res;
+
         let currYear: number = new Date().getFullYear();
         let startingMonth = 0;
         let totalMonths: number = this.loanTerm;
@@ -226,7 +285,9 @@ export class MortgageComponent implements OnInit {
         let totalPaymentPerYear = 0;
         let accTotalInterestPaid = 0;
         let accPrincipalBalanceRemainingPerYear = this.loanAmount;
-        for (let j = startingMonth; j <= totalMonths; j++) {
+
+        for (let j = startingMonth; j < totalMonths; j++) {
+          // NOTE check if the the curr month is December
           if ((j + 1) % 12 === 0) {
             totalPrincipalPerYear += res[j].principal;
             totalInterestPerYear += res[j].interest;
@@ -234,6 +295,13 @@ export class MortgageComponent implements OnInit {
             accTotalInterestPaid = res[j].totalInterestPaid;
             accPrincipalBalanceRemainingPerYear = res[j].balanceRemaining;
 
+            // FOR LINECHART DATA
+            this.mortgageLabels.push(currYear);
+            this.principalLineData.push(totalPrincipalPerYear / 12);
+            this.interestLineData.push(totalInterestPerYear / 12);
+            this.monthlyPaymentLineData.push(totalPaymentPerYear / 12);
+
+            // FOR TREE TABLE
             let mortgageDataEachYear: TreeNode<any> = {
               data: {
                 date: currYear,
@@ -246,11 +314,12 @@ export class MortgageComponent implements OnInit {
               children: [],
             };
 
+            let monthIndex = 0;
             res.map((m) => {
               if (m.year === currYear) {
                 let mortgageDataEachMonth: TreeNode<any> = {
                   data: {
-                    date: m.year,
+                    date: `${this.months[monthIndex]} ${m.year}`,
                     principal: m.principal,
                     interest: m.interest,
                     payment: m.repayment,
@@ -259,6 +328,7 @@ export class MortgageComponent implements OnInit {
                   },
                 };
                 mortgageDataEachYear.children?.push(mortgageDataEachMonth);
+                monthIndex++;
               }
             });
 
@@ -274,10 +344,250 @@ export class MortgageComponent implements OnInit {
             totalPaymentPerYear += res[j].repayment;
           }
         }
+
+        // FOR REMAINING MONTHS
+        totalPrincipalPerYear = 0;
+        totalInterestPerYear = 0;
+        totalPaymentPerYear = 0;
+        console.log('total months > ', totalMonths);
+        const remainingMonths = totalMonths % 12;
+        console.log('remaining month > ', remainingMonths); // if remaining 2 months
+        console.log('resuslt', res);
+        console.log(
+          totalPrincipalPerYear,
+          totalInterestPerYear,
+          totalPaymentPerYear
+        );
+        if (remainingMonths !== 0) {
+          for (let i = totalMonths - remainingMonths; i < totalMonths; i++) {
+            if (i === totalMonths - 1) {
+              console.log('i', i);
+
+              totalPrincipalPerYear += res[i].principal;
+              totalInterestPerYear += res[i].interest;
+              totalPaymentPerYear += res[i].repayment;
+              accTotalInterestPaid = res[i].totalInterestPaid;
+              accPrincipalBalanceRemainingPerYear = res[i].balanceRemaining;
+
+              // FOR LINECHART DATA
+              this.mortgageLabels.push(currYear);
+              this.principalLineData.push(
+                totalPrincipalPerYear / remainingMonths
+              );
+
+              this.interestLineData.push(
+                totalInterestPerYear / remainingMonths
+              );
+
+              this.monthlyPaymentLineData.push(
+                totalPaymentPerYear / remainingMonths
+              );
+
+              // FOR TREE TABLE
+              let mortgageDataEachYear: TreeNode<any> = {
+                data: {
+                  date: currYear,
+                  principal: totalPrincipalPerYear,
+                  interest: totalInterestPerYear,
+                  payment: totalPaymentPerYear,
+                  totalInterestPaid: accTotalInterestPaid,
+                  balanceRemaining: accPrincipalBalanceRemainingPerYear,
+                },
+                children: [],
+              };
+
+              let monthIndex = 0;
+              res.map((m) => {
+                if (m.year === currYear) {
+                  let mortgageDataEachMonth: TreeNode<any> = {
+                    data: {
+                      date: `${this.months[monthIndex]} ${m.year}`,
+                      principal: m.principal,
+                      interest: m.interest,
+                      payment: m.repayment,
+                      totalInterestPaid: m.totalInterestPaid,
+                      balanceRemaining: m.balanceRemaining,
+                    },
+                  };
+                  mortgageDataEachYear.children?.push(mortgageDataEachMonth);
+                  monthIndex++;
+                }
+              });
+
+              this.mortgageRepaymentData.push(mortgageDataEachYear);
+            } else {
+              console.log('i', i);
+              totalPrincipalPerYear += res[i]?.principal;
+              totalInterestPerYear += res[i]?.interest;
+              totalPaymentPerYear += res[i]?.repayment;
+            }
+          }
+        }
       });
+    // console.log(this.mortgageRepaymentData);
+    setTimeout(() => {
+      this.showSkeleton = false;
+      this.showAmortizationTable = true;
+      this.showAmortizationChart = true;
+      this.initiateLineChart();
+    }, 200);
   }
 
-  exportExcelTransaction() {}
+  expandRecursive(nodes: any[]) {
+    for (const node of nodes) {
+      node.expanded = true;
 
-  exportPdfTransaction() {}
+      if (node.children) {
+        this.expandRecursive(node.children);
+      }
+    }
+  }
+
+  toggleExpandRecursive(nodes: any[], expand: boolean) {
+    for (const node of nodes) {
+      node.expanded = expand;
+
+      if (node.children) {
+        this.expandRecursive(node.children);
+      }
+    }
+  }
+
+  toggleExpandTreeTable() {
+    this.expandTreeTable === true ? false : true;
+    this.showAmortizationTable = false;
+    this.showSkeleton = true;
+    this.toggleExpandRecursive(this.treeTable.value, this.expandTreeTable);
+    setTimeout(() => {
+      this.showAmortizationTable = true;
+      this.showSkeleton = false;
+    }, 200);
+  }
+
+  isNumber(date: number | string): boolean {
+    if (typeof date === 'number' && this.expandTreeTable) return true;
+    return false;
+  }
+
+  exportExcelMortgageTable() {
+    this.exportSvc.exportExcel(
+      'mortgagett',
+      `mortgage_amortization_table_${this.getSvc.userId}`
+    );
+  }
+
+  exportPdfMortgageTable() {
+    this.exportSvc.exportPdf(
+      this.mortgageTreeTableExportCols,
+      this.mortgageData,
+      `mortgage_amortization_table_${this.getSvc.userId}`
+    );
+  }
+
+  initiateLineChart() {
+    // const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = this.documentStyle().getPropertyValue(
+      '--primary-color-text'
+    );
+    const textColorSecondary = this.documentStyle().getPropertyValue(
+      '--text-color-secondary'
+    );
+    const surfaceBorder =
+      this.documentStyle().getPropertyValue('--surface-border');
+
+    this.lineData = {
+      labels: this.mortgageLabels, // years
+      datasets: [
+        {
+          label: 'Princial',
+          fill: 'origin',
+          borderColor: this.documentStyle().getPropertyValue('--blue-500'),
+          // yAxisID: 'y',
+          tension: 0.4,
+          // data: this.principalLineData,
+        },
+        {
+          label: 'Interest',
+          fill: {
+            target: 'origin',
+            above: 'rgb(0, 128, 128, 0.5)',
+          },
+          borderColor: this.documentStyle().getPropertyValue('--teal-500'),
+          // yAxisID: 'y1',
+          tension: 0.4,
+          data: this.interestLineData,
+        },
+        {
+          label: 'Monthly Payment',
+          fill: {
+            target: 'origin',
+            above: 'rgba(53, 162, 235, 0.4)',
+          },
+          borderColor: this.documentStyle().getPropertyValue('--primary-color'),
+          // yAxisID: 'y1',
+          tension: 0.4,
+          data: this.monthlyPaymentLineData,
+        },
+      ],
+    };
+
+    this.lineOptions = {
+      stacked: false,
+      maintainAspectRatio: false,
+      aspectRatio: 0.8,
+      plugins: {
+        legend: {
+          labels: {
+            color: textColorSecondary,
+            // color: '#000000 ',
+          },
+        },
+        customCanvasBackgroundColor: {
+          color: this.documentStyle().getPropertyValue('--surface-ground'),
+        },
+        title: {
+          display: true,
+          text: 'Average Monthly Payment Breakdown',
+          color: textColorSecondary,
+          position: 'bottom',
+        },
+        tooltip: {
+          callbacks: {
+            footer: (tooltipItem: any, data: any) => {
+              // console.log(tooltipItem);
+              const principal: number = tooltipItem[1].raw - tooltipItem[0].raw;
+              const principalStr: string = principal.toString().substring(0, 8);
+              return `Principal: ${principalStr}`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: textColorSecondary,
+          },
+          grid: {
+            color: surfaceBorder,
+          },
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          ticks: {
+            color: textColorSecondary,
+          },
+          grid: {
+            color: surfaceBorder,
+          },
+        },
+      },
+      hoverRadius: 15,
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
+    };
+  }
 }

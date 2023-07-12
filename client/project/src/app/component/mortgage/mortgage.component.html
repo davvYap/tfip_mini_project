@@ -29,6 +29,7 @@
           [max]="2000000"
           [step]="50000"
           (onSlideEnd)="calculate()"
+          class="mt-2"
         ></p-slider>
       </div>
       <div class="d-flex flex-column m-4">
@@ -58,6 +59,7 @@
           [min]="minLoanTerm"
           [max]="maxLoanTerm"
           (onSlideEnd)="calculate()"
+          class="mt-2"
         ></p-slider>
       </div>
       <div class="d-flex flex-column m-4">
@@ -78,15 +80,26 @@
           [min]="0"
           [max]="100"
           (onSlideEnd)="calculate()"
+          class="mt-2"
         ></p-slider>
       </div>
 
-      <div class="text-center mt-3 mb-4">
-        <p-button
-          label="Amortization Table"
-          styleClass="p-button-rounded"
-          (onClick)="getAmortizationTable()"
-        ></p-button>
+      <div class="d-flex justify-content-evenly align-items-center mt-3 mb-4">
+        <div class="text-center">
+          <p-button
+            label="Add to Regular Expense"
+            styleClass="p-button-rounded p-button-secondary"
+            (onClick)="getAmortizationTable()"
+          ></p-button>
+        </div>
+
+        <div class="text-center">
+          <p-button
+            label="Amortization Table"
+            styleClass="p-button-rounded"
+            (onClick)="getAmortizationTable()"
+          ></p-button>
+        </div>
       </div>
     </div>
 
@@ -105,8 +118,10 @@
           }}</span>
         </p>
         <p class="font-monospace fs-5">
-          Principal:
-          <span class="principal-color">{{ loanAmount | currency }}</span>
+          Total Repayment:
+          <span class="principal-color">{{
+            repaymentAmountData()[0] + repaymentAmountData()[1] | currency
+          }}</span>
         </p>
       </div>
       <p-chart
@@ -117,11 +132,24 @@
     </div>
   </div>
 
+  <div *ngIf="showSkeleton">
+    <p-skeleton height="50dvh"></p-skeleton>
+  </div>
+
+  <div
+    *ngIf="showAmortizationChart"
+    class="row justify-content-center align-items-center my-5"
+  >
+    <div class="col-10 mortgage-card">
+      <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
+    </div>
+  </div>
+
   <div
     *ngIf="showAmortizationTable"
-    class="row justify-content-center align-items-center mortgage-card"
+    class="row justify-content-center align-items-center"
   >
-    <div class="col-10">
+    <div class="col-10 mortgage-card">
       <p-treeTable
         id="mortgagett"
         #mortgagett
@@ -133,41 +161,41 @@
         [tableStyle]="{ 'min-width': '30dvh' }"
         [scrollable]="true"
         scrollHeight="500px"
+        [rowHover]="true"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [rowsPerPageOptions]="[5, 10, 15, 50, mortgageData.length]"
       >
         <ng-template pTemplate="caption">
           <div class="d-flex justify-content-between">
             <div>
-              <h3>Principal + Interest = Payment</h3>
+              <h3>
+                <span class="principal-color">Principal</span> +
+                <span class="interest-color">Interest</span> = Payment
+              </h3>
             </div>
             <div>
-              <button
-                type="button"
-                pButton
-                pRipple
-                icon="pi pi-file-excel"
-                (click)="exportExcelTransaction()"
-                class="p-button-success export-buttons"
-                pTooltip="XLS"
-                tooltipPosition="bottom"
-              ></button>
-              <button
-                type="button"
-                pButton
-                pRipple
-                icon="pi pi-file-pdf"
-                (click)="exportPdfTransaction()"
-                class="p-button-danger export-buttons"
-                pTooltip="PDF"
-                tooltipPosition="bottom"
-              ></button>
+              <span class="me-3">
+                <span> Expand all years </span>
+                <p-inputSwitch
+                  [(ngModel)]="expandTreeTable"
+                  (onChange)="toggleExpandTreeTable()"
+                ></p-inputSwitch>
+              </span>
             </div>
           </div>
         </ng-template>
         <ng-template pTemplate="header" let-columns>
           <tr>
-            <th *ngFor="let col of columns">
+            <!-- <th *ngFor="let col of columns">
               {{ col.header }}
-            </th>
+            </th> -->
+            <th>Date</th>
+            <th><span class="principal-color">Principal</span></th>
+            <th><span class="interest-color">Interest</span></th>
+            <th><strong>Payment</strong></th>
+            <th>Total Interest Paid</th>
+            <th>Total Remaining Balance</th>
           </tr>
         </ng-template>
         <ng-template
@@ -176,26 +204,28 @@
           let-rowData="rowData"
           let-columns="columns"
         >
-          <tr [ttRow]="rowNode">
-            <!-- <td *ngFor="let col of columns; let i = index">
-              <p-treeTableToggler
-                [rowNode]="rowNode"
-                *ngIf="i === 0"
-              ></p-treeTableToggler>
-              {{ rowData[col.field] | currency }}
-            </td> -->
+          <tr
+            [ttRow]="rowNode"
+            [ngClass]="{ 'p-highlight': isNumber(rowData.date) }"
+          >
             <td>
               <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
               {{ rowData.date }}
             </td>
             <td>
-              {{ rowData.principal | currency }}
+              <span class="principal-color">
+                {{ rowData.principal | currency }}
+              </span>
             </td>
             <td>
-              {{ rowData.interest | currency }}
+              <span class="interest-color">
+                {{ rowData.interest | currency }}
+              </span>
             </td>
             <td>
-              {{ rowData.payment | currency }}
+              <strong>
+                {{ rowData.payment | currency }}
+              </strong>
             </td>
             <td>
               {{ rowData.totalInterestPaid | currency }}
@@ -205,8 +235,26 @@
             </td>
           </tr>
         </ng-template>
+        <ng-template pTemplate="paginatorleft">
+          <p-splitButton
+            icon="pi pi-download"
+            styleClass="p-button-text"
+            pTooltip="Export pdf"
+            (onClick)="exportPdfMortgageTable()"
+            [model]="mortgageExportBtnItems"
+          ></p-splitButton>
+        </ng-template>
+        <ng-template pTemplate="paginatorright">
+          <i
+            class="pi pi-info-circle"
+            pTooltip="Amortization schedule breakdown"
+          ></i>
+        </ng-template>
       </p-treeTable>
     </div>
   </div>
   <p-toast></p-toast>
+  <p-scrollTop></p-scrollTop>
 </div>
+
+<ng-template #skeleton> <p-skeleton height="20rem"></p-skeleton></ng-template>
