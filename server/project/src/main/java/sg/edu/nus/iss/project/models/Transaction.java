@@ -105,6 +105,21 @@ public class Transaction {
         return t;
     }
 
+    public static Transaction convertFromResultsNoJoin(SqlRowSet rs) {
+        Transaction t = new Transaction();
+        t.setTransactionId(rs.getString("trans_id"));
+        t.setTransactionName(rs.getString("trans_name"));
+        Date date = rs.getDate("date_of_trans");
+        if (date != null) {
+            LocalDate localDate = date.toLocalDate();
+            t.setDate(localDate);
+        }
+        t.setAmount(rs.getDouble("amount"));
+        t.setRemarks(rs.getString("remarks"));
+        t.setCategoryId(rs.getInt("cat_id"));
+        return t;
+    }
+
     public JsonObjectBuilder toJsonObjectBuilder() {
         return Json.createObjectBuilder()
                 .add("categoryName", categoryName)

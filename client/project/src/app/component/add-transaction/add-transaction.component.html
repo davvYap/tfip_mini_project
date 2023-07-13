@@ -118,7 +118,7 @@
               icon="pi pi-check"
               class="p-button-text"
               (click)="saveTransaction()"
-              [disabled]="form.invalid"
+              [disabled]="invalidForm()"
             ></button>
           </div>
         </div>

@@ -67,8 +67,6 @@ dialog::backdrop {
 }
 
 #dates {
-  color: green;
-  box-shadow: 5px 10px #888888;
   font-family: "Righteous", cursive;
 }
 

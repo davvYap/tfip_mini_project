@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -35,6 +35,7 @@ import player from 'lottie-web';
 import { MortgageComponent } from './component/mortgage/mortgage.component';
 import { AddMortgageComponent } from './component/add-mortgage/add-mortgage.component';
 import { MortgageDashboardComponent } from './component/mortgage-dashboard/mortgage-dashboard.component';
+import { NgxPayPalModule } from 'ngx-paypal';
 
 // Export this function
 export function playerFactory(): any {
@@ -73,6 +74,7 @@ export function playerFactory(): any {
     GoogleSigninButtonModule,
     CommonModule,
     LottieModule.forRoot({ player: playerFactory }),
+    NgxPayPalModule,
   ],
   providers: [
     MessageService,
@@ -96,6 +98,7 @@ export function playerFactory(): any {
       } as SocialAuthServiceConfig,
     },
     GoogleSigninButtonDirective,
+    DecimalPipe,
   ],
   bootstrap: [AppComponent],
 })

@@ -44,7 +44,8 @@ public class MortgageController {
 
     @GetMapping(path = "/amortization_mortgage")
     @ResponseBody
-    public ResponseEntity<String> amortizationMortgageTable(@RequestParam double amount, @RequestParam double interest,
+    public ResponseEntity<String> amortizationMortgageTable(@RequestParam double amount,
+            @RequestParam double interest,
             @RequestParam int term, @RequestParam String typeOfTerm) {
         List<MortgageTableMonth> mtmList = mortgageSvc.getAmorTizationTable(amount, term, interest, typeOfTerm);
 
@@ -65,13 +66,15 @@ public class MortgageController {
 
         if (!upsertMongo) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Duplicate mortgage ID.".formatted(mp.getId()))
+                    .body(Json.createObjectBuilder()
+                            .add("message", "Duplicate mortgage ID.".formatted(mp.getId()))
                             .build()
                             .toString());
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
-                .body(Json.createObjectBuilder().add("message", "Added mortgage %s successfully.".formatted(mp.getId()))
+                .body(Json.createObjectBuilder()
+                        .add("message", "Added mortgage %s successfully.".formatted(mp.getId()))
                         .build()
                         .toString());
     }
@@ -93,21 +96,26 @@ public class MortgageController {
 
     @DeleteMapping(path = "/{userId}/delete_mortgage_portfolio")
     @ResponseBody
-    public ResponseEntity<String> deleteMortgagePortfolio(@PathVariable String userId, @RequestParam String mortgageId)
+    public ResponseEntity<String> deleteMortgagePortfolio(@PathVariable String userId,
+            @RequestParam String mortgageId)
             throws IOException {
 
         boolean deleted = false;
-
+        int deletedMortgageTransactions = mortgageSvc.deleteUserMortgageTransactionsJdbc(userId, mortgageId);
         deleted = mortgageSvc.deleteUserMortgagePortfolioMongo(userId, mortgageId);
         if (!deleted) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                     .body(Json.createObjectBuilder()
-                            .add("message", "Failed to delete mortgage with ID.".formatted(mortgageId))
+                            .add("message", "Failed to delete mortgage with ID."
+                                    .formatted(mortgageId))
                             .build()
                             .toString());
         }
+
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
-                .body(Json.createObjectBuilder().add("message", "Delete mortgage with ID.".formatted(mortgageId))
+                .body(Json.createObjectBuilder()
+                        .add("message", "Delete mortgage and relavant transactions with ID %s."
+                                .formatted(mortgageId))
                         .build()
                         .toString());
     }

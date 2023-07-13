@@ -38,6 +38,7 @@ import { ExportService } from 'src/app/service/export.service';
 import {
   faFolderOpen,
   faHandPointRight,
+  faPenToSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@angular/platform-browser';
 
@@ -48,6 +49,7 @@ import { Title } from '@angular/platform-browser';
 })
 export class SavingsComponent implements OnInit, OnDestroy {
   pointRightIcon = faHandPointRight;
+  editIcon = faPenToSquare;
   documentStyle = signal(getComputedStyle(document.documentElement));
   breadcrumbItems: MenuItem[] | undefined;
   breadcrumbHome: MenuItem | undefined;
@@ -368,6 +370,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
       baseZIndex: 10000,
       maximizable: true,
       dismissableMask: true,
+      data: { mortgageMonthlyPayment: null },
     });
 
     this.dialogRef.onClose.subscribe((msg) => {

@@ -20,7 +20,7 @@ import {
 } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { ThemeService } from 'src/app/service/theme.service';
-import { faFolderOpen } from '@fortawesome/free-solid-svg-icons';
+import { faFolderOpen, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { AddTransactionComponent } from '../add-transaction/add-transaction.component';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import {
@@ -44,6 +44,7 @@ import { faHandPointRight } from '@fortawesome/free-regular-svg-icons';
 })
 export class TransactionRecordsComponent implements OnInit, OnDestroy {
   pointRightIcon = faHandPointRight;
+  editIcon = faPenToSquare;
   documentStyle = signal(getComputedStyle(document.documentElement));
   breadcrumbItems: MenuItem[] | undefined;
   breadcrumbHome: MenuItem | undefined;
@@ -382,6 +383,7 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
       baseZIndex: 10000,
       maximizable: true,
       dismissableMask: true,
+      data: { mortgageMonthlyPayment: null },
     });
 
     this.dialogRef.onClose.subscribe((msg) => {

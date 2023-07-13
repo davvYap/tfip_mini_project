@@ -11,43 +11,54 @@
   </div>
   <div
     *ngIf="mortgagePortfolios.length > 0; else emptyMortgagePortfolio"
-    class="row justify-content-center align-items-center my-5 mortgage-cards"
+    class="row row-cols-1 row-cols-lg-3 justify-content-center align-items-center my-5 mortgage-cards"
   >
     <div
-      class="col-4"
+      class="col mb-3"
       *ngFor="let mortgage of mortgagePortfolios; let i = index"
     >
-      <p-card
-        [header]="mortgage.id"
-        [subheader]="(mortgage.totalRepayment | currency)?.toString()"
-        [style]="{ width: '360px' }"
-      >
-        <ng-template pTemplate="header">
-          <img
-            alt="Card"
-            [src]="mortgage.imgString"
-            class="mortgage-images"
-            (click)="navigateTo(i)"
-          />
-        </ng-template>
-        <p>Loan Amount: {{ mortgage.loanAmount | currency }}</p>
-        <p>Interest Rate: {{ mortgage.interest / 100 | percent : "1.2-2" }}</p>
-        <p>Monthly Payment: {{ mortgage.monthlyRepayment | currency }}</p>
-        <ng-template pTemplate="footer">
-          <p-button
-            label="Transaction"
-            icon="pi pi-plus"
-            (onClick)="addToTransaction(i)"
-          ></p-button>
-          <p-button
-            label="Remove"
-            icon="pi pi-trash"
-            styleClass="p-button-secondary"
-            [style]="{ 'margin-left': '.5em' }"
-            (onClick)="confirmRemoveMortgage(i)"
-          ></p-button>
-        </ng-template>
-      </p-card>
+      <div class="d-flex justify-content-center">
+        <p-card
+          [header]="mortgage.id"
+          [subheader]="(mortgage.totalRepayment | currency)?.toString()"
+          [style]="{ width: '360px' }"
+        >
+          <ng-template pTemplate="header">
+            <img
+              alt="Card"
+              [src]="mortgage.imgString"
+              class="mortgage-images"
+              (click)="navigateTo(i)"
+            />
+          </ng-template>
+          <p>Loan Amount: {{ mortgage.loanAmount | currency }}</p>
+          <p>
+            Interest Rate: {{ mortgage.interest / 100 | percent : "1.2-2" }}
+          </p>
+          <p>Monthly Payment: {{ mortgage.monthlyRepayment | currency }}</p>
+          <p>Repayment status:</p>
+          <p-progressBar
+            [value]="
+              getMortgageRepaymentProgress(mortgage.id, mortgage.totalRepayment)
+            "
+            [showValue]="true"
+          ></p-progressBar>
+          <ng-template pTemplate="footer">
+            <p-button
+              label="Transaction"
+              icon="pi pi-plus"
+              (onClick)="addToTransaction(i)"
+            ></p-button>
+            <p-button
+              label="Remove"
+              icon="pi pi-trash"
+              styleClass="p-button-secondary"
+              [style]="{ 'margin-left': '.5em' }"
+              (onClick)="confirmRemoveMortgage(i)"
+            ></p-button>
+          </ng-template>
+        </p-card>
+      </div>
     </div>
   </div>
   <p-toast></p-toast>

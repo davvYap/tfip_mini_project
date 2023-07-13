@@ -84,6 +84,13 @@ export class AddTransactionComponent implements OnInit {
     });
   }
 
+  invalidForm(): boolean {
+    return (
+      this.form.invalid ||
+      !(typeof this.form.get('categoryName')?.value === 'string')
+    );
+  }
+
   getSeverity(type: string): string {
     return type === 'income' ? 'success' : 'danger';
   }

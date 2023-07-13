@@ -1,6 +1,7 @@
 package sg.edu.nus.iss.project.repositories;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,18 +11,25 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import com.mongodb.client.result.UpdateResult;
 
 import sg.edu.nus.iss.project.models.MortgagePortfolio;
-import sg.edu.nus.iss.project.models.Stock;
+import sg.edu.nus.iss.project.models.Transaction;
+
+import static sg.edu.nus.iss.project.repositories.DBQueries.*;
 
 @Repository
 public class MortgageRepository {
 
     @Autowired
     private MongoTemplate mongo;
+
+    @Autowired
+    private JdbcTemplate jdbc;
 
     public Boolean upsertUserMortgagePortfolioMongo(String userId, MortgagePortfolio mp) {
 
@@ -77,6 +85,29 @@ public class MortgageRepository {
             return true;
         }
         return false;
+    }
+
+    public List<Transaction> getUserMortagageTransactionJdbc(String userId, String remarks) {
+        List<Transaction> trans = new LinkedList<>();
+        String concatRemarks = remarks + "%";
+        SqlRowSet rs = jdbc.queryForRowSet(SQL_GET_USER_TRANSACTIONS_BASED_ON_REMARKS, userId, concatRemarks);
+        while (rs.next()) {
+            trans.add(Transaction.convertFromResultsNoJoin(rs));
+        }
+        return trans;
+    }
+
+    public int deleteUserMortgageTransactionsJdbc(String userId, String remarks) {
+
+        List<Transaction> mortTrans = getUserMortagageTransactionJdbc(userId, remarks);
+        int totalDeleteAmount = 0;
+        if (mortTrans.size() > 0) {
+            for (Transaction transaction : mortTrans) {
+                totalDeleteAmount += jdbc.update(SQL_DELETE_USER_TRANSACATION, transaction.getTransactionId(), userId,
+                        transaction.getCategoryId());
+            }
+        }
+        return totalDeleteAmount;
     }
 
 }

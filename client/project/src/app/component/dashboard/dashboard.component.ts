@@ -5,6 +5,7 @@ import {
   WritableSignal,
   computed,
   Signal,
+  OnDestroy,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Params, Router } from '@angular/router';
@@ -14,6 +15,7 @@ import {
   LoginStatus,
   MessageResponse,
   PurchasedStocksCount,
+  SoldStock,
   StockLogo,
   StonkStockPrice,
   Transaction,
@@ -35,7 +37,7 @@ import { MessageService } from 'primeng/api';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   smileIcon = faFaceSmileWink;
   pointRightIcon = faHandPointRight;
   thisYear = signal(new Date().getFullYear());
@@ -53,7 +55,7 @@ export class DashboardComponent implements OnInit {
         ctx.globalCompositeOperation = 'destination-over';
         ctx.fillStyle =
           options.color ||
-          this.documentStyle().getPropertyValue('--surface-ground');
+          this.documentStyle().getPropertyValue('--surface-overlay');
         ctx.fillRect(0, 0, chart.width, chart.height);
         ctx.restore();
       },
@@ -73,6 +75,8 @@ export class DashboardComponent implements OnInit {
   categoriesColor!: string[];
   stocksCount!: PurchasedStocksCount[];
   stocksCount$!: Subscription;
+  soldStocks!: SoldStock[];
+  soldStocks$!: Subscription;
 
   categoriesData = signal<number[]>([]);
   transactions!: Transaction[];
@@ -102,9 +106,11 @@ export class DashboardComponent implements OnInit {
   totalValue = computed(() => {
     return this.stocksValue() + this.savingsValue() + this.cryptoValue();
   });
-  investmentsValue!: number;
-  propertiesValue!: number;
-  miscValue!: number;
+  stocksRealizedProfit = signal(0);
+  stocksUnrealizedProfit = signal(0);
+  totalStocksValue = computed(() => {
+    return this.stocksRealizedProfit() + this.stocksValue();
+  });
 
   goalForm!: FormGroup;
 
@@ -243,6 +249,13 @@ export class DashboardComponent implements OnInit {
     this.stocksCount = [];
     this.initiateStockCount();
 
+    // STOCKS REALIZED PROFIT
+    this.soldStocks$ = this.getSvc
+      .getUserSoldStocks(this.getSvc.userId)
+      .subscribe((stks: SoldStock[]) => {
+        this.stocksRealizedProfit.set(this.calculateRealizedProfit(stks));
+      });
+
     // SAVINGS DONUT CHART
     this.transactions = [];
     setTimeout(() => {
@@ -251,11 +264,12 @@ export class DashboardComponent implements OnInit {
 
     // LINE CHART
     this.initiateChartsData();
+  }
 
-    // this.getSvc.getUserGoal(this.getSvc.userId).then((res) => {
-    //   this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
-    //   this.initiateLineChart();
-    // });
+  ngOnDestroy(): void {
+    if (this.soldStocks$) this.soldStocks$.unsubscribe;
+    if (this.stocksCount$) this.stocksCount$.unsubscribe;
+    if (this.transactions$) this.transactions$.unsubscribe;
   }
 
   createGoalForm(): FormGroup {
@@ -307,6 +321,26 @@ export class DashboardComponent implements OnInit {
 
   getColor(percent: number): string {
     return percent >= 0 ? 'positive' : 'negative';
+  }
+
+  getProfitColorClass(unrealizedProfit: number): string {
+    return unrealizedProfit > 0 ? 'positive' : 'negative';
+  }
+
+  calculateRealizedProfit(soldStocks: SoldStock[]): number {
+    let total: number = 0;
+    soldStocks.map((stock) => {
+      total += stock.netProfit;
+    });
+    return total;
+  }
+
+  calculateUnrealizedProfit(stockCounts: PurchasedStocksCount[]): number {
+    let total: number = 0.0;
+    stockCounts.map((stockCount) => {
+      total += stockCount.marketPrice - stockCount.cost;
+    });
+    return total;
   }
 
   initiateChartsData() {
@@ -491,9 +525,9 @@ export class DashboardComponent implements OnInit {
       )
       .subscribe((stockCounts) => {
         this.stocksCount = this.sortStockByMarketPrice(stockCounts);
-        // this.totalStockMarketValue =
-        //   this.calculateUserTotalStockMarketValue(stockCounts);
-        // this.unrealizedProfit = this.calculateUnrealizedProfit(stockCounts);
+        this.stocksUnrealizedProfit.set(
+          this.calculateUnrealizedProfit(stockCounts)
+        );
 
         this.stockCountDonutSymbol = [];
         this.stockCountDonutData.set([]);
@@ -540,9 +574,10 @@ export class DashboardComponent implements OnInit {
       hoverOffset: 10,
       plugins: {
         legend: {
+          display: false,
           labels: {
             color: textColor,
-            // color: '#fff',
+            // color: '#000000',
             padding: 5,
           },
         },
@@ -560,6 +595,11 @@ export class DashboardComponent implements OnInit {
         customCanvasBackgroundColor: {
           color: this.documentStyle().getPropertyValue('--surface-ground'),
         },
+      },
+      onClick: (event: any, activeElements: any) => {
+        if (activeElements.length > 0) {
+          this.router.navigate(['/investment-dashboard']);
+        }
       },
     };
   }

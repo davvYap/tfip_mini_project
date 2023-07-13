@@ -1,6 +1,6 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { OnDestroy, Component, OnInit } from '@angular/core';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { map } from 'rxjs';
+import { Subscription, map } from 'rxjs';
 import { MortgagePortfolio, Transaction } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { ThemeService } from 'src/app/service/theme.service';
@@ -13,19 +13,24 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { Params, Router } from '@angular/router';
 import { DeleteService } from 'src/app/service/delete.service';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-mortgage-dashboard',
   templateUrl: './mortgage-dashboard.component.html',
   styleUrls: ['./mortgage-dashboard.component.css'],
 })
-export class MortgageDashboardComponent implements OnInit {
+export class MortgageDashboardComponent implements OnInit, OnDestroy {
   showMortgageCards: boolean = false;
   mortgagePortfolios!: MortgagePortfolio[];
   breadcrumbItems: MenuItem[] | undefined;
   breadcrumbHome: MenuItem | undefined;
   emptyIcon = faFolderOpen;
   pointRightIcon = faHandPointRight;
+  mortgageRepaymentProgress: number = 20;
+  mortgagePortfolio$!: Subscription;
+  userTransactions!: Transaction[];
+  userTransactions$!: Subscription;
 
   dialogRef!: DynamicDialogRef;
 
@@ -37,7 +42,8 @@ export class MortgageDashboardComponent implements OnInit {
     private title: Title,
     private router: Router,
     private deleteSvc: DeleteService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private decimalPipe: DecimalPipe
   ) {}
 
   ngOnInit(): void {
@@ -51,30 +57,74 @@ export class MortgageDashboardComponent implements OnInit {
 
     this.showMortgageCards = true;
     this.mortgagePortfolios = [];
-    this.getSvc
+    this.mortgagePortfolio$ = this.getSvc
       .getUserMortgagePortfolio(this.getSvc.userId)
       .pipe(
         map((res: MortgagePortfolio[]) => {
-          res.map((m) => {
-            m.imgString = this.getImgSrc();
-          });
+          for (let i = 0; i < res.length; i++) {
+            res[i].imgString = this.getImgSrc(i);
+          }
+
           return res;
         })
       )
       .subscribe((res) => {
         this.mortgagePortfolios = res;
       });
+
+    this.userTransactions = [];
+    this.userTransactions$ = this.getSvc
+      .getUserAllTransaction(this.getSvc.userId)
+      .subscribe((res) => {
+        this.userTransactions = res;
+      });
   }
 
-  getImgSrc(): string {
-    const rand = this.getRandomNumber();
+  ngOnDestroy(): void {
+    if (this.userTransactions$) this.userTransactions$.unsubscribe();
+    if (this.mortgagePortfolio$) this.mortgagePortfolio$.unsubscribe();
+  }
+
+  getImgSrc(i: number): string {
+    const rand = this.getImgSrcIndexRecursive(i + 1);
     return `/assets/images/house-${rand}.jpg`;
   }
 
-  getRandomNumber(): number {
-    const randomDecimal = Math.random();
-    const randomNumber = Math.floor(randomDecimal * 5) + 1;
-    return randomNumber;
+  getImgSrcIndexRecursive(i: number): number {
+    let j = i;
+    while (j > 5) {
+      j -= 5;
+      this.getImgSrcIndexRecursive(j);
+    }
+    return j;
+  }
+
+  getMortgageRepaymentProgress(
+    mortgageId: string,
+    totalRepayment: number
+  ): number {
+    const transactions = this.userTransactions;
+    let totalRepaymentPaid = 0;
+    transactions.map((tran) => {
+      if (tran.remarks.includes(mortgageId) && tran.type === 'expense') {
+        totalRepaymentPaid += tran.amount;
+      }
+    });
+    const progress: number = (totalRepaymentPaid / totalRepayment) * 100;
+    const progressPercent = this.convertToPercentage(progress);
+    return progressPercent;
+  }
+
+  convertToPercentage(numberValue: number): number {
+    const percentageString: string | null = this.decimalPipe.transform(
+      numberValue,
+      '1.2-2'
+    );
+    if (percentageString !== null) {
+      const percentage = parseFloat(percentageString);
+      return percentage;
+    }
+    return numberValue;
   }
 
   toMortgageCalculator() {
@@ -96,7 +146,7 @@ export class MortgageDashboardComponent implements OnInit {
       date: '',
       amount: this.mortgagePortfolios[index].monthlyRepayment,
       remarks: this.mortgagePortfolios[index].id,
-      categoryName: 'Mortgage',
+      categoryName: '',
       categoryId: '',
       dateNum: 0,
     };
@@ -125,10 +175,9 @@ export class MortgageDashboardComponent implements OnInit {
   }
 
   confirmRemoveMortgage(i: number) {
-    console.log('confriming delete');
+    const selectedMort = this.mortgagePortfolios[i];
     this.confirmationService.confirm({
-      message:
-        'Are you sure that you want to delete this mortgage from portfolio?',
+      message: `Are you sure that you want to delete mortgage (${selectedMort.id}) and relavant transactions from portfolio?`,
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {

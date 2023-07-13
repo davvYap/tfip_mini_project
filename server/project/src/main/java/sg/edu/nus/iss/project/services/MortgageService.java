@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import sg.edu.nus.iss.project.models.Mortgage;
 import sg.edu.nus.iss.project.models.MortgagePortfolio;
@@ -78,5 +79,10 @@ public class MortgageService {
 
     public boolean deleteUserMortgagePortfolioMongo(String userId, String mortgageId) {
         return mortgageRepo.deleteUserMortgagePortfolioMongo(userId, mortgageId);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteUserMortgageTransactionsJdbc(String userId, String remarks) {
+        return mortgageRepo.deleteUserMortgageTransactionsJdbc(userId, remarks);
     }
 }

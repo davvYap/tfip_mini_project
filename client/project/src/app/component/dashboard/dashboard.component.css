@@ -37,6 +37,10 @@ h5 {
   margin-bottom: 0;
 }
 
+.dashboard-text {
+  color: var(--text-color);
+}
+
 /* .card {
   padding: 2rem;
   border-radius: 10px;

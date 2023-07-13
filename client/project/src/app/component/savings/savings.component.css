@@ -65,10 +65,10 @@ dialog::backdrop {
   box-shadow: 2px 4px #888888;
 }
 
-#year {
+/* #year {
   color: green;
   box-shadow: 5px 10px #888888;
-}
+} */
 
 #year:hover {
   cursor: pointer;

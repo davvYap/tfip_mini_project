@@ -15,6 +15,7 @@
           (click)="showDialog()"
         >
           {{ thisYear() }}
+          <fa-icon [icon]="editIcon"></fa-icon>
         </span>
       </h1>
       <dialog #appDialog id="dialogModal">
@@ -440,7 +441,7 @@
                     (click)="onRowEditInit(transaction)"
                     class="p-button-rounded p-button-text"
                   ></button>
-                  <p-confirmPopup></p-confirmPopup>
+                  <!-- <p-confirmPopup></p-confirmPopup> -->
                   <button
                     *ngIf="!editing"
                     pButton

@@ -93,9 +93,42 @@
         <h1 class="mt-3">Hi {{ userFullname | titlecase }}</h1>
       </div>
       <div class="user-summary mt-3">
-        <p class="fs-4">Total Assets: {{ totalValue() | currency }}</p>
-        <p class="fs-4">Investment: {{ stocksValue() | currency }}</p>
-        <p class="fs-4">Savings: {{ savingsValue() | currency }}</p>
+        <div class="row row-cols-2 justify-content-between align-items-center">
+          <div class="col">
+            <p class="fs-4">Total Assets:</p>
+          </div>
+          <div class="col">
+            <p class="fs-4">{{ totalValue() | currency }}</p>
+          </div>
+        </div>
+        <!-- <p class="fs-4">Total Assets: {{ totalValue() | currency }}</p> -->
+        <div class="row row-cols-2 justify-content-between align-items-center">
+          <div class="col">
+            <p class="fs-4">Investment:</p>
+          </div>
+          <div class="col">
+            <p class="fs-4">{{ stocksValue() | currency }}</p>
+          </div>
+        </div>
+        <!-- <p class="fs-4">Investment: {{ stocksValue() | currency }}</p> -->
+        <div class="row row-cols-2 justify-content-between align-items-center">
+          <div class="col">
+            <p class="fs-4">Savings:</p>
+          </div>
+          <div class="col">
+            <p class="fs-4">{{ savingsValue() | currency }}</p>
+          </div>
+        </div>
+        <!-- <p class="fs-4">Savings: {{ savingsValue() | currency }}</p> -->
+        <div class="row row-cols-2 justify-content-between align-items-center">
+          <div class="col">
+            <p class="fs-4">Mortgages:</p>
+          </div>
+          <div class="col">
+            <p class="fs-4">{{ mortgageNumber() }}</p>
+          </div>
+        </div>
+        <!-- <p class="fs-4">Mortgages: {{ mortgageNumber() }}</p> -->
       </div>
       <div class="router-h3 mt-3">
         <h3 *ngIf="!isGoogleUser()" (click)="showUserSettingDialog()">

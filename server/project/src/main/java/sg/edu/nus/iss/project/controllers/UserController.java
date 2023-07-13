@@ -23,6 +23,7 @@ import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockCount;
+import sg.edu.nus.iss.project.models.StockPrice;
 import sg.edu.nus.iss.project.services.StockService;
 import sg.edu.nus.iss.project.services.UserService;
 import java.util.List;
@@ -287,13 +288,24 @@ public class UserController {
             // check redis whether the latest market price is there
             Optional<Double> optPrice = userSvc.retrieveUserStockMarketValueRedis(userId, stkSymbol);
             if (optPrice.isEmpty()) {
-                ResponseEntity<String> realStonkPrice = stockSvc.getRealStonksPrice(stkSymbol);
-                marketPrice = userSvc.getStonkStockPrice(realStonkPrice.getBody());
+                // SEARCH IN MONGO
+                Optional<List<StockPrice>> spListOpt = userSvc.retrieveStockMonthlyPerformanceMongo(stkSymbol);
+                List<StockPrice> spList = spListOpt.get();
+                marketPrice = spList.get(0).getClosePrice();
                 userSvc.saveUserStockMarketValueRedis(userId, stkSymbol, marketPrice);
+
+                // CALL STONK STOCK API
+                // ResponseEntity<String> realStonkPrice =
+                // stockSvc.getRealStonksPrice(stkSymbol);
+                // marketPrice = userSvc.getStonkStockPrice(realStonkPrice.getBody());
+                // userSvc.saveUserStockMarketValueRedis(userId, stkSymbol, marketPrice);
             } else {
                 marketPrice = optPrice.get();
             }
-            totalStockValue += stockCount.getQuantity() * marketPrice;
+            double totalStockMarketValue = stockCount.getQuantity() * marketPrice;
+            totalStockValue += totalStockMarketValue;
+            System.out.println("Stocks symbol %s - qty %.2f - market price %.2f ".formatted(stkSymbol,
+                    stockCount.getQuantity(), totalStockMarketValue));
         }
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -350,7 +362,7 @@ public class UserController {
     public ResponseEntity<String> getUserStockMonthlyValue(@PathVariable String userId,
             @RequestParam(defaultValue = "1000") int limit,
             @RequestParam(defaultValue = "0") int skip, @RequestParam int year) throws IOException {
-        System.out.println("Calling API for user stock monnthly value...");
+        System.out.println("Calling Controller API for user stock monnthly value...");
         List<Double> userStockValue = userSvc.getUserMonthlyStockValueForYear(year, userId, limit, skip);
 
         JsonArrayBuilder jsArr = Json.createArrayBuilder();

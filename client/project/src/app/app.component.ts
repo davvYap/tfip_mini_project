@@ -16,7 +16,13 @@ import {
 import { ThemeService } from './service/theme.service';
 import { GetService } from './service/get.service';
 import { Router } from '@angular/router';
-import { LoginStatus, MessageResponse, SignUp, Transaction } from './models';
+import {
+  LoginStatus,
+  MessageResponse,
+  MortgagePortfolio,
+  SignUp,
+  Transaction,
+} from './models';
 import { PostService } from './service/post.service';
 import { Observable, Subscription, forkJoin, map, of, switchMap } from 'rxjs';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
@@ -69,6 +75,7 @@ export class AppComponent implements OnInit {
   totalValue = computed(() => {
     return this.stocksValue() + this.savingsValue() + this.cryptoValue();
   });
+  mortgageNumber = signal(0);
 
   themes: string[] = [
     'mira',
@@ -284,31 +291,17 @@ export class AppComponent implements OnInit {
               ],
             },
             {
-              label: 'Check Login',
-              icon: 'pi pi-fw pi-user-plus',
-              command: () => this.checkLoginStatus(),
-            },
-            {
               label: 'Setting',
               icon: 'pi pi pi-spin pi-cog',
-              items: [
-                {
-                  label: 'Filter',
-                  icon: 'pi pi-fw pi-filter',
-                  items: [
-                    {
-                      label: 'Print',
-                      icon: 'pi pi-fw pi-print',
-                    },
-                  ],
-                },
-                {
-                  icon: 'pi pi-fw pi-bars',
-                  label: 'List',
-                },
-              ],
+              disabled: this.isGoogleUser(),
+              command: () => this.showUserSettingDialog(),
             },
           ],
+        },
+        {
+          label: 'Coffee',
+          icon: 'pi pi-fw pi-paypal',
+          command: () => {},
         },
       ];
     } else {
@@ -531,7 +524,7 @@ export class AppComponent implements OnInit {
 
   showUserDetail() {
     this.sidebarVisible = true;
-    this.getUserAssetsValue();
+    this.getUserAssetsValueSideBar();
   }
 
   navigateTo(route: string): void {
@@ -539,7 +532,7 @@ export class AppComponent implements OnInit {
     this.router.navigate([route]);
   }
 
-  getUserAssetsValue() {
+  getUserAssetsValueSideBar() {
     this.stockChangePercentage = 0.0;
     this.getSvc
       .getUserTotalStockValue(this.getSvc.userId)
@@ -592,6 +585,12 @@ export class AppComponent implements OnInit {
       )
       .subscribe(() => {
         console.log(this.stocksValue());
+      });
+
+    this.getSvc
+      .getUserMortgagePortfolio(this.getSvc.userId)
+      .subscribe((res) => {
+        this.mortgageNumber.set(res.length);
       });
   }
 }
