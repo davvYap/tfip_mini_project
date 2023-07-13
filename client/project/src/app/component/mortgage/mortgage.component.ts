@@ -583,6 +583,7 @@ export class MortgageComponent implements OnInit {
             color: textColorSecondary,
             // color: '#000000 ',
           },
+          onClick: () => {},
         },
         customCanvasBackgroundColor: {
           color: this.documentStyle().getPropertyValue('--surface-ground'),

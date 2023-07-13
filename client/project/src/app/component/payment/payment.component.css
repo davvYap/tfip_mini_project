@@ -1,0 +1,6 @@
+.payment-container {
+  min-height: 70dvh;
+}
+.font-color {
+  color: var(--text-color);
+}

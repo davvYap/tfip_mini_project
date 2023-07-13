@@ -1,0 +1,27 @@
+<div class="container">
+  <div
+    class="row justify-content-center align-items-center my-5 payment-container"
+  >
+    <div class="col-lg-6 col-sm-10">
+      <div class="font-color">
+        <h1 class="mb-5">We need your support !</h1>
+        <div *ngIf="!paymentComplete">
+          <h3>
+            Coffee brewing
+            <fa-icon [icon]="coffeeIcon" animation="bounce"></fa-icon>
+          </h3>
+        </div>
+        <div *ngIf="paymentComplete">
+          <h1 class="mb-5">Thank you for your support !</h1>
+          <h3>
+            Payment Received ! The coffee was served
+            <fa-icon [icon]="coffeeServed"></fa-icon>
+          </h3>
+        </div>
+      </div>
+      <div #paypalRef class="paypal-btn"></div>
+    </div>
+  </div>
+
+  <p-toast></p-toast>
+</div>

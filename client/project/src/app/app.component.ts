@@ -3,6 +3,7 @@ import {
   ElementRef,
   OnInit,
   Renderer2,
+  ViewChild,
   WritableSignal,
   computed,
   signal,
@@ -87,6 +88,9 @@ export class AppComponent implements OnInit {
     'lara-dark-teal',
     'arya-green',
   ];
+
+  @ViewChild('appDialog', { static: true })
+  appDialog!: ElementRef<HTMLDialogElement>;
 
   constructor(
     private primengConfig: PrimeNGConfig,
@@ -301,7 +305,7 @@ export class AppComponent implements OnInit {
         {
           label: 'Coffee',
           icon: 'pi pi-fw pi-paypal',
-          command: () => {},
+          routerLink: '/payment',
         },
       ];
     } else {

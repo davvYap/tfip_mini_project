@@ -11,6 +11,7 @@ import { AddTransactionComponent } from './component/add-transaction/add-transac
 import { TransactionRecordsComponent } from './component/transaction-records/transaction-records.component';
 import { MortgageComponent } from './component/mortgage/mortgage.component';
 import { MortgageDashboardComponent } from './component/mortgage-dashboard/mortgage-dashboard.component';
+import { PaymentComponent } from './component/payment/payment.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [loginGuard] },
@@ -53,6 +54,11 @@ const routes: Routes = [
   {
     path: 'mortgage',
     component: MortgageComponent,
+    canActivate: [loginGuard],
+  },
+  {
+    path: 'payment',
+    component: PaymentComponent,
     canActivate: [loginGuard],
   },
   { path: 'logout', component: LogoutComponent },

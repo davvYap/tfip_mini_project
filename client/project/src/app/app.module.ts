@@ -35,7 +35,7 @@ import player from 'lottie-web';
 import { MortgageComponent } from './component/mortgage/mortgage.component';
 import { AddMortgageComponent } from './component/add-mortgage/add-mortgage.component';
 import { MortgageDashboardComponent } from './component/mortgage-dashboard/mortgage-dashboard.component';
-import { NgxPayPalModule } from 'ngx-paypal';
+import { PaymentComponent } from './component/payment/payment.component';
 
 // Export this function
 export function playerFactory(): any {
@@ -60,6 +60,7 @@ export function playerFactory(): any {
     MortgageComponent,
     AddMortgageComponent,
     MortgageDashboardComponent,
+    PaymentComponent,
   ],
   imports: [
     BrowserModule,
@@ -74,7 +75,6 @@ export function playerFactory(): any {
     GoogleSigninButtonModule,
     CommonModule,
     LottieModule.forRoot({ player: playerFactory }),
-    NgxPayPalModule,
   ],
   providers: [
     MessageService,

@@ -579,18 +579,11 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
             color: surfaceBorder,
           },
         },
-        // y1: {
-        //   type: 'linear',
-        //   display: true,
-        //   position: 'right',
-        //   ticks: {
-        //     color: textColorSecondary,
-        //   },
-        //   grid: {
-        //     drawOnChartArea: false,
-        //     color: surfaceBorder,
-        //   },
-        // },
+      },
+      hoverRadius: 15,
+      interaction: {
+        intersect: false,
+        mode: 'index',
       },
     };
   }
