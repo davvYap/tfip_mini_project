@@ -138,7 +138,10 @@
         </div>
 
         <!-- DONUT CHART INVESTMENT -->
-        <div class="row justify-content-evenly align-items-center m-4">
+        <div
+          *ngIf="stocksCount.length > 0"
+          class="row justify-content-evenly align-items-center m-4"
+        >
           <div class="col-10 donutbackground">
             <div class="row justify-content-evenly align-items-center mt-2">
               <div class="col-3">
@@ -150,12 +153,12 @@
               </div>
               <div class="col-6 dashboard-text">
                 <div class="d-flex flex-column align-items-start">
-                  <i
-                    class="pi pi-info-circle"
-                    pTooltip="Current investment holdings + realized P&L"
-                  ></i>
                   <h3 class="mb-3">
-                    Total Investment Value
+                    <i
+                      class="pi pi-info-circle"
+                      pTooltip="Current investment holdings + realized P&L"
+                    ></i>
+                    Total Stock Value
                     <span
                       class="pi pi-angle-right"
                       style="font-size: 1.5rem"
@@ -206,45 +209,82 @@
           </div>
         </div>
         <!-- DONUT CHART SAVINGS  -->
-        <div class="row justify-content-evenly align-items-center m-4">
+        <div
+          *ngIf="haveTransactions()"
+          class="row justify-content-evenly align-items-center m-4"
+        >
           <div class="col-10 donutbackground">
             <div class="row justify-content-evenly align-items-center">
               <div class="col-6 dashboard-text">
                 <div class="d-flex flex-column align-items-start">
                   <h3 class="mb-3">
-                    Year {{ thisYear() }} Net Savings
-                    <span
-                      class="pi pi-angle-right"
-                      style="font-size: 1.5rem"
-                    ></span>
-                    <span
-                      *ngIf="!skeletonLoading; else loading"
-                      [className]="getProfitColorClass(savingsValue())"
+                    <p-button
+                      styleClass="p-button-rounded p-button-text"
+                      (onClick)="toggleMonthlyAverage()"
                     >
-                      {{ savingsValue() | currency }}
+                      <fa-icon [icon]="switchIcon"></fa-icon>
+                    </p-button>
+                    <span *ngIf="showYearSavings">
+                      Year {{ thisYear() }} Net Savings
+                      <span
+                        class="pi pi-angle-right"
+                        style="font-size: 1.5rem"
+                      ></span>
+                      <span
+                        *ngIf="!skeletonLoading; else loading"
+                        [className]="getProfitColorClass(savingsValue())"
+                      >
+                        {{ savingsValue() | currency }}
+                      </span>
+                    </span>
+                    <span *ngIf="showTotalExpense">
+                      Total Expense ({{ thisYear() }})
+                      <span
+                        class="pi pi-angle-right"
+                        style="font-size: 1.5rem"
+                      ></span>
+                      <span
+                        *ngIf="!skeletonLoading; else loading"
+                        class="negative"
+                      >
+                        {{ totalExpense() | currency }}
+                      </span>
+                    </span>
+                    <span *ngIf="showTotalIncome">
+                      Total Income ({{ thisYear() }})
+                      <span
+                        class="pi pi-angle-right"
+                        style="font-size: 1.5rem"
+                      ></span>
+                      <span
+                        *ngIf="!skeletonLoading; else loading"
+                        class="positive"
+                      >
+                        {{ totalIncome() | currency }}
+                      </span>
                     </span>
                   </h3>
                   <div>
                     <h4>
-                      Total <span class="positive">Income</span>
+                      Average Monthly <span class="positive">Income</span>
                       <span
                         class="pi pi-angle-right"
                         style="font-size: 1.5rem"
                       ></span>
                       <span *ngIf="!skeletonLoading; else loading">
-                        {{ totalIncome() | currency }}
+                        {{ averageMonthlyIncome() | currency }}
                       </span>
                     </h4>
                   </div>
                   <div>
                     <h4>
-                      Total <span class="negative">Expense</span>
+                      Average Monthly <span class="negative">Expense</span>
                       <span
                         class="pi pi-angle-right"
                         style="font-size: 1.5rem"
                       ></span>
                       <span *ngIf="!skeletonLoading; else loading">
-                        {{ totalExpense() | currency }}
+                        {{ averageMonthlyExpense() | currency }}
                       </span>
                     </h4>
                   </div>

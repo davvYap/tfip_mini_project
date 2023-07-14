@@ -183,3 +183,10 @@ export interface MortgagePortfolio {
   totalPeriod: number;
   imgString: string;
 }
+
+export interface NotificationMessage {
+  notificationNumber: number;
+  month: string;
+  benchmark: number;
+  performance: number;
+}

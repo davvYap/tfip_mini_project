@@ -92,6 +92,7 @@ export class AuthenticationComponent implements OnInit {
       baseZIndex: 10000,
       maximizable: true,
       dismissableMask: true,
+      data: { signUp: null },
     });
   }
 

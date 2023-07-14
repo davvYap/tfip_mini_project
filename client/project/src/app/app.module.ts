@@ -36,6 +36,7 @@ import { MortgageComponent } from './component/mortgage/mortgage.component';
 import { AddMortgageComponent } from './component/add-mortgage/add-mortgage.component';
 import { MortgageDashboardComponent } from './component/mortgage-dashboard/mortgage-dashboard.component';
 import { PaymentComponent } from './component/payment/payment.component';
+import { StockDetailsComponent } from './component/stock-details/stock-details.component';
 
 // Export this function
 export function playerFactory(): any {
@@ -61,6 +62,7 @@ export function playerFactory(): any {
     AddMortgageComponent,
     MortgageDashboardComponent,
     PaymentComponent,
+    StockDetailsComponent,
   ],
   imports: [
     BrowserModule,

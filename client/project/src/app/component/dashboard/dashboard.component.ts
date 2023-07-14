@@ -14,6 +14,7 @@ import { Observable, Subscription, forkJoin, map, of, switchMap } from 'rxjs';
 import {
   LoginStatus,
   MessageResponse,
+  NotificationMessage,
   PurchasedStocksCount,
   SoldStock,
   StockLogo,
@@ -29,8 +30,10 @@ import { Title } from '@angular/platform-browser';
 import {
   faFaceSmileWink,
   faHandPointRight,
+  faRepeat,
 } from '@fortawesome/free-solid-svg-icons';
 import { MessageService } from 'primeng/api';
+import { NotificationService } from 'src/app/service/notification.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -40,7 +43,9 @@ import { MessageService } from 'primeng/api';
 export class DashboardComponent implements OnInit, OnDestroy {
   smileIcon = faFaceSmileWink;
   pointRightIcon = faHandPointRight;
+  switchIcon = faRepeat;
   thisYear = signal(new Date().getFullYear());
+  currMonth = signal(new Date().getMonth());
   documentStyle = signal(getComputedStyle(document.documentElement));
   username: WritableSignal<string | null> = signal('visitor');
   chartPlugin: {
@@ -120,6 +125,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   showAddGoal: boolean = true;
 
+  showYearSavings: boolean = true;
+  showTotalExpense: boolean = false;
+  showTotalIncome: boolean = false;
+  averageMonthlyIncome = signal(0);
+  averageMonthlyExpense = signal(0);
+
   // CATEGORIES
   generalCategories: string[] = ['Savings', 'Investments'];
   generalCategoriesRoutes: string[] = [
@@ -146,6 +157,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     '12',
   ];
 
+  monthsString: string[] = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'June',
+    'July',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
   constructor(
     private getSvc: GetService,
     private postSvc: PostService,
@@ -153,7 +179,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private fb: FormBuilder,
     private title: Title,
-    private messageSvc: MessageService
+    private messageSvc: MessageService,
+    private notificationSvc: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -189,11 +216,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.quoteOfTheDay = quote.q;
     });
 
-    // GET USER STOCK VALUE
-    // this.getSvc.getUserTotalStockValuePromise(this.getSvc.userId).then((res) => {
-    //   this.stocksValue = res.value;
-    //   this.totalValue = this.stocksValue; // NOTE temporarily
-    // });
     this.stockChangePercentage = 0.0;
     this.getSvc
       .getUserTotalStockValue(this.getSvc.userId)
@@ -238,6 +260,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             }
           });
           this.savingsValue.set(totalIncome - totalExpense);
+          const totalMonths = this.currMonth() + 1;
+          this.averageMonthlyExpense.set(totalExpense / totalMonths);
+          this.averageMonthlyIncome.set(totalIncome / totalMonths);
           return of(trans);
         })
       )
@@ -264,6 +289,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     // LINE CHART
     this.initiateChartsData();
+
+    // NOTIFICATION IF USER PEFORMANCE > GOAL THAT MONTH LINECHART
   }
 
   ngOnDestroy(): void {
@@ -362,7 +389,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }),
         switchMap((res) => {
           this.portfolioPerformanceData = res;
-          console.log(this.portfolioPerformanceData);
+          // console.log(this.portfolioPerformanceData);
           return of(res);
         }),
         switchMap((res) => {
@@ -401,11 +428,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
               }
               index++;
             });
-            console.log(this.portfolioPerformanceData);
+            console.log('user performance', this.portfolioPerformanceData);
             this.portfolioPerformanceDataFinal.set(
               this.portfolioPerformanceData
             );
             this.initiateLineChart();
+            this.getNotificationOfLineChart();
           });
           return of(res);
         })
@@ -733,20 +761,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.documentStyle().getPropertyValue('--surface-border');
 
     this.lineData = {
-      labels: [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'June',
-        'July',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ],
+      labels: this.monthsString,
       datasets: [
         {
           label: 'Yearly Goal',
@@ -827,5 +842,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
         mode: 'index',
       },
     };
+  }
+  toggleMonthlyAverage() {
+    if (this.showYearSavings) {
+      this.showYearSavings = false;
+      this.showTotalIncome = true;
+      this.showTotalExpense = false;
+    } else if (this.showTotalIncome) {
+      this.showTotalIncome = false;
+      this.showTotalExpense = true;
+      this, (this.showYearSavings = false);
+    } else {
+      this.showYearSavings = true;
+      this.showTotalIncome = false;
+      this.showTotalExpense = false;
+    }
+  }
+
+  haveTransactions(): boolean {
+    return this.totalIncome() > 0 || this.totalExpense() > 0;
+  }
+
+  getNotificationOfLineChart() {
+    let totalNotifcationMessages: NotificationMessage[] = [];
+    for (let i = 0; i < this.monthsString.length; i++) {
+      if (
+        this.portfolioPerformanceDataFinal()[i] >=
+        this.guideLineDataForYearlyGoal[i]
+      ) {
+        const notifcation: NotificationMessage = {
+          notificationNumber: 1,
+          benchmark: this.guideLineDataForYearlyGoal[i],
+          performance: this.portfolioPerformanceDataFinal()[i],
+          month: this.monthsString[i],
+        };
+        totalNotifcationMessages.push(notifcation);
+      }
+    }
+    this.notificationSvc.newNotification$.next(totalNotifcationMessages);
   }
 }

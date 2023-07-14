@@ -142,3 +142,14 @@ footer {
   /* box-shadow: 0 4px 30px rgba(10, 0, 0, 0.9); */
   box-shadow: 5px 10px var(--primary-color);
 }
+
+.notification-words > p {
+  margin-top: 1rem;
+  padding-left: 1rem;
+}
+
+.notification-words {
+  border-bottom: 1px solid var(--primary-color);
+  /* border: 1px solid var(--primary-color);
+  border-radius: 1rem; */
+}

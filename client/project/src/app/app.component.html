@@ -21,14 +21,19 @@
   <ng-template pTemplate="end">
     <!-- <input type="text" pInputText placeholder="Search" class="w-full" /> -->
     <div class="d-flex justify-content-evenly align-items-center">
-      <div class="me-2">
-        <i
-          class="pi pi-bell mr-4 p-text-secondary"
-          pBadge
-          style="font-size: 2rem"
-          value="2"
-          severity="danger"
-        ></i>
+      <div class="me-1">
+        <p-button
+          styleClass=" p-button-secondary p-button-text"
+          (onClick)="notifcationIcon.toggle($event)"
+        >
+          <i
+            class="pi pi-bell mr-4"
+            pBadge
+            style="font-size: 1.5rem"
+            [value]="notificationAmount()"
+            severity="danger"
+          ></i>
+        </p-button>
       </div>
       <div class="application-name fs-2" [routerLink]="'/dashboard'">
         <p>am<span class="primary">.app</span></p>
@@ -37,6 +42,51 @@
   </ng-template>
 </p-menubar>
 <p-confirmDialog [style]="{ width: '50vw' }"></p-confirmDialog>
+<p-overlayPanel
+  #notifcationIcon
+  [showCloseIcon]="true"
+  [showTransitionOptions]="'0.3s cubic-bezier(.4, .4, 0.4, .1)'"
+  [hideTransitionOptions]="'0.3s ease-in'"
+>
+  <div *ngIf="notificationMessages.length > 0">
+    <div
+      *ngFor="let notificationMsg of notificationMessages; let i = index"
+      class="d-flex justify-content-between align-items-center notification-words my-2"
+    >
+      <div>
+        <p>
+          Goal achived on {{ notificationMsg.month }} {{ thisYear() }}
+          <span class="positive">
+            {{
+              notificationMsg.performance - notificationMsg.benchmark | currency
+            }}
+          </span>
+        </p>
+      </div>
+      <div>
+        <span
+          ><p-button
+            icon="pi pi-times"
+            styleClass="p-button-rounded p-button-danger p-button-text"
+            (onClick)="dismissNotifcation(i)"
+          ></p-button
+        ></span>
+      </div>
+    </div>
+    <div class="d-flex justify-content-center align-items-center">
+      <p-button
+        styleClass="p-button-text"
+        (onClick)="clearAllNotifications()"
+        (onClick)="notifcationIcon.toggle($event)"
+      >
+        <i class="pi pi-trash"></i>
+        <span class="ms-2">Clear All</span>
+      </p-button>
+    </div>
+  </div>
+
+  <div *ngIf="notificationMessages.length === 0">No notification</div>
+</p-overlayPanel>
 
 <!-- am.app -->
 <p-menubar *ngIf="!isLogin()" [model]="items" id="applicationMenubar">

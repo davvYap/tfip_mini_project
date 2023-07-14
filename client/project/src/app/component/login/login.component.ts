@@ -164,7 +164,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   }
 
   onAnimate(animationItem: AnimationItem): void {
-    console.log(animationItem);
+    // console.log(animationItem);
   }
 
   showLoginDialog() {

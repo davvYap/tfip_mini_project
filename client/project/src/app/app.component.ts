@@ -21,6 +21,7 @@ import {
   LoginStatus,
   MessageResponse,
   MortgagePortfolio,
+  NotificationMessage,
   SignUp,
   Transaction,
 } from './models';
@@ -44,6 +45,7 @@ import {
 import { AuthenticationComponent } from './component/authentication/authentication.component';
 import { SignUpComponent } from './component/sign-up/sign-up.component';
 import { EditCategoryComponent } from './component/edit-category/edit-category.component';
+import { NotificationService } from './service/notification.service';
 
 @Component({
   selector: 'app-root',
@@ -78,6 +80,8 @@ export class AppComponent implements OnInit {
   });
   mortgageNumber = signal(0);
 
+  notificationAmount: WritableSignal<string> = signal('0');
+  notificationMessages!: NotificationMessage[];
   themes: string[] = [
     'mira',
     'nano',
@@ -102,7 +106,8 @@ export class AppComponent implements OnInit {
     private dialogSvc: DialogService,
     private renderer: Renderer2,
     private el: ElementRef,
-    private confirmationSvc: ConfirmationService
+    private confirmationSvc: ConfirmationService,
+    private notificationSvc: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -138,6 +143,19 @@ export class AppComponent implements OnInit {
     });
 
     this.currTime = new Date().toDateString();
+
+    this.notificationSvc.newNotification$.subscribe(
+      (notifications: NotificationMessage[]) => {
+        let totalNotiNum = 0;
+        notifications.map((noti) => {
+          totalNotiNum++;
+        });
+        this.notificationAmount.set(totalNotiNum.toString());
+        this.notificationMessages = notifications;
+      }
+    );
+
+    this.notificationMessages = [];
   }
 
   getMenuItem(isLogin: boolean): MenuItem[] {
@@ -596,5 +614,20 @@ export class AppComponent implements OnInit {
       .subscribe((res) => {
         this.mortgageNumber.set(res.length);
       });
+  }
+
+  dismissNotifcation(i: number) {
+    this.notificationMessages.splice(i, 1);
+    const oriNotificationAmount: number = parseInt(
+      this.notificationAmount(),
+      10
+    );
+    const newAmount: number = oriNotificationAmount - 1;
+    this.notificationAmount.set(newAmount.toString());
+  }
+
+  clearAllNotifications() {
+    this.notificationAmount.set('0');
+    this.notificationMessages = [];
   }
 }
