@@ -44,7 +44,6 @@
 <p-confirmDialog [style]="{ width: '50vw' }"></p-confirmDialog>
 <p-overlayPanel
   #notifcationIcon
-  [showCloseIcon]="true"
   [showTransitionOptions]="'0.3s cubic-bezier(.4, .4, 0.4, .1)'"
   [hideTransitionOptions]="'0.3s ease-in'"
 >
@@ -190,7 +189,7 @@
         <h3 (click)="navigateTo('/savings')">
           <fa-icon [icon]="rightIcon"></fa-icon> Savings
         </h3>
-        <h3 (click)="navigateTo('/mortgage')">
+        <h3 (click)="navigateTo('/mortgage-dashboard')">
           <fa-icon [icon]="rightIcon"></fa-icon> Mortgage
         </h3>
       </div>
@@ -219,7 +218,9 @@
       <div class="d-flex justify-content-center align-items-center">
         <a href="#"><fa-icon [icon]="facebookIcon"></fa-icon></a>
         <a href="#"><fa-icon [icon]="instaIcon"></fa-icon></a>
-        <a href="#"><fa-icon [icon]="youtubeIcon"></fa-icon></a>
+        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank"
+          ><fa-icon [icon]="youtubeIcon"></fa-icon
+        ></a>
         <a href="#"><fa-icon [icon]="twitterIcon"></fa-icon></a>
       </div>
     </div>

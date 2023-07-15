@@ -389,7 +389,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }),
         switchMap((res) => {
           this.portfolioPerformanceData = res;
-          // console.log(this.portfolioPerformanceData);
+          console.log('user stock data', this.portfolioPerformanceData);
           return of(res);
         }),
         switchMap((res) => {
@@ -440,7 +440,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe(() => {
         // console.log('line chart');
-        console.log('final', this.portfolioPerformanceDataFinal());
         this.skeletonLoading = false;
         this.initiateDonutChartOverall();
       });
