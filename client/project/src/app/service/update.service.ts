@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import {
   Categories,
   MessageResponse,
+  MortgagePortfolio,
   PurchasedStock,
   Transaction,
 } from '../models';
@@ -55,6 +56,18 @@ export class UpdateService {
       this.http.put<MessageResponse>(
         `http://localhost:8080/api/${userId}/edit_profile`,
         formData
+      )
+    );
+  }
+
+  updateUserMortgagePortfolio(
+    userId: string,
+    mort: MortgagePortfolio
+  ): Promise<MessageResponse> {
+    return lastValueFrom(
+      this.http.put<MessageResponse>(
+        `http://localhost:8080/api/${userId}/update_mortgage_profile`,
+        mort
       )
     );
   }

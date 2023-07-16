@@ -226,6 +226,11 @@ export class AppComponent implements OnInit {
                   icon: 'pi pi-fw pi-ticket ',
                   command: () => this.editCategory(),
                 },
+                {
+                  label: 'Schedule',
+                  icon: 'pi pi-fw pi-calendar ',
+                  routerLink: '/regular-transactions',
+                },
               ],
             },
             {
@@ -256,8 +261,8 @@ export class AppComponent implements OnInit {
               separator: true,
             },
             {
-              label: 'Dashboard',
-              icon: 'pi pi-fw pi-chart-line',
+              label: 'Portfolio',
+              icon: 'pi pi-fw pi-building',
               routerLink: '/mortgage-dashboard',
             },
           ],

@@ -81,6 +81,7 @@ export class AddTransactionComponent implements OnInit {
         Validators.required
       ),
       remarks: this.fb.control(!!tran ? tran.remarks : ''),
+      regular: this.fb.control(!!tran ? tran.regular : false),
     });
   }
 

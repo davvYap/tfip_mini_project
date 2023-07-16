@@ -12,6 +12,7 @@ import { TransactionRecordsComponent } from './component/transaction-records/tra
 import { MortgageComponent } from './component/mortgage/mortgage.component';
 import { MortgageDashboardComponent } from './component/mortgage-dashboard/mortgage-dashboard.component';
 import { PaymentComponent } from './component/payment/payment.component';
+import { RegularTransactionsComponent } from './component/regular-transactions/regular-transactions.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [loginGuard] },
@@ -44,6 +45,11 @@ const routes: Routes = [
   {
     path: 'transaction-records',
     component: TransactionRecordsComponent,
+    canActivate: [loginGuard],
+  },
+  {
+    path: 'regular-transactions',
+    component: RegularTransactionsComponent,
     canActivate: [loginGuard],
   },
   {

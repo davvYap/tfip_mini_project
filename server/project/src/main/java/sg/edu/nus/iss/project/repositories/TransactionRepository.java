@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import sg.edu.nus.iss.project.models.Category;
+import sg.edu.nus.iss.project.models.RegularTransaction;
 import sg.edu.nus.iss.project.models.Transaction;
 
 import static sg.edu.nus.iss.project.repositories.DBQueries.*;
@@ -13,6 +14,7 @@ import static sg.edu.nus.iss.project.repositories.DBQueries.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public class TransactionRepository {
@@ -101,4 +103,38 @@ public class TransactionRepository {
         }
         return trans;
     }
+
+    public Transaction getUserTransactionBasedOnTransIdJdbc(String userId, String transId) {
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_USER_TRANSACTION_BASED_ON_TRANS_ID, userId, transId);
+        Transaction tran = null;
+        while (rs.next()) {
+            tran = Transaction.convertFromResult(rs);
+        }
+        return tran;
+    }
+
+    public int insertRegularTransactionJdbc(String userId, String tranId) {
+        String regularTranId = UUID.randomUUID().toString().substring(0, 8);
+
+        return jdbcTemplate.update(SQL_INSERT_USER_REGULAR_TRANSACTION, regularTranId, tranId, userId);
+    }
+
+    public List<RegularTransaction> getUserRegularTransactionsJdbc(String userId) {
+        List<RegularTransaction> trans = new LinkedList<>();
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_USER_REGULAR_TRANSACTIONS, userId);
+        while (rs.next()) {
+            trans.add(RegularTransaction.convertFromResult(rs));
+        }
+        return trans;
+    }
+
+    public List<RegularTransaction> getAllRegularTransactionsJdbc() {
+        List<RegularTransaction> trans = new LinkedList<>();
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(SQL_GET_ALL_REGULAR_TRANSACTIONS);
+        while (rs.next()) {
+            trans.add(RegularTransaction.convertFromResult(rs));
+        }
+        return trans;
+    }
+
 }

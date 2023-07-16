@@ -23,6 +23,7 @@ public class Transaction {
     private String categoryName;
     private Integer categoryId;
     private String type;
+    private boolean regularTransaction;
 
     public String getTransactionId() {
         return transactionId;
@@ -88,6 +89,14 @@ public class Transaction {
         this.type = type;
     }
 
+    public boolean isRegularTransaction() {
+        return regularTransaction;
+    }
+
+    public void setRegularTransaction(boolean regularTransaction) {
+        this.regularTransaction = regularTransaction;
+    }
+
     public static Transaction convertFromResult(SqlRowSet rs) {
         Transaction t = new Transaction();
         t.setTransactionId(rs.getString("trans_id"));
@@ -142,6 +151,7 @@ public class Transaction {
             t.setAmount(jsObj.getJsonNumber("amount").doubleValue());
             t.setCategoryName(jsObj.getString("categoryName"));
             t.setRemarks(jsObj.getString("remarks"));
+            t.setRegularTransaction(jsObj.getBoolean("regular"));
 
             String dateStr = jsObj.getString("date");
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

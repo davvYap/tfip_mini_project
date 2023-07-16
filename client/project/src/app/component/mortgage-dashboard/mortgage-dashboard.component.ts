@@ -149,6 +149,7 @@ export class MortgageDashboardComponent implements OnInit, OnDestroy {
       categoryName: '',
       categoryId: '',
       dateNum: 0,
+      regular: true,
     };
 
     this.dialogRef = this.dialogSvc.open(AddTransactionComponent, {

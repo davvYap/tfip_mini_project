@@ -1,12 +1,17 @@
 package sg.edu.nus.iss.project.services;
 
+import java.time.LocalDate;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import sg.edu.nus.iss.project.models.Category;
+import sg.edu.nus.iss.project.models.RegularTransaction;
 import sg.edu.nus.iss.project.models.Transaction;
 import sg.edu.nus.iss.project.repositories.TransactionRepository;
 
@@ -68,4 +73,39 @@ public class TransactionService {
         return transRepo.getUserAllTransactionsJdbc(userId);
     }
 
+    public int insertRegularTransactionJdbc(String userId, String tranId) {
+        return transRepo.insertRegularTransactionJdbc(userId, tranId);
+    }
+
+    public List<RegularTransaction> getUserRegularTransactionsJdbc(String userId) {
+        return transRepo.getUserRegularTransactionsJdbc(userId);
+    }
+
+    public List<RegularTransaction> getAllRegularTransactionsJdbc() {
+        return transRepo.getAllRegularTransactionsJdbc();
+    }
+
+    @Scheduled(cron = "0 0 0 1 * *")
+    public void executeInsertRegularTransactionsTask() {
+        System.out.println("Executing regular transactions insertion task on the 17th of the month...");
+        List<RegularTransaction> regularTrans = getAllRegularTransactionsJdbc();
+        int totalInserted = 0;
+        for (RegularTransaction regTran : regularTrans) {
+            Transaction tran = transRepo.getUserTransactionBasedOnTransIdJdbc(regTran.getUserId(), regTran.getTranId());
+            if (tran != null) {
+                // update transaction date month to current month
+                LocalDate oldDate = tran.getDate();
+                LocalDate newDate = oldDate.withMonth(LocalDate.now().getMonthValue());
+                tran.setDate(newDate);
+
+                // get new transaction ID
+                tran.setTransactionId(UUID.randomUUID().toString().substring(0, 8));
+
+                // add to each user transaction repo
+                totalInserted += insertTransactionJdbc(regTran.getUserId(), tran);
+            }
+        }
+        System.out
+                .println("Executed regular transactions insertion task , total inserted > %d".formatted(totalInserted));
+    }
 }

@@ -89,13 +89,24 @@
 
       <div class="d-flex justify-content-evenly align-items-center mt-3 mb-4">
         <span class="p-buttonset">
-          <button
-            pButton
-            pRipple
-            label="Portfolio"
-            icon="pi pi-plus"
-            (click)="addToPortfolio()"
-          ></button>
+          <span *ngIf="!showUpdateButton">
+            <button
+              pButton
+              pRipple
+              label="Portfolio"
+              icon="pi pi-plus"
+              (click)="addToPortfolio()"
+            ></button>
+          </span>
+          <span *ngIf="showUpdateButton">
+            <button
+              pButton
+              pRipple
+              label="Update"
+              icon="pi pi-sync"
+              (click)="updateMortgagePortfolio()"
+            ></button>
+          </span>
 
           <button
             pButton

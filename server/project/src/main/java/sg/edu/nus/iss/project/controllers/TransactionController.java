@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import sg.edu.nus.iss.project.models.Category;
+import sg.edu.nus.iss.project.models.RegularTransaction;
 import sg.edu.nus.iss.project.models.Transaction;
 import sg.edu.nus.iss.project.services.TransactionService;
 
@@ -126,7 +127,13 @@ public class TransactionController {
 		Transaction tran = null;
 		try {
 			tran = Transaction.convertFromJsonAdd(json);
+
 			int insertedRow = transSvc.insertTransactionJdbc(userId, tran);
+			// check if it is regular transaction
+			if (tran.isRegularTransaction()) {
+				transSvc.insertRegularTransactionJdbc(userId, tran.getTransactionId());
+			}
+
 			if (insertedRow > 0) {
 				return ResponseEntity.status(HttpStatus.CREATED)
 						.contentType(MediaType.APPLICATION_JSON)
@@ -243,6 +250,22 @@ public class TransactionController {
 			@RequestParam String startDate, @RequestParam String endDate) {
 
 		List<Transaction> trans = transSvc.geTransactionsBasedOnDatesJdbc(userId, startDate, endDate);
+
+		JsonArrayBuilder jsArr = Json.createArrayBuilder();
+		trans.stream().forEach((tran) -> {
+			jsArr.add(tran.toJsonObjectBuilder());
+		});
+
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(jsArr.build().toString());
+	}
+
+	@GetMapping(path = "/{userId}/all_regular_trans")
+	@ResponseBody
+	public ResponseEntity<String> getUserAllRegularTransactions(@PathVariable String userId) {
+
+		List<RegularTransaction> trans = transSvc.getUserRegularTransactionsJdbc(userId);
 
 		JsonArrayBuilder jsArr = Json.createArrayBuilder();
 		trans.stream().forEach((tran) -> {

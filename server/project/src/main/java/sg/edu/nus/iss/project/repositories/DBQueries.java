@@ -60,6 +60,10 @@ public class DBQueries {
 			select trans_id, trans_name, date_of_trans, amount, remarks, t.cat_id, c.cat_name, c.type from transactions t join categories c on t.cat_id = c.cat_id where t.user_id  = ?
 			""";
 
+	public static final String SQL_GET_USER_TRANSACTION_BASED_ON_TRANS_ID = """
+			select trans_id, trans_name, date_of_trans, amount, remarks, t.cat_id, c.cat_name, c.type from transactions t join categories c on t.cat_id = c.cat_id where t.user_id  = ? and trans_id = ?;
+			""";
+
 	public static final String SQL_GET_USER_TRANSACTIONS_BASED_ON_YEAR = """
 			select trans_id, trans_name, date_of_trans, amount, remarks, t.cat_id, c.cat_name, c.type from transactions t join categories c on t.cat_id = c.cat_id
 			where t.user_id  = ? and month(date_of_trans) = ? and year(date_of_trans) = ?;
@@ -72,7 +76,20 @@ public class DBQueries {
 
 	public static final String SQL_GET_USER_TRANSACTIONS_BASED_ON_REMARKS = """
 			select * from transactions where user_id = ? and remarks like ?;
-				""";
+			""";
+
+	public static final String SQL_INSERT_USER_REGULAR_TRANSACTION = """
+			insert into regular_transactions(regular_trans_id, trans_id, user_id)
+			values
+			(? ,?, ?);
+			""";
+	public static final String SQL_GET_USER_REGULAR_TRANSACTIONS = """
+			select * from regular_transactions where user_id = ?;
+			""";
+
+	public static final String SQL_GET_ALL_REGULAR_TRANSACTIONS = """
+			select * from regular_transactions;
+			""";
 
 	public static final String SQL_NEW_USER_SIGNUP = """
 			insert into users(user_id, username, password, email, firstname, lastname, profile_pic)

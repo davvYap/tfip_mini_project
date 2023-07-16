@@ -52,6 +52,26 @@ public class MortgageRepository {
         return true;
     }
 
+    public Boolean updateUserMortgagePortfolioMongo(String userId, MortgagePortfolio mp) {
+
+        // delete old mortgage profile
+        boolean deletedOldMortProfile = deleteUserMortgagePortfolioMongo(userId,
+                mp.getId());
+        System.out.println("Deleted > " + deletedOldMortProfile);
+        if (deletedOldMortProfile) {
+            // upsert updated mortgage profile
+            boolean upsertUpdatedMortProfile = upsertUserMortgagePortfolioMongo(userId,
+                    mp);
+            System.out.println("Upsert > " + upsertUpdatedMortProfile);
+
+            if (deletedOldMortProfile && upsertUpdatedMortProfile) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public List<MortgagePortfolio> retrieveUserMortgagePortfolioMongo(String userId) {
         Query query = Query.query(Criteria.where("user_id").is(userId));
         Document d = mongo.findOne(query, Document.class, "mortgages");

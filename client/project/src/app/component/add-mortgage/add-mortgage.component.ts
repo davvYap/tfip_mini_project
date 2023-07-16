@@ -6,6 +6,7 @@ import { MortgagePortfolio } from 'src/app/models';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
+import { UpdateService } from 'src/app/service/update.service';
 
 @Component({
   selector: 'app-add-mortgage',
@@ -15,6 +16,7 @@ import { ThemeService } from 'src/app/service/theme.service';
 export class AddMortgageComponent implements OnInit {
   form!: FormGroup;
   idPattern: RegExp = /^#/;
+  showUpdateUpdateButton!: boolean;
 
   constructor(
     private themeSvc: ThemeService,
@@ -23,7 +25,8 @@ export class AddMortgageComponent implements OnInit {
     private postSvc: PostService,
     private getSvc: GetService,
     private messageSvc: MessageService,
-    public dialogRef: DynamicDialogRef
+    public dialogRef: DynamicDialogRef,
+    private updateSvc: UpdateService
   ) {}
 
   ngOnInit(): void {
@@ -32,6 +35,11 @@ export class AddMortgageComponent implements OnInit {
     // FROM MORTGAGE COMPONENT
     const mortgagePort: MortgagePortfolio =
       this.dialogConfig.data.mortgagePortfolio;
+    if (mortgagePort.new) {
+      this.showUpdateUpdateButton = false;
+    } else {
+      this.showUpdateUpdateButton = true;
+    }
     this.form = this.createForm(mortgagePort);
   }
 
@@ -74,6 +82,22 @@ export class AddMortgageComponent implements OnInit {
     console.log(newMort);
     this.postSvc
       .addUserMortgagePortfolio(this.getSvc.userId, newMort)
+      .then((msg) => {
+        this.dialogRef.close(msg.message);
+      })
+      .catch((err) => {
+        this.messageSvc.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error.message,
+        });
+      });
+  }
+
+  updateMortgageProfile() {
+    const mort = this.form.value as MortgagePortfolio;
+    this.updateSvc
+      .updateUserMortgagePortfolio(this.getSvc.userId, mort)
       .then((msg) => {
         this.dialogRef.close(msg.message);
       })

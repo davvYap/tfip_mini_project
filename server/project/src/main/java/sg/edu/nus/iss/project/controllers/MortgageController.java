@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -75,6 +76,28 @@ public class MortgageController {
         return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder()
                         .add("message", "Added mortgage %s successfully.".formatted(mp.getId()))
+                        .build()
+                        .toString());
+    }
+
+    @PutMapping(path = "/{userId}/update_mortgage_profile")
+    @ResponseBody
+    public ResponseEntity<String> updateMortgageProfile(@PathVariable String userId, @RequestBody String mortgageJson)
+            throws IOException {
+        MortgagePortfolio mp = MortgagePortfolio.convertFromJsonString(mortgageJson);
+        boolean upsertMongo = mortgageSvc.updateUserMortgagePortfolioMongo(userId, mp);
+
+        if (!upsertMongo) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder()
+                            .add("message", "Failed to update mortgage profile %s.".formatted(mp.getId()))
+                            .build()
+                            .toString());
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder()
+                        .add("message", "Updated mortgage %s successfully.".formatted(mp.getId()))
                         .build()
                         .toString());
     }

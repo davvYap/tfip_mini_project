@@ -136,6 +136,7 @@ export interface Transaction {
   categoryName: string;
   categoryId: string;
   dateNum: number;
+  regular: boolean;
 }
 
 export interface categoryOptionItem<T = any> {
@@ -182,6 +183,7 @@ export interface MortgagePortfolio {
   monthlyRepayment: number;
   totalPeriod: number;
   imgString: string;
+  new: boolean;
 }
 
 export interface NotificationMessage {
@@ -189,4 +191,9 @@ export interface NotificationMessage {
   month: string;
   benchmark: number;
   performance: number;
+}
+
+export interface RegularTransaction {
+  id: string;
+  tran: Transaction;
 }

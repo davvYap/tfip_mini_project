@@ -86,6 +86,7 @@ export class MortgageComponent implements OnInit {
 
   userMortgagePortfolios!: MortgagePortfolio[];
   selectedMortgageId!: string;
+  showUpdateButton: boolean = false;
 
   months: string[] = [
     'Jan',
@@ -133,26 +134,29 @@ export class MortgageComponent implements OnInit {
     });
 
     this.repaymentCategories = ['Principal', 'Interest'];
-    this.getSvc
-      .getMortgageLoanData(
-        this.loanAmount,
-        this.loanTerm,
-        this.interestRate / 100,
-        this.typeOfLoanTerm
-      )
-      .then((data: MortgageLoan) => {
-        this.repaymentAmountData.set([data.principal, data.totalInterest]);
-        this.monthlyRepayment.set(data.monthlyRepayment);
-      })
-      .then(() => {
-        this.initiateDonutChart();
-      });
+    // this.getSvc
+    //   .getMortgageLoanData(
+    //     this.loanAmount,
+    //     this.loanTerm,
+    //     this.interestRate / 100,
+    //     this.typeOfLoanTerm
+    //   )
+    //   .then((data: MortgageLoan) => {
+    //     this.repaymentAmountData.set([data.principal, data.totalInterest]);
+    //     this.monthlyRepayment.set(data.monthlyRepayment);
+    //   })
+    //   .then(() => {
+    //     this.initiateDonutChart();
+    //   });
 
     // USER MORTGAGE PORTFOLIO
     console.log(this.activatedRoute.snapshot.queryParams['mortgageId']);
     if (this.activatedRoute.snapshot.queryParams['mortgageId']) {
       this.selectedMortgageId =
         this.activatedRoute.snapshot.queryParams['mortgageId'];
+      this.showUpdateButton = true;
+    } else {
+      this.calculate();
     }
     this.userMortgagePortfolios = [];
     this.getSvc
@@ -166,6 +170,7 @@ export class MortgageComponent implements OnInit {
               this.interestRate = mort.interest;
               this.typeOfLoanTerm = 'month';
               setTimeout(() => {
+                this.calculate();
                 this.getAmortizationTable();
               }, 500);
             }
@@ -649,10 +654,52 @@ export class MortgageComponent implements OnInit {
         this.repaymentAmountData()[0] + this.repaymentAmountData()[1],
 
       imgString: '',
+      new: true,
     };
 
     this.dialogRef = this.dialogSvc.open(AddMortgageComponent, {
       header: 'New mortgage portfolio',
+      width: '30%',
+      // height: '90%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      dismissableMask: true,
+      data: { mortgagePortfolio: mortPortfolio },
+    });
+
+    this.dialogRef.onClose.subscribe((msg) => {
+      if (msg !== undefined) {
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Successful',
+          detail: msg,
+        });
+        this.ngOnInit();
+      }
+    });
+  }
+
+  updateMortgagePortfolio() {
+    let totalMonths: number = this.loanTerm;
+    if (this.typeOfLoanTerm === 'year') {
+      totalMonths *= 12;
+    }
+    const mortPortfolio: MortgagePortfolio = {
+      id: this.selectedMortgageId,
+      loanAmount: this.loanAmount,
+      monthlyRepayment: this.monthlyRepayment(),
+      totalPeriod: totalMonths,
+      interest: this.interestRate,
+      totalRepayment:
+        this.repaymentAmountData()[0] + this.repaymentAmountData()[1],
+
+      imgString: '',
+      new: false,
+    };
+
+    this.dialogRef = this.dialogSvc.open(AddMortgageComponent, {
+      header: 'Update mortgage portfolio',
       width: '30%',
       // height: '90%',
       contentStyle: { overflow: 'auto' },

@@ -75,7 +75,10 @@
           >
           </p-inputNumber>
         </div>
-        <div class="d-flex flex-row-reverse m-4">
+        <div
+          *ngIf="!showUpdateUpdateButton"
+          class="d-flex flex-row-reverse m-4"
+        >
           <div>
             <button
               pButton
@@ -84,6 +87,19 @@
               icon="pi pi-check"
               class="p-button-text"
               (click)="addMortgagePortfolio()"
+              [disabled]="invalidForm()"
+            ></button>
+          </div>
+        </div>
+        <div *ngIf="showUpdateUpdateButton" class="d-flex flex-row-reverse m-4">
+          <div>
+            <button
+              pButton
+              pRipple
+              label="Update"
+              icon="pi pi-check"
+              class="p-button-text"
+              (click)="updateMortgageProfile()"
               [disabled]="invalidForm()"
             ></button>
           </div>

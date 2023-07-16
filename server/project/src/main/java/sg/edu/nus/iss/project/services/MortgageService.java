@@ -73,6 +73,10 @@ public class MortgageService {
         return mortgageRepo.upsertUserMortgagePortfolioMongo(userId, mp);
     }
 
+    public Boolean updateUserMortgagePortfolioMongo(String userId, MortgagePortfolio mp) {
+        return mortgageRepo.updateUserMortgagePortfolioMongo(userId, mp);
+    }
+
     public List<MortgagePortfolio> retrieveUserMortgagePortfolioMongo(String userId) {
         return mortgageRepo.retrieveUserMortgagePortfolioMongo(userId);
     }

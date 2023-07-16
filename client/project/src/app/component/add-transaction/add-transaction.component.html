@@ -109,7 +109,16 @@
             [style]="{ width: '100%' }"
           ></textarea>
         </div>
-        <div class="d-flex flex-row-reverse m-4">
+        <div class="d-flex justify-content-between m-4">
+          <div class="d-flex justify-content-center align-items-center">
+            <span class="me-2">
+              <label for="regular">Regular Transaction</label>
+            </span>
+            <p-inputSwitch
+              id="regular"
+              formControlName="regular"
+            ></p-inputSwitch>
+          </div>
           <div>
             <button
               pButton
