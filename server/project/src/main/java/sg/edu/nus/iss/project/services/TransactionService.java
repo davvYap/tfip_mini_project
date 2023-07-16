@@ -73,8 +73,8 @@ public class TransactionService {
         return transRepo.getUserAllTransactionsJdbc(userId);
     }
 
-    public int insertRegularTransactionJdbc(String userId, String tranId) {
-        return transRepo.insertRegularTransactionJdbc(userId, tranId);
+    public int insertRegularTransactionJdbc(String userId, String tranId, boolean active) {
+        return transRepo.insertRegularTransactionJdbc(userId, tranId, active);
     }
 
     public List<RegularTransaction> getUserRegularTransactionsJdbc(String userId) {

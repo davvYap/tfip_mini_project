@@ -113,10 +113,10 @@ public class TransactionRepository {
         return tran;
     }
 
-    public int insertRegularTransactionJdbc(String userId, String tranId) {
+    public int insertRegularTransactionJdbc(String userId, String tranId, boolean active) {
         String regularTranId = UUID.randomUUID().toString().substring(0, 8);
 
-        return jdbcTemplate.update(SQL_INSERT_USER_REGULAR_TRANSACTION, regularTranId, tranId, userId);
+        return jdbcTemplate.update(SQL_INSERT_USER_REGULAR_TRANSACTION, regularTranId, tranId, userId, active);
     }
 
     public List<RegularTransaction> getUserRegularTransactionsJdbc(String userId) {

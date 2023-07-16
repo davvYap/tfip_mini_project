@@ -79,9 +79,9 @@ public class DBQueries {
 			""";
 
 	public static final String SQL_INSERT_USER_REGULAR_TRANSACTION = """
-			insert into regular_transactions(regular_trans_id, trans_id, user_id)
+			insert into regular_transactions(regular_trans_id, trans_id, user_id, active)
 			values
-			(? ,?, ?);
+			(? ,?, ?, ?);
 			""";
 	public static final String SQL_GET_USER_REGULAR_TRANSACTIONS = """
 			select * from regular_transactions where user_id = ?;

@@ -131,7 +131,7 @@ public class TransactionController {
 			int insertedRow = transSvc.insertTransactionJdbc(userId, tran);
 			// check if it is regular transaction
 			if (tran.isRegularTransaction()) {
-				transSvc.insertRegularTransactionJdbc(userId, tran.getTransactionId());
+				transSvc.insertRegularTransactionJdbc(userId, tran.getTransactionId(), true);
 			}
 
 			if (insertedRow > 0) {
@@ -162,6 +162,20 @@ public class TransactionController {
 	@ResponseBody
 	public ResponseEntity<String> deleteTransactionJdbc(@PathVariable String userId, @RequestParam String tranId,
 			@RequestParam String catName) {
+
+		// check if there is regular transaction link to this transaction
+		List<RegularTransaction> reguTrans = transSvc.getUserRegularTransactionsJdbc(userId);
+		for (RegularTransaction regularTransaction : reguTrans) {
+			if (regularTransaction.getTranId().equals(tranId)) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.contentType(MediaType.APPLICATION_JSON)
+						.body(Json.createObjectBuilder()
+								.add("message",
+										"Selected transaction linked to a regular transaction. Please remove the regular transaction.")
+								.build()
+								.toString());
+			}
+		}
 
 		int deletedRow = transSvc.deleteTransactionJdbc(userId, tranId, catName);
 		if (deletedRow > 0) {

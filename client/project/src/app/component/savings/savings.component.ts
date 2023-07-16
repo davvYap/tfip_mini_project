@@ -414,6 +414,13 @@ export class SavingsComponent implements OnInit, OnDestroy {
             setTimeout(() => {
               this.ngOnInit();
             }, 500);
+          })
+          .catch((err) => {
+            this.messageSvc.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: err.error.message,
+            });
           });
       },
       reject: () => {
