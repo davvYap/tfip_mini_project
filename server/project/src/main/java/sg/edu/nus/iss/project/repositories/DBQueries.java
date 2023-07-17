@@ -91,6 +91,14 @@ public class DBQueries {
 			select * from regular_transactions;
 			""";
 
+	public static final String SQL_DELETE_USER_REGULAR_TRANSACTION = """
+			delete from regular_transactions where user_id = ? and regular_trans_id = ?;
+			""";
+
+	public static final String SQL_TOGGLE_USER_REGULAR_TRANSACTION_ACTIVE = """
+			update regular_transactions set active = ? where user_id = ? and regular_trans_id = ?;
+			""";
+
 	public static final String SQL_NEW_USER_SIGNUP = """
 			insert into users(user_id, username, password, email, firstname, lastname, profile_pic)
 			values

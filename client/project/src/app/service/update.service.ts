@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import {
   Categories,
   MessageResponse,
@@ -68,6 +68,23 @@ export class UpdateService {
       this.http.put<MessageResponse>(
         `http://localhost:8080/api/${userId}/update_mortgage_profile`,
         mort
+      )
+    );
+  }
+
+  toggleUserRegularTransaction(
+    userId: string,
+    active: boolean,
+    regTranId: string
+  ): Promise<MessageResponse> {
+    const qp = new HttpParams()
+      .set('regTranId', regTranId)
+      .append('active', active);
+    console.log('qp', qp);
+    return lastValueFrom(
+      this.http.put<MessageResponse>(
+        `http://localhost:8080/api/${userId}/toggle_regular_tran`,
+        qp
       )
     );
   }

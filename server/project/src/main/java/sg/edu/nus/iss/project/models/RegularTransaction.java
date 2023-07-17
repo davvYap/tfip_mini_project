@@ -10,6 +10,7 @@ public class RegularTransaction {
     private String regularTranId;
     private String userId;
     private String tranId;
+    private boolean active;
 
     public String getRegularTranId() {
         return regularTranId;
@@ -35,9 +36,18 @@ public class RegularTransaction {
         this.tranId = tranId;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     @Override
     public String toString() {
-        return "RegularTransaction [regularTranId=" + regularTranId + ", userId=" + userId + ", tranId=" + tranId + "]";
+        return "RegularTransaction [regularTranId=" + regularTranId + ", userId=" + userId + ", tranId=" + tranId
+                + ", active=" + active + "]";
     }
 
     public static RegularTransaction convertFromResult(SqlRowSet rs) {
@@ -45,6 +55,7 @@ public class RegularTransaction {
         tran.setRegularTranId(rs.getString("regular_trans_id"));
         tran.setTranId(rs.getString("trans_id"));
         tran.setUserId(rs.getString("user_id"));
+        tran.setActive(rs.getBoolean("active"));
         return tran;
     }
 
@@ -52,7 +63,8 @@ public class RegularTransaction {
         return Json.createObjectBuilder()
                 .add("regularTranId", regularTranId)
                 .add("userId", userId)
-                .add("tranId", tranId);
+                .add("tranId", tranId)
+                .add("active", active);
     }
 
 }

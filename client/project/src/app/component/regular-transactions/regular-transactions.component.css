@@ -1,5 +1,27 @@
-.custom-background {
-  background: var(--surface-card);
-  padding: 1.5rem;
-  border-radius: 6px;
+.custom-height {
+  min-height: 50dvh;
+}
+
+.regu-transaction-pill {
+  color: var(--text-color);
+  background-color: var(--surface-card);
+  border: 1px solid var(--primary-color);
+  border-radius: 30px;
+}
+
+.right-font {
+  font-family: "Righteous", cursive !important;
+}
+
+.mono-font {
+  font-family: monospace;
+}
+
+.add-transaction {
+  font-family: "Righteous", cursive;
+}
+
+.add-transaction:hover {
+  cursor: pointer;
+  transform: scale(1.03);
 }

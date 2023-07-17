@@ -63,4 +63,20 @@ export class DeleteService {
       )
     );
   }
+
+  deleteRegularTransaction(
+    userId: string,
+    regTranId: string,
+    regTranName: string
+  ): Promise<MessageResponse> {
+    const qp = new HttpParams()
+      .set('regTranId', regTranId)
+      .append('regTranName', regTranName);
+    return lastValueFrom(
+      this.http.delete<MessageResponse>(
+        `http://localhost:8080/api/${userId}/delete_regular_tran`,
+        { params: qp }
+      )
+    );
+  }
 }

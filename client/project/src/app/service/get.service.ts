@@ -10,6 +10,7 @@ import {
   PurchasedStock,
   PurchasedStocksCount,
   quote,
+  RegularTransaction,
   SignUp,
   SoldStock,
   Stock,
@@ -364,6 +365,12 @@ export class GetService {
   getUserMortgagePortfolio(userId: string): Observable<MortgagePortfolio[]> {
     return this.http.get<MortgagePortfolio[]>(
       `http://localhost:8080/api/${userId}/mortgage_portfolio`
+    );
+  }
+
+  getUserRegularTransactions(userId: string): Observable<RegularTransaction[]> {
+    return this.http.get<RegularTransaction[]>(
+      `http://localhost:8080/api/${userId}/all_regular_trans`
     );
   }
 

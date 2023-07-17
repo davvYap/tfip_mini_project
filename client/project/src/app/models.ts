@@ -196,4 +196,5 @@ export interface NotificationMessage {
 export interface RegularTransaction {
   id: string;
   tran: Transaction;
+  active: boolean;
 }

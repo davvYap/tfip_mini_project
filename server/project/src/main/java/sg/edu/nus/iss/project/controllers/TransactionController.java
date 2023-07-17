@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 import sg.edu.nus.iss.project.models.Category;
 import sg.edu.nus.iss.project.models.RegularTransaction;
 import sg.edu.nus.iss.project.models.Transaction;
@@ -282,13 +283,65 @@ public class TransactionController {
 		List<RegularTransaction> trans = transSvc.getUserRegularTransactionsJdbc(userId);
 
 		JsonArrayBuilder jsArr = Json.createArrayBuilder();
-		trans.stream().forEach((tran) -> {
-			jsArr.add(tran.toJsonObjectBuilder());
-		});
+
+		for (RegularTransaction regTran : trans) {
+			Transaction tran = transSvc.getUserTransactionBasedOnTransIdJdbc(userId, regTran.getTranId());
+			JsonObjectBuilder jsObj = Json.createObjectBuilder()
+					.add("id", regTran.getRegularTranId())
+					.add("tran", tran.toJsonObjectBuilder())
+					.add("active", regTran.isActive());
+			jsArr.add(jsObj);
+		}
+		// trans.stream().forEach((tran) -> {
+		// jsArr.add(tran.toJsonObjectBuilder());
+		// });
 
 		return ResponseEntity.status(HttpStatus.OK)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(jsArr.build().toString());
+	}
+
+	@DeleteMapping(path = "/{userId}/delete_regular_tran")
+	@ResponseBody
+	public ResponseEntity<String> deleteUserRegularTransaction(@PathVariable String userId,
+			@RequestParam String regTranId, @RequestParam String regTranName) {
+		int deletedRow = transSvc.deleteUserRegularTransactionJdbc(userId, regTranId);
+
+		if (deletedRow > 0) {
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder()
+							.add("message", "Successfully deleted regular transaction %s".formatted(regTranName))
+							.build().toString());
+		}
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(Json.createObjectBuilder()
+						.add("message", "Fail to delete regular transaction %s".formatted(regTranName))
+						.build().toString());
+	}
+
+	@PutMapping(path = "/{userId}/toggle_regular_tran")
+	@ResponseBody
+	public ResponseEntity<String> toggleUserRegularTransactionActive(@PathVariable String userId,
+			@RequestParam boolean active, @RequestParam String regTranId) {
+		System.out.println("active > " + active);
+		int toggled = transSvc.toggleUserRegularTransactionActive(active, userId, regTranId);
+
+		if (toggled > 0) {
+			String regTranActive = active ? "Activated" : "Deactivated";
+
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder()
+							.add("message", "%s".formatted(regTranActive))
+							.build().toString());
+		}
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(Json.createObjectBuilder()
+						.add("message", "Fail to update regular transaction state")
+						.build().toString());
 	}
 
 }

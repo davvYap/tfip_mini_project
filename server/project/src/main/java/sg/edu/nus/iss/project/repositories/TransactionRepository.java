@@ -137,4 +137,12 @@ public class TransactionRepository {
         return trans;
     }
 
+    public int deleteUserRegularTransactionJdbc(String userId, String regTranId) {
+        return jdbcTemplate.update(SQL_DELETE_USER_REGULAR_TRANSACTION, userId, regTranId);
+    }
+
+    public int toggleUserRegularTransactionActive(boolean active, String userId, String regTranId) {
+        return jdbcTemplate.update(SQL_TOGGLE_USER_REGULAR_TRANSACTION_ACTIVE, active, userId, regTranId);
+    }
+
 }

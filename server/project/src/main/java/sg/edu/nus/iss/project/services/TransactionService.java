@@ -73,6 +73,10 @@ public class TransactionService {
         return transRepo.getUserAllTransactionsJdbc(userId);
     }
 
+    public Transaction getUserTransactionBasedOnTransIdJdbc(String userId, String transId) {
+        return transRepo.getUserTransactionBasedOnTransIdJdbc(userId, transId);
+    }
+
     public int insertRegularTransactionJdbc(String userId, String tranId, boolean active) {
         return transRepo.insertRegularTransactionJdbc(userId, tranId, active);
     }
@@ -85,13 +89,25 @@ public class TransactionService {
         return transRepo.getAllRegularTransactionsJdbc();
     }
 
+    public int deleteUserRegularTransactionJdbc(String userId, String regTranId) {
+        return transRepo.deleteUserRegularTransactionJdbc(userId, regTranId);
+    }
+
+    public int toggleUserRegularTransactionActive(boolean active, String userId, String regTranId) {
+        return transRepo.toggleUserRegularTransactionActive(active, userId, regTranId);
+    }
+
     @Scheduled(cron = "0 0 0 1 * *")
     public void executeInsertRegularTransactionsTask() {
         System.out.println("Executing regular transactions insertion task on the 17th of the month...");
         List<RegularTransaction> regularTrans = getAllRegularTransactionsJdbc();
+
+        // only look for those which is active
+        List<RegularTransaction> activeRegularTrans = regularTrans.stream().filter(t -> t.isActive() == true).toList();
+
         int totalInserted = 0;
-        for (RegularTransaction regTran : regularTrans) {
-            Transaction tran = transRepo.getUserTransactionBasedOnTransIdJdbc(regTran.getUserId(), regTran.getTranId());
+        for (RegularTransaction regTran : activeRegularTrans) {
+            Transaction tran = getUserTransactionBasedOnTransIdJdbc(regTran.getUserId(), regTran.getTranId());
             if (tran != null) {
                 // update transaction date month to current month
                 LocalDate oldDate = tran.getDate();
