@@ -24,6 +24,7 @@ import {
 import {
   Column,
   ExportColumn,
+  NotificationMessage,
   PurchasedStock,
   PurchasedStocksCount,
   SoldStock,
@@ -47,6 +48,8 @@ import {
   faFolderOpen,
   faHandPointRight,
 } from '@fortawesome/free-solid-svg-icons';
+import { NotificationService } from 'src/app/service/notification.service';
+import { Params, Router } from '@angular/router';
 
 @Component({
   selector: 'app-investment-dashboard',
@@ -149,7 +152,9 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     private dialogSvc: DialogService,
     private updateSvc: UpdateService,
     private exportSvc: ExportService,
-    private title: Title
+    private title: Title,
+    private notificationSvc: NotificationService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -495,6 +500,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         this.skeletonLoading = false;
         console.log('initiate line chart');
         this.initiateLineChart();
+        this.getNotificationOfLineChart();
       });
   }
 
@@ -607,44 +613,11 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   }
 
   getCurrentDate(): string {
-    const currDate = new Date();
-    // const yesterdayDate = new Date(currDate);
-    // yesterdayDate.setDate(currDate.getDate() - 1);
-
-    while (
-      currDate.getDay() === 1 ||
-      currDate.getDay() === 0 ||
-      currDate.getDay() === 6
-    ) {
-      currDate.setDate(currDate.getDate() - 1);
-      console.log('currDate2', currDate);
-    }
-    const formattedDate = `${currDate.getFullYear()}-${(currDate.getMonth() + 1)
-      .toString()
-      .padStart(2, '0')}-${currDate.getDate().toString().padStart(2, '0')}`;
-    return formattedDate;
+    return this.getSvc.getCurrentDate();
   }
 
   getEndOfMonth(): string[] {
-    const months = this.months;
-    let endOfMonth: string[] = [];
-    for (let i = 0; i < months.length; i++) {
-      const month = months[i];
-      const endDate = this.getSvc.getEndOfMonth(months, month);
-      endOfMonth.push(endDate);
-    }
-
-    const today = new Date();
-    const yesterday = new Date(today.setDate(today.getDate() - 1));
-    const formattedDate = `${yesterday.getFullYear()}-${(
-      yesterday.getMonth() + 1
-    )
-      .toString()
-      .padStart(2, '0')}-${yesterday.getDate().toString().padStart(2, '0')}`;
-    endOfMonth.push(formattedDate);
-
-    // include yesterday date
-    return endOfMonth;
+    return this.getSvc.getEndOfMonthFinal();
   }
 
   getStockMonthlyPerformance(
@@ -707,7 +680,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         map((stocks: PurchasedStock[]) => {
           for (let i = 0; i < stocks.length; i++) {
             const stock = stocks[i];
-            console.log(`${stock.symbol} ${stock.price} ${stock.marketPrice}`);
+            // console.log(`${stock.symbol} ${stock.price} ${stock.marketPrice}`);
             stock.percentage = (stock.marketPrice - stock.price) / stock.price;
           }
           return stocks;
@@ -1206,6 +1179,55 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     );
   }
 
+  getProfitIcon(profit: number): string {
+    return profit > 0 ? 'pi pi-fw pi-arrow-up' : 'pi pi-fw pi-arrow-down';
+  }
+
+  getNotificationOfLineChart() {
+    let totalNotifcationMessages: NotificationMessage[] = [];
+    for (let i = 0; i < this.months.length; i++) {
+      if (this.userStockDataLineData()[i] > this.sp500data[i]) {
+        const notifcation: NotificationMessage = {
+          notificationNumber: 1,
+          benchmark: this.sp500data[i],
+          performance: this.userStockDataLineData()[i],
+          month: this.months[i],
+          message: `Portfolio performance > S&P500 (${
+            this.months[i]
+          } ${this.today.getFullYear()})`,
+          styleClass: 'positive',
+          performanceType: 'percentage',
+        };
+        totalNotifcationMessages.push(notifcation);
+      } else if (this.userStockDataLineData()[i] > this.nasdaq100data[i]) {
+        const notifcation: NotificationMessage = {
+          notificationNumber: 1,
+          benchmark: this.nasdaq100data[i],
+          performance: this.userStockDataLineData()[i],
+          month: this.months[i],
+          message: `Portfolio performance > NASDAQ100 on ${
+            this.months[i]
+          } ${this.today.getFullYear()}`,
+          styleClass: 'positive',
+          performanceType: 'percentage',
+        };
+        totalNotifcationMessages.push(notifcation);
+      }
+    }
+    this.notificationSvc.newNotification$.next(totalNotifcationMessages);
+  }
+
+  showRoute(symbol: string): string {
+    return `Go to ${symbol} company profile`;
+  }
+
+  navigateToStockProfile(symbol: string, name: string) {
+    this.router.navigate(['/stock-details', symbol], {
+      queryParams: { stockName: name },
+    });
+  }
+
+  // UNUSED
   goToYahoo(symbol: string) {
     const url = new URL(`https://finance.yahoo.com/quote/${symbol}`);
     url.searchParams.append('p', symbol);
@@ -1216,9 +1238,5 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     const url = new URL(`https://finance.yahoo.com/quote/${symbol}`);
     url.searchParams.append('p', symbol);
     return url.href;
-  }
-
-  getProfitIcon(profit: number): string {
-    return profit > 0 ? 'pi pi-fw pi-arrow-up' : 'pi pi-fw pi-arrow-down';
   }
 }

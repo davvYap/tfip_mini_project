@@ -874,6 +874,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
           benchmark: this.guideLineDataForYearlyGoal[i],
           performance: this.portfolioPerformanceDataFinal()[i],
           month: this.monthsString[i],
+          message: `Target goal achived (${
+            this.monthsString[i]
+          } ${this.thisYear()})`,
+          styleClass: 'positive',
+          performanceType: 'number',
         };
         totalNotifcationMessages.push(notifcation);
       }

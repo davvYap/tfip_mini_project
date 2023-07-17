@@ -27,6 +27,8 @@ import com.mongodb.client.result.UpdateResult;
 
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockPrice;
+import sg.edu.nus.iss.project.models.StockProfile;
+
 import static sg.edu.nus.iss.project.repositories.DBQueries.*;
 
 @Repository
@@ -359,6 +361,26 @@ public class UserRepository {
                 .map(doc -> StockPrice.convertFromDocument(doc)).toList();
 
         return Optional.of(prices);
+    }
+
+    public void insertStockProfileMongo(String symbol, StockProfile sp) {
+        Document doc = new Document();
+        doc.append("symbol", symbol).append("profile", sp.toDocument());
+        Document insertedDoc = mongo.insert(doc, "stock_company_profile");
+        System.out.println("Insert stock %s company profile".formatted(symbol));
+    }
+
+    public StockProfile retrieveStockProfileMongo(String symbol) {
+        Query query = Query.query(Criteria.where("symbol").is(symbol));
+        Document doc = mongo.findOne(query, Document.class, "stock_company_profile");
+        // System.out.println("full doc >> " + doc);
+        StockProfile sp = null;
+        if (doc != null) {
+            Document d = (Document) doc.get("profile");
+            // System.out.println("doc >> " + d);
+            sp = StockProfile.convertFromDocument(d);
+        }
+        return sp;
     }
 
     // EXTRA

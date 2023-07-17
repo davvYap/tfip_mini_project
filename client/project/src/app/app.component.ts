@@ -144,6 +144,7 @@ export class AppComponent implements OnInit {
 
     this.currTime = new Date().toDateString();
 
+    this.notificationMessages = [];
     this.notificationSvc.newNotification$.subscribe(
       (notifications: NotificationMessage[]) => {
         let totalNotiNum = 0;
@@ -151,11 +152,10 @@ export class AppComponent implements OnInit {
           totalNotiNum++;
         });
         this.notificationAmount.set(totalNotiNum.toString());
+
         this.notificationMessages = notifications;
       }
     );
-
-    this.notificationMessages = [];
   }
 
   getMenuItem(isLogin: boolean): MenuItem[] {
@@ -634,5 +634,13 @@ export class AppComponent implements OnInit {
   clearAllNotifications() {
     this.notificationAmount.set('0');
     this.notificationMessages = [];
+  }
+
+  getSeverity(style: string): string {
+    if (style === 'positive') {
+      return 'positive';
+    } else {
+      return 'negative';
+    }
   }
 }

@@ -54,11 +54,20 @@
     >
       <div>
         <p>
-          Goal achived on {{ notificationMsg.month }} {{ thisYear() }}
-          <span class="positive">
-            {{
-              notificationMsg.performance - notificationMsg.benchmark | currency
-            }}
+          {{ notificationMsg.message }}
+          <span [class]="notificationMsg.styleClass">
+            <span *ngIf="notificationMsg.performanceType === 'number'">
+              {{
+                notificationMsg.performance - notificationMsg.benchmark
+                  | currency
+              }}
+            </span>
+            <span *ngIf="notificationMsg.performanceType === 'percentage'">
+              {{
+                (notificationMsg.performance - notificationMsg.benchmark) / 100
+                  | percent : "1.2-2"
+              }}
+            </span>
           </span>
         </p>
       </div>

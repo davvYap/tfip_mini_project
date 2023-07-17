@@ -13,6 +13,7 @@ import { MortgageComponent } from './component/mortgage/mortgage.component';
 import { MortgageDashboardComponent } from './component/mortgage-dashboard/mortgage-dashboard.component';
 import { PaymentComponent } from './component/payment/payment.component';
 import { RegularTransactionsComponent } from './component/regular-transactions/regular-transactions.component';
+import { StockDetailsComponent } from './component/stock-details/stock-details.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [loginGuard] },
@@ -30,6 +31,11 @@ const routes: Routes = [
   {
     path: 'investment',
     component: InvestmentComponent,
+    canActivate: [loginGuard],
+  },
+  {
+    path: 'stock-details/:symbol',
+    component: StockDetailsComponent,
     canActivate: [loginGuard],
   },
   {

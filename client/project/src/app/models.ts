@@ -191,10 +191,33 @@ export interface NotificationMessage {
   month: string;
   benchmark: number;
   performance: number;
+  message: string;
+  styleClass: string;
+  performanceType: string;
 }
 
 export interface RegularTransaction {
   id: string;
   tran: Transaction;
   active: boolean;
+}
+
+export interface StockCompanyProfile {
+  symbol: string;
+  sector: string;
+  industry: string;
+  fulltimeEmployees: number;
+  website: string;
+  longBusinessSummary: string;
+  companyOfficers: CompanyOfficers[];
+  country: string;
+  // need to add our own
+  name: string;
+  logo: string;
+}
+
+export interface CompanyOfficers {
+  name: string;
+  age: number;
+  title: string;
 }

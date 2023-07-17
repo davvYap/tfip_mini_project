@@ -192,8 +192,10 @@
                         <p-button
                           [label]="rowData.symbol"
                           styleClass="p-button-text p-button-primary"
-                          (onClick)="goToYahoo(rowData.symbol)"
-                          [pTooltip]="showUrl(rowData.symbol)"
+                          (onClick)="
+                            navigateToStockProfile(rowData.symbol, rowData.name)
+                          "
+                          [pTooltip]="showRoute(rowData.symbol)"
                           tooltipPosition="right"
                         >
                         </p-button>
@@ -375,8 +377,10 @@
                           <p-button
                             [label]="stock.symbol"
                             styleClass="p-button-text p-button-primary"
-                            (onClick)="goToYahoo(stock.symbol)"
-                            [pTooltip]="showUrl(stock.symbol)"
+                            (onClick)="
+                              navigateToStockProfile(stock.symbol, stock.name)
+                            "
+                            [pTooltip]="showRoute(stock.symbol)"
                             tooltipPosition="right"
                           >
                           </p-button>

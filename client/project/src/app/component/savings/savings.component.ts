@@ -25,6 +25,7 @@ import {
   Categories,
   Column,
   ExportColumn,
+  NotificationMessage,
   Transaction,
   categoryOptionItem,
 } from 'src/app/models';
@@ -41,6 +42,7 @@ import {
   faPenToSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@angular/platform-browser';
+import { NotificationService } from 'src/app/service/notification.service';
 
 @Component({
   selector: 'app-savings',
@@ -101,6 +103,21 @@ export class SavingsComponent implements OnInit, OnDestroy {
     '11',
     '12',
   ];
+  monthsString: string[] = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
   incomeBarChartData!: number[];
   expenseBarChartData!: number[];
   balanceBarChartData!: number[];
@@ -146,7 +163,8 @@ export class SavingsComponent implements OnInit, OnDestroy {
     private updateSvc: UpdateService,
     private exportSvc: ExportService,
     private elementRef: ElementRef,
-    private title: Title
+    private title: Title,
+    private notificationSvc: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -591,6 +609,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
       });
 
       this.initiateBarChart();
+      this.getNotificationOfBalanceBarChart();
       this.skeletonLoading = false;
     });
   }
@@ -605,20 +624,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
       this.documentStyle().getPropertyValue('--surface-border');
 
     this.barChartData = {
-      labels: [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ],
+      labels: this.monthsString,
       datasets: [
         {
           type: 'bar',
@@ -687,5 +693,26 @@ export class SavingsComponent implements OnInit, OnDestroy {
         },
       },
     };
+  }
+
+  getNotificationOfBalanceBarChart() {
+    let totalNotifcationMessages: NotificationMessage[] = [];
+    for (let i = 0; i < this.monthsString.length; i++) {
+      if (this.balanceBarChartData[i] < 0) {
+        const notifcation: NotificationMessage = {
+          notificationNumber: 1,
+          benchmark: this.incomeBarChartData[i],
+          performance: this.expenseBarChartData[i],
+          month: this.monthsString[i],
+          message: `Expense > Income (${
+            this.monthsString[i]
+          } ${this.thisYear()})`,
+          styleClass: 'negative',
+          performanceType: 'number',
+        };
+        totalNotifcationMessages.push(notifcation);
+      }
+    }
+    this.notificationSvc.newNotification$.next(totalNotifcationMessages);
   }
 }

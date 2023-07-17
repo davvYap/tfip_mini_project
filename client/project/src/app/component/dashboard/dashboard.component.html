@@ -7,68 +7,6 @@
       </div>
     </div>
     <section *ngIf="totalValue(); else newUser">
-      <!-- <div class="row justify-content-center align-items-center">
-        <div class="dashboardcard mb-5" class="col-10">
-          <p-fieldset
-            [toggleable]="true"
-            [collapsed]="true"
-            class="text-center"
-          >
-            <ng-template pTemplate="header">
-              <div class="d-flex align-items-center">
-                <h3 class="total-value-h3">
-                  Total Assets Value
-                  <span
-                    class="pi pi-angle-right"
-                    style="font-size: 1.5rem"
-                  ></span>
-                  <span *ngIf="!skeletonLoading; else loading">
-                    {{ totalValue() | currency }}
-                    <span
-                      *ngIf="totalValue()"
-                      class="ms-2"
-                      [className]="getColor(stockChangePercentage)"
-                    >
-                      ({{ stockChangePercentage | percent : "1.2-2" }})
-                    </span>
-                  </span>
-                </h3>
-              </div>
-            </ng-template>
-            <div>
-              <h4>
-                Investments
-                <span
-                  class="pi pi-angle-right"
-                  style="font-size: 1.5rem"
-                ></span>
-                <span *ngIf="!skeletonLoading; else loading">
-                  {{ stocksValue() | currency }}
-                  <span
-                    *ngIf="stocksValue()"
-                    class="ms-2"
-                    [className]="getColor(stockChangePercentage)"
-                  >
-                    ({{ stockChangePercentage | percent : "1.2-2" }})
-                  </span>
-                </span>
-              </h4>
-            </div>
-            <div>
-              <h4>
-                Savings
-                <span
-                  class="pi pi-angle-right"
-                  style="font-size: 1.5rem"
-                ></span>
-                <span *ngIf="!skeletonLoading; else loading">
-                  {{ savingsValue() | currency }}
-                </span>
-              </h4>
-            </div>
-          </p-fieldset>
-        </div>
-      </div> -->
       <section *ngIf="!skeletonLoading; else skeleton">
         <!-- DONUT CHART OVERALL-->
         <div class="row justify-content-evenly align-items-center m-4">

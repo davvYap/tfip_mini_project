@@ -29,6 +29,7 @@ import jakarta.json.JsonValue;
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockCount;
 import sg.edu.nus.iss.project.models.StockPrice;
+import sg.edu.nus.iss.project.models.StockProfile;
 import sg.edu.nus.iss.project.repositories.UserRepository;
 
 @Service
@@ -663,6 +664,14 @@ public class UserService {
             refactoredValueEliminateExtraMonths.add(monthlyStockValue.get(i));
         }
         return refactoredValueEliminateExtraMonths;
+    }
+
+    public void insertStockProfileMongo(String symbol, StockProfile sp) {
+        userRepo.insertStockProfileMongo(symbol, sp);
+    }
+
+    public StockProfile retrieveStockProfileMongo(String symbol) {
+        return userRepo.retrieveStockProfileMongo(symbol);
     }
 
     // ***** UNUSED *****

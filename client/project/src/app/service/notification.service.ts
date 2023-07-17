@@ -6,6 +6,8 @@ import { NotificationMessage } from '../models';
   providedIn: 'root',
 })
 export class NotificationService {
+  notifications: NotificationMessage[] = [];
+
   newNotification$ = new Subject<NotificationMessage[]>();
 
   constructor() {}

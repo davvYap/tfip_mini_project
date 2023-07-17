@@ -14,6 +14,7 @@ import {
   SignUp,
   SoldStock,
   Stock,
+  StockCompanyProfile,
   StockLogo,
   StockPrice,
   StockQuantity,
@@ -38,7 +39,22 @@ export class GetService {
   isLogin$ = new Subject<boolean>();
   totalStockValue!: number;
   passStock!: PurchasedStock;
-  applicationName: string = 'ap.app';
+  applicationName: string = 'amapp';
+
+  monthsString = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
 
   constructor(private http: HttpClient) {}
 
@@ -374,6 +390,17 @@ export class GetService {
     );
   }
 
+  getStockCompanyProfile(
+    symbol: string,
+    stockName: string
+  ): Observable<StockCompanyProfile> {
+    const qp = new HttpParams().set('stockName', stockName);
+    return this.http.get<StockCompanyProfile>(
+      `http://localhost:8080/api/${symbol}/company_profile`,
+      { params: qp }
+    );
+  }
+
   // EXTRA
   initiateLoginProcedure(loginStatus: LoginStatus) {
     this.userId = loginStatus.userId;
@@ -477,6 +504,47 @@ export class GetService {
     } else {
       return 'Good Evening';
     }
+  }
+
+  getCurrentDate(): string {
+    const currDate = new Date();
+    // const yesterdayDate = new Date(currDate);
+    // yesterdayDate.setDate(currDate.getDate() - 1);
+
+    while (
+      currDate.getDay() === 1 ||
+      currDate.getDay() === 0 ||
+      currDate.getDay() === 6
+    ) {
+      currDate.setDate(currDate.getDate() - 1);
+      // console.log('currDate2', currDate);
+    }
+    const formattedDate = `${currDate.getFullYear()}-${(currDate.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${currDate.getDate().toString().padStart(2, '0')}`;
+    return formattedDate;
+  }
+
+  getEndOfMonthFinal(): string[] {
+    const months = this.monthsString;
+    let endOfMonth: string[] = [];
+    for (let i = 0; i < months.length; i++) {
+      const month = months[i];
+      const endDate = this.getEndOfMonth(months, month);
+      endOfMonth.push(endDate);
+    }
+
+    const today = new Date();
+    const yesterday = new Date(today.setDate(today.getDate() - 1));
+    const formattedDate = `${yesterday.getFullYear()}-${(
+      yesterday.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}-${yesterday.getDate().toString().padStart(2, '0')}`;
+    endOfMonth.push(formattedDate);
+
+    // include yesterday date
+    return endOfMonth;
   }
 
   getColors(index: number): string {
