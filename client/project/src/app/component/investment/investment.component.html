@@ -7,6 +7,10 @@
   <div class="row justify-content-center align-items-center">
     <div class="col-10 ncard">
       <form [formGroup]="investmentForm" (submit)="addStock()">
+        <i
+          class="pi pi-info-circle"
+          pTooltip="Due to limitation of API, max 8 calls per minute"
+        ></i>
         <div class="d-flex flex-column m-4">
           <label htmlFor="symbol">Symbol</label>
           <p-autoComplete

@@ -113,6 +113,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   portfolioPerformanceData!: number[];
   portfolioPerformanceDataFinal: WritableSignal<number[]> = signal([]);
 
+  savingsValueYearly = signal(0);
   savingsValue = signal(0);
   stocksValue = signal(0);
   stockChangePercentage!: number;
@@ -251,6 +252,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.stockChangePercentage = 0.0;
     // this.calculateUserStockValue();
 
+    // YEARLY TRANSACTION
     this.getSvc
       .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
       .pipe(
@@ -264,10 +266,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
               totalExpense += tran.amount;
             }
           });
-          this.savingsValue.set(totalIncome - totalExpense);
+          this.savingsValueYearly.set(totalIncome - totalExpense);
           const totalMonths = this.currMonth() + 1;
           this.averageMonthlyExpense.set(totalExpense / totalMonths);
           this.averageMonthlyIncome.set(totalIncome / totalMonths);
+          return of(trans);
+        })
+      )
+      .subscribe();
+
+    // OVERALL TRANSACTION
+    this.getSvc
+      .getUserAllTransaction(this.getSvc.userId)
+      .pipe(
+        switchMap((trans: Transaction[]) => {
+          let totalIncome = 0;
+          let totalExpense = 0;
+          trans.map((tran) => {
+            if (tran.type === 'income') {
+              totalIncome += tran.amount;
+            } else {
+              totalExpense += tran.amount;
+            }
+          });
+          this.savingsValue.set(totalIncome - totalExpense);
           return of(trans);
         })
       )
@@ -352,35 +374,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   calculateUserStockValue(): Observable<any> {
-    return this.getSvc
-      .getUserTotalStockValue(this.getSvc.userId, this.thisYear())
-      .pipe(
-        switchMap((res) => {
-          this.stocksValue.set(res.value);
-          // console.log('calculating', this.stocksValue());
-          return of(res);
-        }),
-        switchMap((res) => {
-          let observables: Observable<MessageResponse>[] = [];
-          const observable = this.getSvc.getUserYesterdayTotalStockValue(
-            this.getSvc.userId
-          );
-          observables.push(observable);
-          return forkJoin(observables).pipe(
-            map((res2: MessageResponse[]) => {
-              const msgRes: MessageResponse = res2[0];
-              const yesterdayValue = msgRes.value;
-              if (yesterdayValue === 0) {
-                this.stockChangePercentage = 0;
-              } else {
-                this.stockChangePercentage =
-                  (this.stocksValue() - yesterdayValue) / yesterdayValue;
-              }
-              return res;
-            })
-          );
-        })
-      );
+    return this.getSvc.getUserTotalStockValue(this.getSvc.userId).pipe(
+      switchMap((res) => {
+        this.stocksValue.set(res.value);
+        // console.log('calculating', this.stocksValue());
+        return of(res);
+      }),
+      switchMap((res) => {
+        let observables: Observable<MessageResponse>[] = [];
+        const observable = this.getSvc.getUserYesterdayTotalStockValue(
+          this.getSvc.userId
+        );
+        observables.push(observable);
+        return forkJoin(observables).pipe(
+          map((res2: MessageResponse[]) => {
+            const msgRes: MessageResponse = res2[0];
+            const yesterdayValue = msgRes.value;
+            if (yesterdayValue === 0) {
+              this.stockChangePercentage = 0;
+            } else {
+              this.stockChangePercentage =
+                (this.stocksValue() - yesterdayValue) / yesterdayValue;
+            }
+            return res;
+          })
+        );
+      })
+    );
     // .subscribe();
   }
 

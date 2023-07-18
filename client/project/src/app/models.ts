@@ -214,10 +214,32 @@ export interface StockCompanyProfile {
   // need to add our own
   name: string;
   logo: string;
+  closePrice: number;
+  stockSummaryData: StockSummaryData;
 }
 
 export interface CompanyOfficers {
   name: string;
   age: number;
   title: string;
+}
+
+export interface StockSummaryData {
+  marketCap: number;
+  volume: number;
+  trailingPE: number;
+  fiftyTwoWeekLow: number;
+  fiftyTwoWeekHigh: number;
+}
+
+export interface StockSummaryDataResponse {
+  summaryDetail: StockSummaryData;
+}
+
+export interface StockIdea {
+  userId: string;
+  fullName: string;
+  profileIcon: string;
+  sentiment: number;
+  idea: string;
 }

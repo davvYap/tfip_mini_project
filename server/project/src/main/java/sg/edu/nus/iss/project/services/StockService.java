@@ -23,7 +23,8 @@ public class StockService {
 	private static final String TWELVE_DATA_LOGO_ENDPOINT = "https://twelve-data1.p.rapidapi.com/logo";
 	private static final String MBOUM_FINANCE_COMPONAY_PROFILE_ENDPOINT = "https://mboum-finance.p.rapidapi.com/qu/quote/asset-profile";
 	private static final String REAL_STONKS_PRICE_ENDPOINT = "https://realstonks.p.rapidapi.com";
-	private static final String YH_FINANCE_API = "https://yh-finance-complete.p.rapidapi.com/yhfhistorical";
+	private static final String YH_FINANCE_HISTORICAL_DATA_API = "https://yh-finance-complete.p.rapidapi.com/yhfhistorical";
+	private static final String YH_FINANCE_STOCK_SUMMARY_API = "https://yh-finance-complete.p.rapidapi.com/summaryprofile";
 
 	public ResponseEntity<String> getStockDataTwelveData(String symbol, int outputsize) {
 		String url = UriComponentsBuilder.fromUriString(TWELVE_DATA_SEARCH_ENDPOINT)
@@ -150,7 +151,7 @@ public class StockService {
 		// "Calling YH FINANCE API for %s monthly price from %s to %s from
 		// StockService".formatted(symbol, sdate,
 		// edate));
-		String url = UriComponentsBuilder.fromUriString(YH_FINANCE_API)
+		String url = UriComponentsBuilder.fromUriString(YH_FINANCE_HISTORICAL_DATA_API)
 				.queryParam("ticker", symbol)
 				.queryParam("sdate", sdate)
 				.queryParam("edate", edate)
@@ -188,6 +189,35 @@ public class StockService {
 		RequestEntity req = RequestEntity.get(url)
 				.header("X-RapidAPI-Key", rapidApiKey)
 				.header("X-RapidAPI-Host", "mboum-finance.p.rapidapi.com")
+				.build();
+
+		RestTemplate template = new RestTemplate();
+
+		ResponseEntity<String> resp = null;
+
+		try {
+			resp = template.exchange(req, String.class);
+		} catch (RestClientException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder()
+							.add("message", e.getMessage())
+							.build().toString());
+		}
+
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(resp.getBody());
+	}
+
+	public ResponseEntity<String> getStockSimpleSummaryYHFinance(String symbol) {
+		String url = UriComponentsBuilder.fromUriString(YH_FINANCE_STOCK_SUMMARY_API)
+				.queryParam("symbol", symbol)
+				.toUriString();
+
+		RequestEntity req = RequestEntity.get(url)
+				.header("X-RapidAPI-Key", rapidApiKey)
+				.header("X-RapidAPI-Host", "yh-finance-complete.p.rapidapi.com")
 				.build();
 
 		RestTemplate template = new RestTemplate();

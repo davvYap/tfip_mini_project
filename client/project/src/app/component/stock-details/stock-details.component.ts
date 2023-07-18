@@ -1,10 +1,16 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
-import { StockCompanyProfile, StockPrice } from 'src/app/models';
+import {
+  Stock,
+  StockCompanyProfile,
+  StockIdea,
+  StockPrice,
+} from 'src/app/models';
 import { DeleteService } from 'src/app/service/delete.service';
 import { GetService } from 'src/app/service/get.service';
 import { PostService } from 'src/app/service/post.service';
@@ -30,22 +36,14 @@ export class StockDetailsComponent implements OnInit {
   stockData!: number[];
   endOfMonth!: string[];
 
-  stockSentiment!: number;
+  monthsString!: string[];
 
-  monthsString = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
+  stockSentiment!: number;
+  form!: FormGroup;
+  shareIdeaString!: string;
+  stockIdeas$!: Observable<StockIdea[]>;
+  limit!: number;
+  skip!: number;
 
   constructor(
     private getSvc: GetService,
@@ -55,7 +53,9 @@ export class StockDetailsComponent implements OnInit {
     private themeSvc: ThemeService,
     private dialogSvc: DialogService,
     private title: Title,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private fb: FormBuilder,
+    private messageSvc: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -80,6 +80,8 @@ export class StockDetailsComponent implements OnInit {
       }
     });
 
+    this.monthsString = this.getSvc.monthsString;
+
     // GET COMPANY PROFLE
     this.getSvc
       .getStockCompanyProfile(this.symbol, this.stockName)
@@ -99,6 +101,15 @@ export class StockDetailsComponent implements OnInit {
         switchMap((profile: StockCompanyProfile) => {
           profile.name = this.stockName;
           profile.symbol = this.symbol;
+
+          this.getSvc.getStockPrice(this.symbol).then((stock: Stock) => {
+            profile.closePrice = parseFloat(stock.price);
+          });
+
+          this.getSvc.getStockSummaryData(this.symbol).then((dataRes) => {
+            profile.stockSummaryData = dataRes.summaryDetail;
+          });
+
           return of(profile);
         })
       )
@@ -107,7 +118,13 @@ export class StockDetailsComponent implements OnInit {
         console.log(profile);
       });
 
+    // USER IDEAS
     this.stockSentiment = 4;
+    this.limit = 20;
+    this.skip = 0;
+    this.form = this.createForm();
+    this.shareIdeaString = `Share your idea on $${this.symbol}`;
+    this.initiateStockIdeasData();
 
     // GET LINE CHART DATA
     this.endOfMonth = this.getEndOfMonth();
@@ -146,6 +163,49 @@ export class StockDetailsComponent implements OnInit {
     }
     // return sp.reverse();
     return sp;
+  }
+
+  createForm(): FormGroup {
+    return this.fb.group({
+      idea: this.fb.control('', Validators.required),
+      sentiment: this.fb.control(0, Validators.required),
+    });
+  }
+
+  initiateStockIdeasData() {
+    this.stockIdeas$ = this.getSvc.getStockIdeas(
+      this.symbol,
+      this.limit,
+      this.skip
+    );
+  }
+
+  postNewIdea() {
+    const idea: StockIdea = this.form.value as StockIdea;
+    idea.userId = this.getSvc.userId;
+    idea.fullName = `${localStorage.getItem(
+      'firstname'
+    )}  ${localStorage.getItem('lastname')}`;
+    idea.profileIcon = `${localStorage.getItem('profileIcon')}`;
+    console.log(idea);
+    this.postSvc
+      .newStockIdea(this.symbol, idea)
+      .then((res) => {
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: res.message,
+        });
+        this.form = this.createForm();
+        this.initiateStockIdeasData();
+      })
+      .catch((err) => {
+        this.messageSvc.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error.message,
+        });
+      });
   }
 
   initiateLineChartData() {

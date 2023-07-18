@@ -9,17 +9,19 @@
     *ngIf="stockProfile"
     class="row justify-content-evenly align-items-center"
   >
-    <div class="col-5 stock-profile">
-      <p-image
-        [src]="stockProfile.logo"
-        alt="company-logo"
-        width="100"
-        [preview]="true"
-      ></p-image>
-      <h3 class="mt-2">
-        {{ stockProfile.name }}
-        <span>({{ stockProfile.symbol }})</span>
-      </h3>
+    <div class="col-5 font-color">
+      <div class="d-flex justify-content-between align-items-end">
+        <h3 class="mt-2">
+          {{ stockProfile.name }}
+          <span>({{ stockProfile.symbol }})</span>
+        </h3>
+        <p-image
+          [src]="stockProfile.logo"
+          alt="company-logo"
+          width="100"
+          [preview]="true"
+        ></p-image>
+      </div>
       <div class="d-flex justify-content-between align-items-center">
         <p class="fs-5 font-monospace">Country:</p>
         <p class="fs-5 font-monospace">{{ stockProfile.country }}</p>
@@ -51,6 +53,38 @@
         </a>
       </div>
       <div class="d-flex justify-content-between align-items-center">
+        <p class="fs-5 font-monospace">Close Price:</p>
+        <p class="fs-5 font-monospace">
+          {{ stockProfile.closePrice | currency }}
+        </p>
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
+        <p class="fs-5 font-monospace">52 Week Range:</p>
+        <p class="fs-5 font-monospace">
+          {{ stockProfile.stockSummaryData.fiftyTwoWeekLow | currency }} -
+          {{ stockProfile.stockSummaryData.fiftyTwoWeekHigh | currency }}
+        </p>
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
+        <p class="fs-5 font-monospace">PE Ratio (TTM):</p>
+        <p class="fs-5 font-monospace">
+          {{ stockProfile.stockSummaryData.trailingPE | number }}
+        </p>
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
+        <p class="fs-5 font-monospace">Volume:</p>
+        <p class="fs-5 font-monospace">
+          {{ stockProfile.stockSummaryData.volume | number }}
+        </p>
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
+        <p class="fs-5 font-monospace">Market Cap:</p>
+        <p class="fs-5 font-monospace">
+          {{ stockProfile.stockSummaryData.marketCap / 1000000000 | number }}
+          B
+        </p>
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
         <p class="fs-5 font-monospace">Sentiment:</p>
         <p-rating
           [(ngModel)]="stockSentiment"
@@ -72,9 +106,9 @@
   </div>
   <div
     *ngIf="stockProfile"
-    class="row justify-content-evenly align-items-center mt-2"
+    class="row justify-content-evenly align-items-center my-5"
   >
-    <div class="col-11 stock-profile">
+    <div class="col-11 font-color">
       <div class="d-flex justify-content-between align-items-center">
         <h5 class="text-decoration-underline">Business Summary</h5>
       </div>
@@ -85,6 +119,78 @@
       </p-scrollPanel>
     </div>
   </div>
+
+  <form [formGroup]="form">
+    <div class="row justify-content-center align-items-center">
+      <div class="d-flex justify-content-center align-items-center">
+        <textarea
+          rows="2"
+          pInputTextarea
+          [autoResize]="true"
+          formControlName="idea"
+          [placeholder]="shareIdeaString"
+          [style]="{ width: '50%' }"
+          class="comment-pill"
+        ></textarea>
+      </div>
+      <div class="d-flex justify-content-center align-items-center mt-2">
+        <p class="font-color me-2">
+          Your sentiment for this stock (1 - Bearish, 5 - Bullish)
+        </p>
+        <p-rating formControlName="sentiment" [cancel]="false"></p-rating>
+        <p-button
+          class="ms-3"
+          label="Post"
+          styleClass="p-button-rounded p-button-info"
+          (onClick)="postNewIdea()"
+          [disabled]="form.invalid"
+        ></p-button>
+      </div>
+    </div>
+  </form>
+  <p-divider></p-divider>
+
+  <div class="row row-cols-1 justify-content-center align-items-center">
+    <div *ngFor="let idea of stockIdeas$ | async" class="col-10 font-color m-4">
+      <div class="row">
+        <div class="col-2">
+          <div class="d-flex flex-row-reverse align-items-center">
+            <p-image
+              [src]="idea.profileIcon"
+              alt="user-icon"
+              width="50"
+              [preview]="false"
+            ></p-image>
+          </div>
+        </div>
+        <div class="col-8">
+          <div class="d-flex justify-content-between align-items-center">
+            <p>{{ idea.fullName }}</p>
+            <p-button
+              icon="pi pi-times"
+              styleClass="p-button-rounded p-button-danger p-button-text"
+            ></p-button>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <p-rating
+              [(ngModel)]="idea.sentiment"
+              [readonly]="true"
+              [cancel]="false"
+            ></p-rating>
+            <p-button
+              icon="pi pi-pencil"
+              styleClass="p-button-rounded p-button-text"
+            ></p-button>
+          </div>
+          <p>{{ idea.idea }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p-toast></p-toast>
+  <!-- SCROLL UP BTN -->
+  <p-scrollTop></p-scrollTop>
 </div>
 
 <ng-template #skeleton> <p-skeleton height="20rem"></p-skeleton></ng-template>

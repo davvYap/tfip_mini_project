@@ -562,7 +562,7 @@ export class AppComponent implements OnInit {
   getUserAssetsValueSideBar() {
     this.stockChangePercentage = 0.0;
     this.getSvc
-      .getUserTotalStockValue(this.getSvc.userId, this.thisYear())
+      .getUserTotalStockValue(this.getSvc.userId)
       .pipe(
         switchMap((res) => {
           this.stocksValue.set(res.value);
@@ -594,7 +594,7 @@ export class AppComponent implements OnInit {
       });
 
     this.getSvc
-      .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
+      .getUserAllTransaction(this.getSvc.userId)
       .pipe(
         switchMap((trans: Transaction[]) => {
           let totalIncome = 0;

@@ -1,7 +1,14 @@
-.stock-profile {
+.font-color {
   color: var(--text-color);
 }
 
 p {
   margin-bottom: 0;
+}
+
+.comment-pill {
+  color: var(--text-color);
+  background-color: var(--surface-card);
+  border: 1px solid var(--primary-color);
+  border-radius: 30px;
 }

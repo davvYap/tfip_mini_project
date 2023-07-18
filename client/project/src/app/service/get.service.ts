@@ -15,10 +15,13 @@ import {
   SoldStock,
   Stock,
   StockCompanyProfile,
+  StockIdea,
   StockLogo,
   StockPrice,
   StockQuantity,
   StocksData,
+  StockSummaryData,
+  StockSummaryDataResponse,
   StonkStockPrice,
   Transaction,
   UserSettings,
@@ -179,14 +182,9 @@ export class GetService {
     );
   }
 
-  getUserTotalStockValue(
-    userId: string,
-    year: number
-  ): Observable<MessageResponse> {
-    let qp = new HttpParams().set('year', year);
+  getUserTotalStockValue(userId: string): Observable<MessageResponse> {
     return this.http.get<MessageResponse>(
-      `http://localhost:8080/api/${userId}/stocksValue`,
-      { params: qp }
+      `http://localhost:8080/api/${userId}/stocksValue`
     );
   }
 
@@ -406,7 +404,27 @@ export class GetService {
     );
   }
 
-  // EXTRA
+  getStockSummaryData(symbol: string): Promise<StockSummaryDataResponse> {
+    return lastValueFrom(
+      this.http.get<StockSummaryDataResponse>(
+        `http://localhost:8080/api/${symbol}/stock_summary_data`
+      )
+    );
+  }
+
+  getStockIdeas(
+    symbol: string,
+    limit: number,
+    skip: number
+  ): Observable<StockIdea[]> {
+    const qp = new HttpParams().set('limit', limit).append('skip', skip);
+    return this.http.get<StockIdea[]>(
+      `http://localhost:8080/api/${symbol}/ideas`,
+      { params: qp }
+    );
+  }
+
+  //NOTE EXTRA
   initiateLoginProcedure(loginStatus: LoginStatus) {
     this.userId = loginStatus.userId;
     this.isLogin = loginStatus.isLogin;

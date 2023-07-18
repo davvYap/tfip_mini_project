@@ -26,6 +26,7 @@ import org.springframework.stereotype.Repository;
 import com.mongodb.client.result.UpdateResult;
 
 import sg.edu.nus.iss.project.models.Stock;
+import sg.edu.nus.iss.project.models.StockIdea;
 import sg.edu.nus.iss.project.models.StockPrice;
 import sg.edu.nus.iss.project.models.StockProfile;
 
@@ -291,19 +292,53 @@ public class UserRepository {
         return null;
     }
 
-    public void saveUserStockMarketValueRedis(String userId, String symbol, double value) {
-        redis.opsForHash().put(userId, symbol, String.valueOf(value));
-        redis.expireAt(userId, expirationDayInInstance());
+    // public void saveUserStockMarketValueRedis(String userId, String symbol,
+    // double value) {
+    // redis.opsForHash().put(userId, symbol, String.valueOf(value));
+    // redis.expireAt(userId, expirationDayInInstance());
+    // System.out.println("Redis saved user stock market value for
+    // %s".formatted(symbol));
+    // }
+
+    // public Optional<Double> retrieveUserStockMarketValueRedis(String userId,
+    // String symbol) {
+    // String marketprice = (String) redis.opsForHash().get(userId, symbol);
+    // // System.out.println("Checking redis for %s market
+    // price".formatted(symbol));
+    // if (marketprice == null) {
+    // return Optional.empty();
+    // }
+    // return Optional.of(Double.parseDouble(marketprice));
+    // }
+
+    public void saveStockMarketValueRedis(String symbol, double value) {
+        redis.opsForValue().set(symbol, String.valueOf(value));
+        redis.expireAt(symbol, expirationDayInInstance());
         System.out.println("Redis saved stock market value for %s".formatted(symbol));
     }
 
-    public Optional<Double> retrieveUserStockMarketValueRedis(String userId, String symbol) {
-        String marketprice = (String) redis.opsForHash().get(userId, symbol);
-        // System.out.println("Checking redis for %s market price".formatted(symbol));
-        if (marketprice == null) {
+    public Optional<Double> retrieveStockMarketValueRedis(String symbol) {
+        String marketPrice = (String) redis.opsForValue().get(symbol);
+        if (marketPrice == null) {
             return Optional.empty();
         }
-        return Optional.of(Double.parseDouble(marketprice));
+        return Optional.of(Double.parseDouble(marketPrice));
+    }
+
+    public void saveStockSummaryDataRedis(String symbol, String json) {
+        String redisKey = symbol + "_summary_data";
+        redis.expireAt(redisKey, expirationDayInInstance());
+        redis.opsForValue().set(redisKey, json);
+        System.out.println("Redis saved stock summary data for %s".formatted(symbol));
+    }
+
+    public Optional<String> retrieveStockSummaryDataRedis(String symbol) {
+        String redisKey = symbol.toUpperCase() + "_summary_data";
+        String json = (String) redis.opsForValue().get(redisKey);
+        if (json == null) {
+            return Optional.empty();
+        }
+        return Optional.of(json);
     }
 
     public boolean upsertUserYesterdayTotalValueMongo(String userId, double value) {
@@ -383,7 +418,36 @@ public class UserRepository {
         return sp;
     }
 
-    // EXTRA
+    public boolean upsertUserStockIdeaMongo(String symbol, StockIdea idea) {
+        idea.setId(UUID.randomUUID().toString().substring(0, 8));
+        Query query = Query.query(Criteria.where("symbol").is(symbol));
+        Update udpateOps = new Update()
+                .set("symbol", symbol)
+                .push("stock_idea", idea.toDocument());
+
+        UpdateResult upsertDoc = mongo.upsert(query, udpateOps, "stocks_ideas");
+        return upsertDoc.getModifiedCount() > 0;
+    }
+
+    public List<StockIdea> retrieveStockIdeasMongo(String symbol, int limit, int skip) {
+        Query query = Query.query(Criteria.where("symbol").is(symbol)).limit(limit).skip(skip);
+        Document d = mongo.findOne(query, Document.class, "stocks_ideas");
+
+        if (d != null) {
+            List<StockIdea> stockIdeas = d.getList("stock_idea", Document.class).stream()
+                    .map(StockIdea::convertFromDocument)
+                    .toList();
+            // NOTE here will limit user stocks
+            if (stockIdeas.size() > limit + 1) {
+                List<StockIdea> limitedStockIdeas = stockIdeas.subList(skip, limit + 1);
+                return limitedStockIdeas;
+            }
+            return stockIdeas;
+        }
+        return null;
+    }
+
+    // NOTE EXTRA
     public Instant expirationDayInInstance() {
         LocalDate currDate = LocalDate.now();
         // System.out.println("currDate >>> " + currDate);

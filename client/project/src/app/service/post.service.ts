@@ -7,6 +7,7 @@ import {
   MortgagePortfolio,
   PurchasedStock,
   SignUp,
+  StockIdea,
   Transaction,
 } from '../models';
 import { Observable, lastValueFrom } from 'rxjs';
@@ -123,6 +124,15 @@ export class PostService {
       this.http.post<MessageResponse>(
         `http://localhost:8080/api/${userId}/add_mortgage_profile`,
         mort
+      )
+    );
+  }
+
+  newStockIdea(symbol: string, idea: StockIdea): Promise<MessageResponse> {
+    return lastValueFrom(
+      this.http.post<MessageResponse>(
+        `http://localhost:8080/api/${symbol}/new_idea`,
+        idea
       )
     );
   }

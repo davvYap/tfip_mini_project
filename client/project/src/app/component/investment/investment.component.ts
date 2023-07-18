@@ -68,16 +68,41 @@ export class InvestmentComponent implements OnInit, OnDestroy {
     let filtered: String[] = [];
     let query = event.query;
 
-    this.stocksData$ = this.getSvc.getStocks(query).subscribe((res) => {
-      this.stocks = res.data;
-      for (let i = 0; i < this.stocks.length; i++) {
-        let stock = this.stocks[i];
-        if (stock.symbol.toLowerCase().indexOf(query.toLowerCase()) == 0) {
-          let queryStock = `${stock.symbol} | ${stock.instrument_name} (${stock.exchange})`;
-          filtered.push(queryStock);
+    // this.stocksData$ = this.getSvc.getStocks(query).subscribe((res) => {
+    //   this.stocks = res.data;
+    //   for (let i = 0; i < this.stocks.length; i++) {
+    //     let stock = this.stocks[i];
+    //     if (stock.symbol.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+    //       let queryStock = `${stock.symbol} | ${stock.instrument_name} (${stock.exchange})`;
+    //       filtered.push(queryStock);
+    //     }
+    //   }
+    //   this.filteredStocksSymbol = filtered;
+    // });
+
+    this.stocksData$ = this.getSvc.getStocks(query).subscribe({
+      next: (res) => {
+        this.stocks = res.data;
+        for (let i = 0; i < this.stocks.length; i++) {
+          let stock = this.stocks[i];
+          if (stock.symbol.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+            let queryStock = `${stock.symbol} | ${stock.instrument_name} (${stock.exchange})`;
+            filtered.push(queryStock);
+          }
         }
-      }
-      this.filteredStocksSymbol = filtered;
+        this.filteredStocksSymbol = filtered;
+      },
+      error: (error) => {
+        this.messageSvc.add({
+          severity: 'error',
+          summary: 'Error',
+          detail:
+            'The API calls had exceed the limit of 8 calls per minute. Please wait a minute.',
+        });
+      },
+      complete: () => {
+        this.stocksData$.unsubscribe();
+      },
     });
   }
 

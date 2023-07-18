@@ -49,10 +49,56 @@ public class StockController {
 
     @GetMapping(path = "/{symbol}/price")
     public ResponseEntity<String> getStockPrice(@PathVariable String symbol,
-            @RequestParam(defaultValue = "10") int outputsize) {
-        return stockSvc.getStockPrice(symbol, outputsize);
+            @RequestParam(defaultValue = "10") int outputsize) throws IOException {
+        String stkSymbol = symbol.toUpperCase();
+        double marketPrice = 0;
+        // CHECK REDIS
+        Optional<Double> redisOpt = userSvc.retrieveStockMarketValueRedis(stkSymbol);
+        if (redisOpt.isEmpty()) {
+            // CHECK MONGO
+            Optional<List<StockPrice>> mongoOpt = userSvc.retrieveStockMonthlyPerformanceMongo(stkSymbol);
+            if (mongoOpt.isEmpty()) {
+                System.out.println("Called Twelve API for stock price at Stock Controller");
+                ResponseEntity<String> res = stockSvc.getStockPrice(stkSymbol, outputsize);
+                if (res.getStatusCode().isError()) {
+                    return res;
+                }
+                String body = res.getBody();
+                double newStockPrice = 0.0;
+                try (InputStream is = new ByteArrayInputStream(body.getBytes())) {
+                    JsonReader reader = Json.createReader(is);
+                    JsonObject jsObj = reader.readObject();
+                    String newStockPriceString = jsObj.getString("price");
+                    newStockPrice = Double.parseDouble(newStockPriceString);
+                }
+                userSvc.saveStockMarketValueRedis(stkSymbol, newStockPrice);
+                return stockSvc.getStockPrice(stkSymbol, outputsize);
+            }
+            List<StockPrice> spList = mongoOpt.get();
+            marketPrice = spList.get(spList.size() - 1).getClosePrice();
+            userSvc.saveStockMarketValueRedis(stkSymbol, marketPrice);
 
+            return ResponseEntity.status(HttpStatus.OK)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("symbol", stkSymbol).add("price", String.valueOf(marketPrice))
+                            .build()
+                            .toString());
+        }
+        marketPrice = redisOpt.get();
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("symbol", stkSymbol).add("price", String.valueOf(marketPrice))
+                        .build()
+                        .toString());
     }
+
+    // @GetMapping(path = "/{symbol}/price_database")
+    // public ResponseEntity<String> getStockPriceFromDatabase(@PathVariable String
+    // symbol) {
+    // // check redis whether the latest market price is there
+    // Optional<Double> optPrice = userSvc.retrieveStockMarketValueRedis(symbol);
+    // if()
+    // }
 
     @GetMapping(path = "/{symbol}/logo")
     public ResponseEntity<String> getStockLogo(@PathVariable String symbol) throws IOException {
@@ -86,7 +132,7 @@ public class StockController {
     @GetMapping(path = "/{symbol}/stonkprice")
     public ResponseEntity<String> getStonkStockPrice(@PathVariable String symbol, @RequestParam String userId) {
 
-        Optional<Double> optPrice = userSvc.retrieveUserStockMarketValueRedis(userId, symbol);
+        Optional<Double> optPrice = userSvc.retrieveStockMarketValueRedis(symbol);
         if (optPrice.isPresent()) {
             double marketPrice = optPrice.get();
             return ResponseEntity.status(HttpStatus.OK)
@@ -151,7 +197,7 @@ public class StockController {
         StockProfile sp = userSvc.retrieveStockProfileMongo(symbol);
         if (sp == null) {
             ResponseEntity<String> res = stockSvc.getStockProfile(symbol);
-            System.out.println(res);
+            // System.out.println(res);
             if (res.getStatusCode().isError()) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -172,10 +218,44 @@ public class StockController {
                         .body(newSp.toJsonObject().toString());
             }
         }
-        System.out.println("response >>> " + sp.toJsonObject().toString());
+        // System.out.println("response >>> " + sp.toJsonObject().toString());
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(sp.toJsonObject().toString());
 
     }
+
+    @GetMapping(value = "/{symbol}/stock_summary_data")
+    public ResponseEntity<String> getStockSimpleSummaryYHFinance(@PathVariable String symbol) throws IOException {
+        // CHECK REDIS
+        Optional<String> redisOpt = userSvc.retrieveStockSummaryDataRedis(symbol);
+        if (redisOpt.isEmpty()) {
+            System.out.println("Call YH FINANCE API to get stock summary data");
+            ResponseEntity<String> res = stockSvc.getStockSimpleSummaryYHFinance(symbol);
+            if (res.getStatusCode().isError()) {
+                return res;
+            }
+            String body = res.getBody();
+
+            try (InputStream is = new ByteArrayInputStream(body.getBytes())) {
+                JsonReader reader = Json.createReader(is);
+                JsonObject jsObj = reader.readObject();
+                JsonObject json = jsObj.getJsonObject("summaryDetail");
+                userSvc.saveStockSummaryDataRedis(symbol, json.toString());
+            }
+            return res;
+        }
+
+        String json = redisOpt.get();
+        JsonObject jsObj = null;
+        try (InputStream is = new ByteArrayInputStream(json.getBytes())) {
+            JsonReader reader = Json.createReader(is);
+            jsObj = reader.readObject();
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("summaryDetail", jsObj).build().toString());
+    }
+
 }

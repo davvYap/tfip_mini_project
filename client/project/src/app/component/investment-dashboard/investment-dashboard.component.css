@@ -23,8 +23,8 @@ h1 {
 .linebackground {
   background: var(--surface-overlay);
   padding: 1rem;
-  border-radius: 10px;
   margin-bottom: 1rem;
+  border-radius: 10px;
   color: var(--text-color);
 }
 

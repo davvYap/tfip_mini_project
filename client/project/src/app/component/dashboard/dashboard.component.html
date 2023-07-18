@@ -170,9 +170,9 @@
                       ></span>
                       <span
                         *ngIf="!skeletonLoading; else loading"
-                        [className]="getProfitColorClass(savingsValue())"
+                        [className]="getProfitColorClass(savingsValueYearly())"
                       >
-                        {{ savingsValue() | currency }}
+                        {{ savingsValueYearly() | currency }}
                       </span>
                     </span>
                     <span *ngIf="showTotalExpense">

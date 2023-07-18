@@ -23,6 +23,7 @@ import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockCount;
+import sg.edu.nus.iss.project.models.StockIdea;
 import sg.edu.nus.iss.project.models.StockPrice;
 import sg.edu.nus.iss.project.services.StockService;
 import sg.edu.nus.iss.project.services.UserService;
@@ -120,7 +121,7 @@ public class UserController {
         // SAVE THE MARKET PRICE OF THE STOCKS TO REDIS
         String stockMarketValueString = stockSvc.getRealStonksPrice(stock.getSymbol()).getBody();
         double stockMarketValue = userSvc.getStonkStockPrice(stockMarketValueString);
-        userSvc.saveUserStockMarketValueRedis(userId, stock.getSymbol(), stockMarketValue);
+        userSvc.saveStockMarketValueRedis(stock.getSymbol(), stockMarketValue);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -270,8 +271,7 @@ public class UserController {
 
     @GetMapping(path = "/{userId}/stocksValue")
     public ResponseEntity<String> getUserStocksValue(@PathVariable String userId,
-            @RequestParam(defaultValue = "1000") int limit, @RequestParam(defaultValue = "0") int skip,
-            @RequestParam int year)
+            @RequestParam(defaultValue = "1000") int limit, @RequestParam(defaultValue = "0") int skip)
             throws IOException {
 
         List<StockCount> sc = userSvc.retrieveUserStocksCount(userId, limit, skip);
@@ -287,20 +287,15 @@ public class UserController {
             String stkSymbol = stockCount.getSymbol();
             double marketPrice = 0;
             // check redis whether the latest market price is there
-            Optional<Double> optPrice = userSvc.retrieveUserStockMarketValueRedis(userId, stkSymbol);
+            Optional<Double> optPrice = userSvc.retrieveStockMarketValueRedis(stkSymbol);
             if (optPrice.isEmpty()) {
                 // SEARCH IN MONGO
                 Optional<List<StockPrice>> spListOpt = userSvc.retrieveStockMonthlyPerformanceMongo(stkSymbol);
                 if (spListOpt.isPresent()) {
                     List<StockPrice> spList = spListOpt.get();
                     marketPrice = spList.get(spList.size() - 1).getClosePrice();
-                    userSvc.saveUserStockMarketValueRedis(userId, stkSymbol, marketPrice);
+                    userSvc.saveStockMarketValueRedis(stkSymbol, marketPrice);
                 }
-                // CALL STONK STOCK API
-                // ResponseEntity<String> realStonkPrice =
-                // stockSvc.getRealStonksPrice(stkSymbol);
-                // marketPrice = userSvc.getStonkStockPrice(realStonkPrice.getBody());
-                // userSvc.saveUserStockMarketValueRedis(userId, stkSymbol, marketPrice);
             } else {
                 marketPrice = optPrice.get();
             }
@@ -413,6 +408,33 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("quantity", opt.get()).build().toString());
+    }
+
+    @PostMapping(path = "/{symbol}/new_idea")
+    @ResponseBody
+    public ResponseEntity<String> newStockIdeaFromUserMongo(@PathVariable String symbol, @RequestBody String ideaJson)
+            throws IOException {
+        StockIdea idea = StockIdea.convertFromJsonString(ideaJson);
+        boolean upserted = userSvc.upsertUserStockIdeaMongo(symbol, idea);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("message", "Posted stock idea successfully").build().toString());
+    }
+
+    @GetMapping(path = "/{symbol}/ideas")
+    @ResponseBody
+    public ResponseEntity<String> getStockIdeasMongo(@PathVariable String symbol,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int skip) {
+        List<StockIdea> ideas = userSvc.retrieveStockIdeasMongo(symbol, limit, skip);
+        JsonArrayBuilder jsArr = Json.createArrayBuilder();
+        if (ideas != null) {
+            ideas.forEach(i -> jsArr.add(i.toJsonObject()));
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsArr.build().toString());
     }
 
 }
