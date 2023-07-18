@@ -329,8 +329,8 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           symbol: sc.symbol,
           name: sc.name,
           quantity: sc.quantity,
-          cost: sc.cost,
-          marketPrice: sc.marketPrice,
+          cost: sc.cost / sc.quantity,
+          marketPrice: sc.marketPrice / sc.quantity,
           performance: sc.performance,
           logo: sc.logo,
           fees: 0,
@@ -625,8 +625,9 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     endOfMonth: string[]
   ): number[] {
     let sp: number[] = [];
-    const firstPurchasePrice: number =
-      stockPrices[stockPrices.length - 1].close;
+    // const firstPurchasePrice: number =
+    //   stockPrices[stockPrices.length - 1].close;
+    const firstPurchasePrice: number = stockPrices[0].close;
     for (let i = 0; i < stockPrices.length; i++) {
       const stockPrice = stockPrices[i];
       for (let j = 0; j < endOfMonth.length; j++) {
@@ -637,7 +638,8 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         }
       }
     }
-    return sp.reverse();
+    // return sp.reverse();
+    return sp;
   }
 
   initiateStockTable() {

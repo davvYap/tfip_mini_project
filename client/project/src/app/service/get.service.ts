@@ -179,9 +179,14 @@ export class GetService {
     );
   }
 
-  getUserTotalStockValue(userId: string): Observable<MessageResponse> {
+  getUserTotalStockValue(
+    userId: string,
+    year: number
+  ): Observable<MessageResponse> {
+    let qp = new HttpParams().set('year', year);
     return this.http.get<MessageResponse>(
-      `http://localhost:8080/api/${userId}/stocksValue`
+      `http://localhost:8080/api/${userId}/stocksValue`,
+      { params: qp }
     );
   }
 

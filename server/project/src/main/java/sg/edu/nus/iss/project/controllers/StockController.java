@@ -96,7 +96,7 @@ public class StockController {
                             .build().toString());
         }
 
-        System.out.println("Calling stonk price >>> " + symbol);
+        System.out.println("Calling stonk price from Stock Controller >>> " + symbol);
         return stockSvc.getRealStonksPrice(symbol);
     }
 

@@ -131,8 +131,9 @@ export class StockDetailsComponent implements OnInit {
     endOfMonth: string[]
   ): number[] {
     let sp: number[] = [];
-    const firstPurchasePrice: number =
-      stockPrices[stockPrices.length - 1].close;
+    // const firstPurchasePrice: number =
+    //   stockPrices[stockPrices.length - 1].close;
+    const firstPurchasePrice: number = stockPrices[0].close;
     for (let i = 0; i < stockPrices.length; i++) {
       const stockPrice = stockPrices[i];
       for (let j = 0; j < endOfMonth.length; j++) {
@@ -143,7 +144,8 @@ export class StockDetailsComponent implements OnInit {
         }
       }
     }
-    return sp.reverse();
+    // return sp.reverse();
+    return sp;
   }
 
   initiateLineChartData() {
@@ -172,6 +174,7 @@ export class StockDetailsComponent implements OnInit {
           if (count === 0) {
             endOfMonth.push(this.getCurrentDate());
           }
+          // console.log('end of month ', endOfMonth);
 
           const performance: number[] = this.getStockMonthlyPerformance(
             stockPrice,
@@ -180,7 +183,7 @@ export class StockDetailsComponent implements OnInit {
           this.stockData = performance;
           this.skeletonLoading = false;
           this.initiateLineChart();
-          console.log(this.stockData);
+          // console.log('stocks data > ', this.stockData);
         })
       )
       .subscribe();

@@ -484,7 +484,7 @@ public class UserService {
                         System.out.println("total market price >>> " + totalStockMarketPrice);
                     } else {
                         // else call api to save stock performance into mongo and return the result
-                        System.out.println("Calling YH FINANCE API for %s monthly price from %s to %s"
+                        System.out.println("Calling YH FINANCE API for %s monthly price from %s to %s from UserService"
                                 .formatted(stock.getSymbol(), startDateOfTheYear, currDate));
                         ResponseEntity<String> res = stockSvc.getStockMonthlyPrice(stock.getSymbol(),
                                 startDateOfTheYear, currDate);
@@ -617,7 +617,7 @@ public class UserService {
                         // System.out.println("total market price >>> " + totalStockMarketPrice);
                     } else {
                         // else call api to save stock performance into mongo and return the result
-                        System.out.println("Calling YH FINANCE API for %s monthly price from %s to %s"
+                        System.out.println("Calling YH FINANCE API for %s monthly price from %s to %s from UserService"
                                 .formatted(stock.getSymbol(), startDateOfTheYear, currDate));
                         ResponseEntity<String> res = stockSvc.getStockMonthlyPrice(stock.getSymbol(),
                                 startDateOfTheYear, currDate);
@@ -634,7 +634,10 @@ public class UserService {
                                 JsonArray jrArr = reader.readArray();
                                 for (JsonValue jsonValue : jrArr) {
                                     JsonObject jsObj = (JsonObject) jsonValue;
-                                    spList.add(StockPrice.convertFromJsonObject(jsObj));
+                                    // System.out.println(jsObj);
+                                    StockPrice sp = StockPrice.convertFromJsonObject(jsObj);
+                                    sp.setSymbol(stock.getSymbol());
+                                    spList.add(sp);
                                 }
                             }
                         }

@@ -270,7 +270,8 @@ public class UserController {
 
     @GetMapping(path = "/{userId}/stocksValue")
     public ResponseEntity<String> getUserStocksValue(@PathVariable String userId,
-            @RequestParam(defaultValue = "1000") int limit, @RequestParam(defaultValue = "0") int skip)
+            @RequestParam(defaultValue = "1000") int limit, @RequestParam(defaultValue = "0") int skip,
+            @RequestParam int year)
             throws IOException {
 
         List<StockCount> sc = userSvc.retrieveUserStocksCount(userId, limit, skip);
@@ -290,10 +291,11 @@ public class UserController {
             if (optPrice.isEmpty()) {
                 // SEARCH IN MONGO
                 Optional<List<StockPrice>> spListOpt = userSvc.retrieveStockMonthlyPerformanceMongo(stkSymbol);
-                List<StockPrice> spList = spListOpt.get();
-                marketPrice = spList.get(0).getClosePrice();
-                userSvc.saveUserStockMarketValueRedis(userId, stkSymbol, marketPrice);
-
+                if (spListOpt.isPresent()) {
+                    List<StockPrice> spList = spListOpt.get();
+                    marketPrice = spList.get(spList.size() - 1).getClosePrice();
+                    userSvc.saveUserStockMarketValueRedis(userId, stkSymbol, marketPrice);
+                }
                 // CALL STONK STOCK API
                 // ResponseEntity<String> realStonkPrice =
                 // stockSvc.getRealStonksPrice(stkSymbol);
@@ -304,8 +306,10 @@ public class UserController {
             }
             double totalStockMarketValue = stockCount.getQuantity() * marketPrice;
             totalStockValue += totalStockMarketValue;
-            System.out.println("Stocks symbol %s - qty %.2f - market price %.2f ".formatted(stkSymbol,
-                    stockCount.getQuantity(), totalStockMarketValue));
+            System.out.println(
+                    "Calculating User total stock value from User controller -> Stocks symbol %s - qty %.2f - market price %.2f "
+                            .formatted(stkSymbol,
+                                    stockCount.getQuantity(), totalStockMarketValue));
         }
 
         return ResponseEntity.status(HttpStatus.OK)

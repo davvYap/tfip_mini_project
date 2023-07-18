@@ -10,7 +10,16 @@ import {
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Params, Router } from '@angular/router';
 import { Chart } from 'chart.js';
-import { Observable, Subscription, forkJoin, map, of, switchMap } from 'rxjs';
+import {
+  Observable,
+  Subscription,
+  finalize,
+  forkJoin,
+  map,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import {
   LoginStatus,
   MessageResponse,
@@ -216,36 +225,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.quoteOfTheDay = quote.q;
     });
 
+    // INVESTMENT DONUT CHART
+    this.stockCountDonutSymbol = [];
+    this.categoriesColor = [];
+    this.stocksCount = [];
+    // this.initiateStockCount();
+
+    // STOCKS REALIZED PROFIT
+    this.soldStocks$ = this.getSvc
+      .getUserSoldStocks(this.getSvc.userId)
+      .subscribe((stks: SoldStock[]) => {
+        this.stocksRealizedProfit.set(this.calculateRealizedProfit(stks));
+      });
+
+    // SAVINGS DONUT CHART
+    this.transactions = [];
+    setTimeout(() => {
+      this.initiateDonutChartData();
+    }, 200);
+
+    // LINE CHART & USER TOTAL STOCK VALUE & STOCK COUNT FOR DONUT CHART
+    this.initiateChartsData();
+
+    // USER TOTAL STOCK VALUE
     this.stockChangePercentage = 0.0;
-    this.getSvc
-      .getUserTotalStockValue(this.getSvc.userId)
-      .pipe(
-        switchMap((res) => {
-          this.stocksValue.set(res.value);
-          return of(res);
-        }),
-        switchMap((res) => {
-          let observables: Observable<MessageResponse>[] = [];
-          const observable = this.getSvc.getUserYesterdayTotalStockValue(
-            this.getSvc.userId
-          );
-          observables.push(observable);
-          return forkJoin(observables).pipe(
-            map((res2: MessageResponse[]) => {
-              const msgRes: MessageResponse = res2[0];
-              const yesterdayValue = msgRes.value;
-              if (yesterdayValue === 0) {
-                this.stockChangePercentage = 0;
-              } else {
-                this.stockChangePercentage =
-                  (this.stocksValue() - yesterdayValue) / yesterdayValue;
-              }
-              return res;
-            })
-          );
-        })
-      )
-      .subscribe();
+    // this.calculateUserStockValue();
+
     this.getSvc
       .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
       .pipe(
@@ -267,30 +272,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe();
-
-    // INVESTMENT DONUT CHART
-    this.stockCountDonutSymbol = [];
-    this.categoriesColor = [];
-    this.stocksCount = [];
-    this.initiateStockCount();
-
-    // STOCKS REALIZED PROFIT
-    this.soldStocks$ = this.getSvc
-      .getUserSoldStocks(this.getSvc.userId)
-      .subscribe((stks: SoldStock[]) => {
-        this.stocksRealizedProfit.set(this.calculateRealizedProfit(stks));
-      });
-
-    // SAVINGS DONUT CHART
-    this.transactions = [];
-    setTimeout(() => {
-      this.initiateDonutChartData();
-    }, 200);
-
-    // LINE CHART
-    this.initiateChartsData();
-
-    // NOTIFICATION IF USER PEFORMANCE > GOAL THAT MONTH LINECHART
   }
 
   ngOnDestroy(): void {
@@ -370,6 +351,39 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return total;
   }
 
+  calculateUserStockValue(): Observable<any> {
+    return this.getSvc
+      .getUserTotalStockValue(this.getSvc.userId, this.thisYear())
+      .pipe(
+        switchMap((res) => {
+          this.stocksValue.set(res.value);
+          // console.log('calculating', this.stocksValue());
+          return of(res);
+        }),
+        switchMap((res) => {
+          let observables: Observable<MessageResponse>[] = [];
+          const observable = this.getSvc.getUserYesterdayTotalStockValue(
+            this.getSvc.userId
+          );
+          observables.push(observable);
+          return forkJoin(observables).pipe(
+            map((res2: MessageResponse[]) => {
+              const msgRes: MessageResponse = res2[0];
+              const yesterdayValue = msgRes.value;
+              if (yesterdayValue === 0) {
+                this.stockChangePercentage = 0;
+              } else {
+                this.stockChangePercentage =
+                  (this.stocksValue() - yesterdayValue) / yesterdayValue;
+              }
+              return res;
+            })
+          );
+        })
+      );
+    // .subscribe();
+  }
+
   initiateChartsData() {
     this.getSvc
       .getUserStockMonthlyValue(this.getSvc.userId, new Date().getFullYear())
@@ -389,8 +403,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }),
         switchMap((res) => {
           this.portfolioPerformanceData = res;
-          console.log('user stock data', this.portfolioPerformanceData);
+          // console.log('user stock data', this.portfolioPerformanceData);
           return of(res);
+        }),
+        switchMap((res) => {
+          // CALCULATE USER TOTAL STOCK VALUE
+          return new Observable((observer) => {
+            this.calculateUserStockValue()
+              .pipe(
+                finalize(() => {
+                  observer.next(res);
+                  observer.complete();
+                })
+              )
+              .subscribe();
+          });
         }),
         switchMap((res) => {
           // Create an array of observables
@@ -442,11 +469,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         // console.log('line chart');
         this.skeletonLoading = false;
         this.initiateDonutChartOverall();
+        this.initiateStockCount();
       });
   }
 
   initiateDonutChartOverall() {
     // const documentStyle = getComputedStyle(document.documentElement);
+    console.log('stock value', this.stocksValue());
+    console.log('savings value', this.savingsValue());
     const textColor = this.documentStyle().getPropertyValue('--text-color');
 
     this.donutDataOverall = {
@@ -508,7 +538,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
   }
 
+  // HERE USING STOCKSTOCKPRICE FOR DONUT CHART
   initiateStockCount() {
+    console.log('initate stock count for donut chart');
     this.stocksCount$ = this.getSvc
       .getUserStocksCount(this.getSvc.userId)
       .pipe(

@@ -47,7 +47,7 @@ public class StockPrice {
     public static StockPrice convertFromJsonObject(JsonObject js) {
         StockPrice sp = new StockPrice();
 
-        sp.setSymbol(js.getString("symbol"));
+        // sp.setSymbol(js.getString("symbol"));
         sp.setClosePrice(js.getJsonNumber("close").doubleValue());
         sp.setVolume(js.getJsonNumber("volume").longValue());
         sp.setDate(js.getString("date").substring(0, 10));

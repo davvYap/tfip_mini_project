@@ -146,6 +146,10 @@ public class StockService {
 	}
 
 	public ResponseEntity<String> getStockMonthlyPrice(String symbol, String sdate, String edate) {
+		// System.out.println(
+		// "Calling YH FINANCE API for %s monthly price from %s to %s from
+		// StockService".formatted(symbol, sdate,
+		// edate));
 		String url = UriComponentsBuilder.fromUriString(YH_FINANCE_API)
 				.queryParam("ticker", symbol)
 				.queryParam("sdate", sdate)
