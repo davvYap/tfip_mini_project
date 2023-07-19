@@ -68,18 +68,6 @@ export class InvestmentComponent implements OnInit, OnDestroy {
     let filtered: String[] = [];
     let query = event.query;
 
-    // this.stocksData$ = this.getSvc.getStocks(query).subscribe((res) => {
-    //   this.stocks = res.data;
-    //   for (let i = 0; i < this.stocks.length; i++) {
-    //     let stock = this.stocks[i];
-    //     if (stock.symbol.toLowerCase().indexOf(query.toLowerCase()) == 0) {
-    //       let queryStock = `${stock.symbol} | ${stock.instrument_name} (${stock.exchange})`;
-    //       filtered.push(queryStock);
-    //     }
-    //   }
-    //   this.filteredStocksSymbol = filtered;
-    // });
-
     this.stocksData$ = this.getSvc.getStocks(query).subscribe({
       next: (res) => {
         this.stocks = res.data;

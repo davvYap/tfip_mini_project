@@ -46,6 +46,7 @@ import { AuthenticationComponent } from './component/authentication/authenticati
 import { SignUpComponent } from './component/sign-up/sign-up.component';
 import { EditCategoryComponent } from './component/edit-category/edit-category.component';
 import { NotificationService } from './service/notification.service';
+import { AddCategoryComponent } from './component/add-category/add-category.component';
 
 @Component({
   selector: 'app-root',
@@ -86,11 +87,16 @@ export class AppComponent implements OnInit {
     'mira',
     'nano',
     'md-light-indigo',
-    'md-dark-purple',
+    'fluent-light',
     'mdc-dark-deeppurple',
+    'rhea',
     'viva-dark',
     'lara-dark-teal',
     'arya-green',
+    'arya-orange',
+    'luna-pink',
+    'luna-blue',
+    'luna-green',
   ];
 
   @ViewChild('appDialog', { static: true })
@@ -213,7 +219,7 @@ export class AppComponent implements OnInit {
                 {
                   label: 'Category',
                   icon: 'pi pi-fw pi-cart-plus',
-                  routerLink: '/savings',
+                  command: () => this.newCategory(),
                 },
               ],
             },
@@ -227,7 +233,7 @@ export class AppComponent implements OnInit {
                   command: () => this.editCategory(),
                 },
                 {
-                  label: 'Schedule',
+                  label: 'Regular',
                   icon: 'pi pi-fw pi-calendar ',
                   routerLink: '/regular-transactions',
                 },
@@ -291,29 +297,54 @@ export class AppComponent implements OnInit {
                   command: () => this.changeTheme(2),
                 },
                 {
-                  label: 'MD Dark Purple',
+                  label: 'Fluent Light',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(3),
                 },
                 {
-                  label: 'MDC Dark',
+                  label: 'MDC Dark Purple',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(4),
                 },
                 {
-                  label: 'Viva Dark',
+                  label: 'Rhea',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(5),
                 },
                 {
-                  label: 'Lara Dark Teal',
+                  label: 'Viva Dark',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(6),
                 },
                 {
-                  label: 'Arya Green',
+                  label: 'Lara Dark Teal',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(7),
+                },
+                {
+                  label: 'Arya Green',
+                  icon: 'pi pi-fw pi-images',
+                  command: () => this.changeTheme(8),
+                },
+                {
+                  label: 'Arya Orange',
+                  icon: 'pi pi-fw pi-images',
+                  command: () => this.changeTheme(9),
+                },
+                {
+                  label: 'Luna Pink',
+                  icon: 'pi pi-fw pi-images',
+                  command: () => this.changeTheme(10),
+                },
+                {
+                  label: 'Luna Blue',
+                  icon: 'pi pi-fw pi-images',
+                  command: () => this.changeTheme(11),
+                },
+                {
+                  label: 'Luna Green',
+                  icon: 'pi pi-fw pi-images',
+                  command: () => this.changeTheme(12),
                 },
               ],
             },
@@ -503,6 +534,29 @@ export class AppComponent implements OnInit {
       maximizable: true,
       dismissableMask: true,
       data: { mortgageMonthlyPayment: null },
+    });
+
+    this.dialogRef.onClose.subscribe((msg) => {
+      if (msg !== undefined) {
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Successful',
+          detail: msg,
+        });
+        this.ngOnInit();
+      }
+    });
+  }
+
+  newCategory() {
+    this.dialogRef = this.dialogSvc.open(AddCategoryComponent, {
+      header: 'New Category',
+      width: '30%',
+      // height: '90%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      dismissableMask: true,
     });
 
     this.dialogRef.onClose.subscribe((msg) => {

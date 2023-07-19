@@ -7,6 +7,8 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +16,7 @@ import java.util.UUID;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -22,6 +25,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.comparator.Comparators;
 
 import com.mongodb.client.result.UpdateResult;
 
@@ -327,8 +331,8 @@ public class UserRepository {
 
     public void saveStockSummaryDataRedis(String symbol, String json) {
         String redisKey = symbol + "_summary_data";
-        redis.expireAt(redisKey, expirationDayInInstance());
         redis.opsForValue().set(redisKey, json);
+        redis.expireAt(redisKey, expirationDayInInstance());
         System.out.println("Redis saved stock summary data for %s".formatted(symbol));
     }
 
@@ -432,19 +436,50 @@ public class UserRepository {
     public List<StockIdea> retrieveStockIdeasMongo(String symbol, int limit, int skip) {
         Query query = Query.query(Criteria.where("symbol").is(symbol)).limit(limit).skip(skip);
         Document d = mongo.findOne(query, Document.class, "stocks_ideas");
-
         if (d != null) {
             List<StockIdea> stockIdeas = d.getList("stock_idea", Document.class).stream()
                     .map(StockIdea::convertFromDocument)
                     .toList();
+
+            List<StockIdea> mutableStockIdeas = new ArrayList<>(stockIdeas);
+
+            Collections.sort(mutableStockIdeas, Comparator.comparingLong(StockIdea::getDate).reversed());
+
+            // mutableStockIdeas.forEach(s -> System.out.println(s.toString()));
             // NOTE here will limit user stocks
-            if (stockIdeas.size() > limit + 1) {
-                List<StockIdea> limitedStockIdeas = stockIdeas.subList(skip, limit + 1);
+            if (mutableStockIdeas.size() > limit + 1) {
+                List<StockIdea> limitedStockIdeas = mutableStockIdeas.subList(skip, limit + 1);
                 return limitedStockIdeas;
             }
-            return stockIdeas;
+            return mutableStockIdeas;
         }
         return null;
+    }
+
+    public boolean deleteStockIdeaMongo(String symbol, String ideaId) {
+        Query query = Query.query(Criteria.where("symbol").is(symbol));
+        // Stock stock = findUserStockWithPurchaseId(userId, purchaseId);
+
+        Document d = mongo.findOne(query, Document.class, "stocks_ideas");
+        StockIdea idea = null;
+        if (d != null) {
+            List<StockIdea> stocksIdeas = d.getList("stock_idea", Document.class).stream()
+                    .map(StockIdea::convertFromDocument)
+                    .toList();
+            Optional<StockIdea> ideaOptional = stocksIdeas.stream().filter(s -> s.getId().equalsIgnoreCase(ideaId))
+                    .findFirst();
+            if (ideaOptional.isPresent()) {
+                idea = ideaOptional.get();
+                System.out.println("Deleting %s idea with id -> %s in mongo".formatted(symbol, ideaId));
+            }
+        }
+        if (idea != null) {
+            System.out.println(idea.toString());
+            Update update = new Update().pull("stock_idea", idea.toDocument());
+            mongo.updateFirst(query, update, "stocks_ideas");
+            return true;
+        }
+        return false;
     }
 
     // NOTE EXTRA

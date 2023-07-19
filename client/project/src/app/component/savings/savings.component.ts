@@ -43,6 +43,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@angular/platform-browser';
 import { NotificationService } from 'src/app/service/notification.service';
+import { AddCategoryComponent } from '../add-category/add-category.component';
 
 @Component({
   selector: 'app-savings',
@@ -389,6 +390,29 @@ export class SavingsComponent implements OnInit, OnDestroy {
       maximizable: true,
       dismissableMask: true,
       data: { mortgageMonthlyPayment: null },
+    });
+
+    this.dialogRef.onClose.subscribe((msg) => {
+      if (msg !== undefined) {
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Successful',
+          detail: msg,
+        });
+        this.ngOnInit();
+      }
+    });
+  }
+
+  newCategory() {
+    this.dialogRef = this.dialogSvc.open(AddCategoryComponent, {
+      header: 'New Category',
+      width: '30%',
+      // height: '90%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      dismissableMask: true,
     });
 
     this.dialogRef.onClose.subscribe((msg) => {

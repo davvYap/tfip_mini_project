@@ -42,8 +42,8 @@
                 "inject": false
               },
               {
-                "input": "src/theme/theme-material-deep-purple.css",
-                "bundleName": "md-dark-purple",
+                "input": "src/theme/theme-rhea.css",
+                "bundleName": "rhea",
                 "inject": false
               },
               {
@@ -64,6 +64,31 @@
               {
                 "input": "src/theme/theme-arya-green.css",
                 "bundleName": "arya-green",
+                "inject": false
+              },
+              {
+                "input": "src/theme/theme-arya-orange.css",
+                "bundleName": "arya-orange",
+                "inject": false
+              },
+              {
+                "input": "src/theme/theme-fluent-light.css",
+                "bundleName": "fluent-light",
+                "inject": false
+              },
+              {
+                "input": "src/theme/theme-luna-pink.css",
+                "bundleName": "luna-pink",
+                "inject": false
+              },
+              {
+                "input": "src/theme/theme-luna-blue.css",
+                "bundleName": "luna-blue",
+                "inject": false
+              },
+              {
+                "input": "src/theme/theme-luna-green.css",
+                "bundleName": "luna-green",
                 "inject": false
               }
             ],

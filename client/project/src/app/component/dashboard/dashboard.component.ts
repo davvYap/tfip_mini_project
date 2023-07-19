@@ -6,6 +6,8 @@ import {
   computed,
   Signal,
   OnDestroy,
+  ElementRef,
+  ViewChild,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Params, Router } from '@angular/router';
@@ -182,6 +184,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     'Dec',
   ];
 
+  @ViewChild('appDialog', { static: true })
+  appDialog!: ElementRef<HTMLDialogElement>;
+
   constructor(
     private getSvc: GetService,
     private postSvc: PostService,
@@ -308,36 +313,73 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  submitGoal(event: any) {
-    if (event.key === 'Enter') {
-      const goal: number = this.goalForm.value.goal;
-      console.log(goal);
-      console.log(event.key);
-      this.postSvc
-        .updateUserGoal(this.getSvc.userId, goal)
-        .then((res) => {
-          // console.log(res);
-          this.showAddGoal = false;
-          this.messageSvc.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: res.message,
-          });
-        })
-        .catch((err) => {
-          this.messageSvc.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: err.error.message,
-          });
-        });
-      this.getSvc.getUserGoalPromise(this.getSvc.userId).then((res) => {
-        this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
-        this.initiateLineChart();
-      });
-      this.ngOnInit();
-    }
+  // Dialog
+  showDialog() {
+    this.appDialog.nativeElement.showModal();
   }
+
+  closeDialog() {
+    this.appDialog.nativeElement.close();
+  }
+
+  submitGoal() {
+    const goal: number = this.goalForm.value.goal;
+
+    this.postSvc
+      .updateUserGoal(this.getSvc.userId, goal)
+      .then((res) => {
+        // console.log(res);
+        this.showAddGoal = false;
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: res.message,
+        });
+      })
+      .catch((err) => {
+        this.messageSvc.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error.message,
+        });
+      });
+    this.getSvc.getUserGoalPromise(this.getSvc.userId).then((res) => {
+      this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
+      this.ngOnInit();
+    });
+    this.closeDialog();
+  }
+
+  // submitGoal(event: any) {
+  //   if (event.key === 'Enter') {
+  //     const goal: number = this.goalForm.value.goal;
+  //     console.log(goal);
+  //     console.log(event.key);
+  //     this.postSvc
+  //       .updateUserGoal(this.getSvc.userId, goal)
+  //       .then((res) => {
+  //         // console.log(res);
+  //         this.showAddGoal = false;
+  //         this.messageSvc.add({
+  //           severity: 'success',
+  //           summary: 'Success',
+  //           detail: res.message,
+  //         });
+  //       })
+  //       .catch((err) => {
+  //         this.messageSvc.add({
+  //           severity: 'error',
+  //           summary: 'Error',
+  //           detail: err.error.message,
+  //         });
+  //       });
+  //     this.getSvc.getUserGoalPromise(this.getSvc.userId).then((res) => {
+  //       this.guideLineDataForYearlyGoal = this.setYearlyGuideLine(res.goal);
+  //       this.initiateLineChart();
+  //     });
+  //     this.ngOnInit();
+  //   }
+  // }
 
   setYearlyGuideLine(goal: number): number[] {
     let months = 12;

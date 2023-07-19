@@ -104,11 +104,11 @@ public class StockProfile {
                 JsonReader reader = Json.createReader(is);
                 JsonObject jsObj = reader.readObject();
 
-                String country = jsObj.getString("country");
+                JsonString country = jsObj.getJsonString("country");
                 if (country == null) {
                     sp.setCountry("NA");
                 } else {
-                    sp.setCountry(country);
+                    sp.setCountry(jsObj.getString("country"));
                 }
 
                 JsonNumber employees = jsObj.getJsonNumber("fullTimeEmployees");
@@ -118,25 +118,25 @@ public class StockProfile {
                     sp.setFulltimeEmployees(employees.longValue());
                 }
 
-                String industry = jsObj.getString("industry");
+                JsonString industry = jsObj.getJsonString("industry");
                 if (industry == null) {
                     sp.setIndustry("NA");
                 } else {
-                    sp.setIndustry(industry);
+                    sp.setIndustry(jsObj.getString("industry"));
                 }
 
-                String summary = jsObj.getString("longBusinessSummary");
+                JsonString summary = jsObj.getJsonString("longBusinessSummary");
                 if (summary == null) {
                     sp.setLongBusinessSummary("NA");
                 } else {
-                    sp.setLongBusinessSummary(summary);
+                    sp.setLongBusinessSummary(jsObj.getString("longBusinessSummary"));
                 }
 
-                String website = jsObj.getString("website");
+                JsonString website = jsObj.getJsonString("website");
                 if (website == null) {
                     sp.setWebsite("NA");
                 } else {
-                    sp.setWebsite(website);
+                    sp.setWebsite(jsObj.getString("website"));
                 }
 
                 JsonArray jsArr = jsObj.getJsonArray("companyOfficers");
@@ -156,23 +156,7 @@ public class StockProfile {
 
     public static StockProfile convertFromJsonObject(JsonObject jsObj) {
         StockProfile sp = new StockProfile();
-        // sp.setCountry(jsObj.getString("country"));
-        // JsonNumber employees = jsObj.getJsonNumber("fullTimeEmployees");
-        // if (employees == null) {
-        // sp.setFulltimeEmployees(0);
-        // } else {
-        // sp.setFulltimeEmployees(jsObj.getJsonNumber("fullTimeEmployees").longValue());
-        // }
-        // sp.setIndustry(jsObj.getString("industry"));
-        // sp.setLongBusinessSummary(jsObj.getString("longBusinessSummary"));
-        // sp.setWebsite(jsObj.getString("website"));
 
-        // List<StockCompanyOfficer> officers =
-        // jsObj.getJsonArray("companyOfficers").stream()
-        // .map(ofc -> (JsonObject) ofc)
-        // .map(ofc -> StockCompanyOfficer.convertFromJson(ofc))
-        // .toList();
-        // sp.setCompanyOfficers(officers);
         JsonString country = jsObj.getJsonString("country");
         if (country == null) {
             sp.setCountry("NA");

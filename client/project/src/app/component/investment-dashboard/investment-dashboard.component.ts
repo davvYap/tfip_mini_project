@@ -143,6 +143,10 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.initTreeTableSignal
   );
 
+  filteredStocksSymbol!: String[];
+  stocksData$!: Subscription;
+  filterStocks!: Stock[];
+
   constructor(
     private getSvc: GetService,
     private themeSvc: ThemeService,
@@ -1240,5 +1244,49 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     const url = new URL(`https://finance.yahoo.com/quote/${symbol}`);
     url.searchParams.append('p', symbol);
     return url.href;
+  }
+
+  filterStock(event: any) {
+    let filtered: String[] = [];
+    let query = event.query;
+
+    this.stocksData$ = this.getSvc.getStocks(query).subscribe({
+      next: (res) => {
+        this.filterStocks = res.data;
+        for (let i = 0; i < this.filterStocks.length; i++) {
+          let stock = this.filterStocks[i];
+          if (stock.symbol.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+            let queryStock = `${stock.symbol} | ${stock.instrument_name} (${stock.exchange})`;
+            filtered.push(queryStock);
+          }
+        }
+        this.filteredStocksSymbol = filtered;
+      },
+      error: (error) => {
+        this.messageSvc.add({
+          severity: 'error',
+          summary: 'Error',
+          detail:
+            'The API calls had exceed the limit of 8 calls per minute. Please wait a minute.',
+        });
+      },
+      complete: () => {
+        this.stocksData$.unsubscribe();
+      },
+    });
+  }
+
+  onSelectStock(event: any) {
+    console.log('event >>> ', event);
+    let stockSymbol: string = event;
+
+    const index: number = stockSymbol.indexOf(' | ');
+    const lastIndex: number = stockSymbol.lastIndexOf(' (');
+    const stockSymbolTrimmed = stockSymbol.substring(0, index);
+    const stockNameTrimmed = stockSymbol.substring(index + 3, lastIndex);
+    // console.log('stockselected >>> ', stockSymbolTrimmed);
+    // console.log('stock name selected >>> ', stockNameTrimmed);
+
+    this.navigateToStockProfile(stockSymbolTrimmed, stockNameTrimmed);
   }
 }

@@ -237,9 +237,11 @@ export interface StockSummaryDataResponse {
 }
 
 export interface StockIdea {
+  id: string;
   userId: string;
   fullName: string;
   profileIcon: string;
   sentiment: number;
   idea: string;
+  date: number;
 }

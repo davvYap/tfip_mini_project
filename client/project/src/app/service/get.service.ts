@@ -133,6 +133,10 @@ export class GetService {
     );
   }
 
+  getStockPriceObservable(symbol: string): Observable<Stock> {
+    return this.http.get<Stock>(`http://localhost:8080/api/${symbol}/price`);
+  }
+
   getStonkStockPrice(symbol: string): Observable<StonkStockPrice> {
     let qp = new HttpParams().set('userId', this.userId);
     return this.http.get<StonkStockPrice>(
@@ -230,9 +234,10 @@ export class GetService {
 
   getUserStockByMonth(
     userId: string,
-    month: string
+    month: string,
+    year: number
   ): Observable<PurchasedStock[]> {
-    let qp = new HttpParams().set('month', month);
+    let qp = new HttpParams().set('month', month).append('year', year);
     return this.http.get<PurchasedStock[]>(
       `http://localhost:8080/api/${userId}/stocks_by_month`,
       { params: qp }
@@ -404,11 +409,9 @@ export class GetService {
     );
   }
 
-  getStockSummaryData(symbol: string): Promise<StockSummaryDataResponse> {
-    return lastValueFrom(
-      this.http.get<StockSummaryDataResponse>(
-        `http://localhost:8080/api/${symbol}/stock_summary_data`
-      )
+  getStockSummaryData(symbol: string): Observable<StockSummaryDataResponse> {
+    return this.http.get<StockSummaryDataResponse>(
+      `http://localhost:8080/api/${symbol}/stock_summary_data`
     );
   }
 

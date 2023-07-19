@@ -138,8 +138,14 @@
           [options]="donutOptions"
           [plugins]="chartPlugin"
         ></p-chart>
-        <p-button
+        <!-- <p-button
           (click)="op.toggle($event)"
+          icon="pi pi-cart-plus"
+          label="Add Category"
+          styleClass="p-button-rounded"
+        ></p-button> -->
+        <p-button
+          (click)="newCategory()"
           icon="pi pi-cart-plus"
           label="Add Category"
           styleClass="p-button-rounded"
@@ -502,10 +508,15 @@
         </div>
 
         <div class="my-5 d-flex flex-column justify-content-evenly">
-          <div
+          <!-- <div
             class="mt-2"
             class="add-transaction mb-3"
             (click)="op.toggle($event)"
+          > -->
+          <div
+            class="mt-2"
+            class="add-transaction mb-3"
+            (click)="newCategory()"
           >
             <h5>
               <fa-icon [icon]="pointRightIcon"></fa-icon>

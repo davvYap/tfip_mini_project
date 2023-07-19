@@ -27,6 +27,8 @@ import sg.edu.nus.iss.project.models.StockIdea;
 import sg.edu.nus.iss.project.models.StockPrice;
 import sg.edu.nus.iss.project.services.StockService;
 import sg.edu.nus.iss.project.services.UserService;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -376,9 +378,9 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<String> getUserStocksByMonth(@PathVariable String userId,
             @RequestParam(defaultValue = "1000") int limit,
-            @RequestParam(defaultValue = "0") int skip, @RequestParam String month) {
+            @RequestParam(defaultValue = "0") int skip, @RequestParam String month, @RequestParam int year) {
 
-        Optional<List<Stock>> stocksOpt = userSvc.retrieveUserStockByMonth(userId, limit, skip, month);
+        Optional<List<Stock>> stocksOpt = userSvc.retrieveUserStockByMonth(userId, limit, skip, month, year);
         if (stocksOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -415,6 +417,9 @@ public class UserController {
     public ResponseEntity<String> newStockIdeaFromUserMongo(@PathVariable String symbol, @RequestBody String ideaJson)
             throws IOException {
         StockIdea idea = StockIdea.convertFromJsonString(ideaJson);
+        Date insertedDate = new Date();
+        long epochTime = insertedDate.getTime();
+        idea.setDate(epochTime);
         boolean upserted = userSvc.upsertUserStockIdeaMongo(symbol, idea);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -437,4 +442,19 @@ public class UserController {
                 .body(jsArr.build().toString());
     }
 
+    @DeleteMapping(path = "/{symbol}/delete_idea")
+    @ResponseBody
+    public ResponseEntity<String> deleteStockIdeaMongo(@PathVariable String symbol, @RequestParam String ideaId) {
+        boolean deleted = userSvc.deleteStockIdeaMongo(symbol, ideaId);
+
+        if (!deleted) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "Failed to delete idea.").build().toString());
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("message", "Deleted").build().toString());
+    }
 }

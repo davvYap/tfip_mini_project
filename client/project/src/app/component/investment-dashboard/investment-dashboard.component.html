@@ -114,12 +114,10 @@
                 [columns]="portfolioTableCols"
                 [loading]="treeTableLoading"
                 [value]="stockTreeTable"
-                [scrollable]="true"
                 [tableStyle]="{ 'min-width': '50rem' }"
                 [paginator]="true"
                 filterMode="strict"
                 [globalFilterFields]="['symbol', 'name']"
-                [scrollable]="true"
                 [frozenColumns]="frozenCols"
                 [resizableColumns]="true"
                 columnResizeMode="expand"
@@ -645,6 +643,33 @@
                     ></p-button>
                   </ng-template>
                 </p-table>
+              </div>
+            </div>
+          </p-tabPanel>
+
+          <p-tabPanel>
+            <ng-template pTemplate="header">
+              <!-- <i class="pi pi-apple"></i> -->
+              <span class="mx-2">Screener</span>
+            </ng-template>
+
+            <div class="row justify-content-center stock-screener">
+              <div class="col-10">
+                <i
+                  class="pi pi-info-circle"
+                  pTooltip="Due to limitation of API, max 8 calls per minute"
+                ></i>
+                <div class="d-flex flex-column m-4">
+                  <label htmlFor="symbol" class="mb-3">Ticker:</label>
+                  <p-autoComplete
+                    [style]="{ width: '100%' }"
+                    [inputStyle]="{ width: '100%' }"
+                    [suggestions]="filteredStocksSymbol"
+                    (completeMethod)="filterStock($event)"
+                    [forceSelection]="true"
+                    (onSelect)="onSelectStock($event)"
+                  ></p-autoComplete>
+                </div>
               </div>
             </div>
           </p-tabPanel>

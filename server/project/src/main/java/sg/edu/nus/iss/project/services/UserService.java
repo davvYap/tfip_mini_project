@@ -220,7 +220,8 @@ public class UserService {
     }
 
     // HERE
-    public Optional<List<Stock>> retrieveUserStockByMonth(String userId, int limit, int skip, String month) {
+    public Optional<List<Stock>> retrieveUserStockByMonth(String userId, int limit, int skip, String month,
+            int selectedYear) {
 
         String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
         for (String mon : months) {
@@ -260,6 +261,14 @@ public class UserService {
 
         for (Stock stock : userStocks) {
             int smonth = stock.getDate().getMonthValue();
+            int syear = stock.getDate().getYear();
+            if (syear != selectedYear) {
+                // System.out.println("syear >>> " + syear);
+                // System.out.println("selected year >>> " + selectedYear);
+                // System.out.println(stock.getSymbol());
+                // System.out.println(stock.getDate());
+                continue;
+            }
             // System.out.println(smonth);
 
             switch (smonth) {
@@ -302,7 +311,6 @@ public class UserService {
             }
         }
 
-        // GET STOCK PERFORMANCE
         List<List<Stock>> allStocks = new LinkedList<>();
         allStocks.add(janStocks);
         allStocks.add(febStocks);
@@ -433,7 +441,7 @@ public class UserService {
         // put stocks into map based on month
         for (int i = 0; i < months.length; i++) {
             String month = months[i];
-            Optional<List<Stock>> stocksByMonthOpt = retrieveUserStockByMonth(userId, limit, skip, month);
+            Optional<List<Stock>> stocksByMonthOpt = retrieveUserStockByMonth(userId, limit, skip, month, year);
             if (stocksByMonthOpt.isPresent()) {
                 List<Stock> stocksByMonth = stocksByMonthOpt.get();
                 System.out.println(stocksByMonth); // HERE
@@ -578,7 +586,7 @@ public class UserService {
         // put stocks into map based on month
         for (int i = 0; i < months.length; i++) {
             String month = months[i];
-            Optional<List<Stock>> stocksByMonthOpt = retrieveUserStockByMonth(userId, limit, skip, month);
+            Optional<List<Stock>> stocksByMonthOpt = retrieveUserStockByMonth(userId, limit, skip, month, year);
             if (stocksByMonthOpt.isPresent()) {
                 List<Stock> stocksByMonth = stocksByMonthOpt.get();
                 allStockMap.put(month, stocksByMonth);
@@ -702,6 +710,10 @@ public class UserService {
 
     public List<StockIdea> retrieveStockIdeasMongo(String symbol, int limit, int skip) {
         return userRepo.retrieveStockIdeasMongo(symbol, limit, skip);
+    }
+
+    public boolean deleteStockIdeaMongo(String symbol, String ideaId) {
+        return userRepo.deleteStockIdeaMongo(symbol, ideaId);
     }
 
     // ***** UNUSED *****

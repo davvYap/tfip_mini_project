@@ -4,12 +4,13 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { MenuItem, MessageService } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
-import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
+import { Observable, forkJoin, map, of, switchMap, tap } from 'rxjs';
 import {
   Stock,
   StockCompanyProfile,
   StockIdea,
   StockPrice,
+  StockSummaryDataResponse,
 } from 'src/app/models';
 import { DeleteService } from 'src/app/service/delete.service';
 import { GetService } from 'src/app/service/get.service';
@@ -102,15 +103,28 @@ export class StockDetailsComponent implements OnInit {
           profile.name = this.stockName;
           profile.symbol = this.symbol;
 
-          this.getSvc.getStockPrice(this.symbol).then((stock: Stock) => {
-            profile.closePrice = parseFloat(stock.price);
-          });
+          let observables: Observable<Stock>[] = [];
+          const observable = this.getSvc.getStockPriceObservable(this.symbol);
+          observables.push(observable);
 
-          this.getSvc.getStockSummaryData(this.symbol).then((dataRes) => {
-            profile.stockSummaryData = dataRes.summaryDetail;
-          });
+          return forkJoin(observables).pipe(
+            map((stockArr) => {
+              profile.closePrice = parseFloat(stockArr[0].price);
+              return profile;
+            })
+          );
+        }),
+        switchMap((profile) => {
+          let observables: Observable<StockSummaryDataResponse>[] = [];
+          const observable = this.getSvc.getStockSummaryData(this.symbol);
+          observables.push(observable);
 
-          return of(profile);
+          return forkJoin(observables).pipe(
+            map((summaryArr) => {
+              profile.stockSummaryData = summaryArr[0].summaryDetail;
+              return profile;
+            })
+          );
         })
       )
       .subscribe((profile) => {
@@ -119,7 +133,7 @@ export class StockDetailsComponent implements OnInit {
       });
 
     // USER IDEAS
-    this.stockSentiment = 4;
+    // this.stockSentiment = 4;
     this.limit = 20;
     this.skip = 0;
     this.form = this.createForm();
@@ -173,11 +187,24 @@ export class StockDetailsComponent implements OnInit {
   }
 
   initiateStockIdeasData() {
-    this.stockIdeas$ = this.getSvc.getStockIdeas(
-      this.symbol,
-      this.limit,
-      this.skip
-    );
+    this.stockIdeas$ = this.getSvc
+      .getStockIdeas(this.symbol, this.limit, this.skip)
+      .pipe(
+        tap((ideas) => {
+          let sentiment = 0;
+          let totalIdeas = 0;
+          ideas.map((idea) => {
+            sentiment += idea.sentiment;
+            totalIdeas++;
+          });
+          this.stockSentiment = sentiment / totalIdeas;
+          console.log(sentiment, totalIdeas, this.stockSentiment);
+        })
+      );
+  }
+
+  isUserIdea(id: string): boolean {
+    return id === this.getSvc.userId;
   }
 
   postNewIdea() {
@@ -197,6 +224,26 @@ export class StockDetailsComponent implements OnInit {
           detail: res.message,
         });
         this.form = this.createForm();
+        this.initiateStockIdeasData();
+      })
+      .catch((err) => {
+        this.messageSvc.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error.message,
+        });
+      });
+  }
+
+  deleteIdea(ideaId: string) {
+    this.deleteSvc
+      .deleteStockIdea(this.symbol, ideaId)
+      .then((msg) => {
+        this.messageSvc.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: msg.message,
+        });
         this.initiateStockIdeasData();
       })
       .catch((err) => {
@@ -282,6 +329,7 @@ export class StockDetailsComponent implements OnInit {
             color: textColor,
             // color: '#fff',
           },
+          onClick: () => {},
         },
         customCanvasBackgroundColor: {
           color: this.documentStyle().getPropertyValue('--surface-ground'),

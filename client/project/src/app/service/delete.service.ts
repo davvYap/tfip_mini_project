@@ -79,4 +79,14 @@ export class DeleteService {
       )
     );
   }
+
+  deleteStockIdea(symbol: string, ideaId: string): Promise<MessageResponse> {
+    const qp = new HttpParams().set('ideaId', ideaId);
+    return lastValueFrom(
+      this.http.delete<MessageResponse>(
+        `http://localhost:8080/api/${symbol}/delete_idea`,
+        { params: qp }
+      )
+    );
+  }
 }

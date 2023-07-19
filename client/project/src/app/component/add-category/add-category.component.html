@@ -1,0 +1,60 @@
+<div class="container">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-12">
+      <form [formGroup]="categoryForm">
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="id">Category Name:</label>
+          <input
+            pInputText
+            id="id"
+            formControlName="category"
+            placeholder="Category name"
+            autofocus
+          />
+        </div>
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="id">Type:</label>
+          <div class="p-fluid">
+            <p-selectButton
+              [options]="typeOptions"
+              formControlName="type"
+              optionLabel="label"
+              optionValue="value"
+              [style]="{ width: '100%' }"
+            ></p-selectButton>
+          </div>
+        </div>
+        <div class="d-flex flex-row-reverse m-4">
+          <p-button
+            label="Add"
+            styleClass="p-button-text"
+            (onClick)="addCategory()"
+            [disabled]="categoryForm.invalid"
+          ></p-button>
+        </div>
+
+        <!-- <div class="d-flex justify-content-center align-items-center">
+          <input
+            pInputText
+            class="p-inputtext-sm"
+            placeholder="Category name"
+            formControlName="category"
+          />
+          <p-selectButton
+            [options]="typeOptions"
+            formControlName="type"
+            optionLabel="label"
+            optionValue="value"
+          ></p-selectButton>
+        </div> -->
+        <!-- <div class="d-flex justify-content-center align-items-center">
+          <p-button
+            label="Add"
+            styleClass="p-button-text"
+            (onClick)="addCategory()"
+          ></p-button>
+        </div> -->
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,11 +1,7 @@
 package sg.edu.nus.iss.project.controllers;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
-
-import javax.print.DocFlavor.STRING;
-import javax.print.attribute.standard.Media;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,6 +43,18 @@ public class TransactionController {
 		String category = categoryForm.getFirst("category");
 		String type = categoryForm.getFirst("type");
 
+		// Check if duplicate name
+		List<Category> categories = transSvc.getUserCategoryJdbc(userId);
+		for (Category cat : categories) {
+			if (cat.getCategoryName().equals(category) && cat.getType().equals(type)) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.contentType(MediaType.APPLICATION_JSON)
+						.body(Json.createObjectBuilder()
+								.add("message", "Category exists".formatted(category))
+								.build().toString());
+			}
+		}
+
 		int res = transSvc.insertCategoryJdbc(userId, category, type);
 		if (res <= 0) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -58,7 +66,7 @@ public class TransactionController {
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(Json.createObjectBuilder()
-						.add("message", "Category %s added succesffuly".formatted(category))
+						.add("message", "Category %s (%s) added succesffuly".formatted(category, type))
 						.build().toString());
 	}
 

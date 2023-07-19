@@ -18,6 +18,7 @@ public class StockIdea {
     private String userId;
     private String fullName;
     private String profileIcon;
+    private long date;
 
     public String getId() {
         return id;
@@ -67,6 +68,20 @@ public class StockIdea {
         this.profileIcon = profileIcon;
     }
 
+    public long getDate() {
+        return date;
+    }
+
+    public void setDate(long date) {
+        this.date = date;
+    }
+
+    @Override
+    public String toString() {
+        return "StockIdea [id=" + id + ", idea=" + idea + ", sentiment=" + sentiment + ", userId=" + userId
+                + ", fullName=" + fullName + ", date=" + date + "]";
+    }
+
     public Document toDocument() {
         Document d = new Document();
         d.append("id", id)
@@ -74,7 +89,8 @@ public class StockIdea {
                 .append("idea", idea)
                 .append("sentiment", sentiment)
                 .append("fullName", fullName)
-                .append("profileIcon", profileIcon);
+                .append("profileIcon", profileIcon)
+                .append("date", date);
         return d;
     }
 
@@ -86,6 +102,7 @@ public class StockIdea {
         idea.setUserId(d.getString("userId"));
         idea.setFullName(d.getString("fullName"));
         idea.setProfileIcon(d.getString("profileIcon"));
+        idea.setDate(d.getLong("date"));
         return idea;
     }
 
@@ -110,7 +127,9 @@ public class StockIdea {
                 .add("idea", idea)
                 .add("sentiment", sentiment)
                 .add("fullName", fullName)
-                .add("profileIcon", profileIcon).build();
+                .add("profileIcon", profileIcon)
+                .add("date", date)
+                .build();
     }
 
 }

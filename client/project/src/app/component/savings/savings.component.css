@@ -26,45 +26,6 @@
   box-shadow: 0 0 20px 8px #020202;
 } */
 
-dialog::backdrop {
-  background-color: rgba(112, 111, 111, 0.5);
-}
-
-#dialogModal {
-  box-shadow: 5px 10px #888888;
-  border-radius: 8px;
-  border: none;
-  font-family: "Righteous", cursive;
-}
-
-#dialogModal header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-#dialogSubmitButton {
-  background-color: green;
-  border: none;
-  color: white;
-  padding: 12px 32px;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-  box-shadow: 2px 4px #888888;
-}
-
-#closeDialogFooterBtn {
-  background-color: gray;
-  border: none;
-  color: white;
-  padding: 12px 32px;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-  box-shadow: 2px 4px #888888;
-}
-
 /* #year {
   color: green;
   box-shadow: 5px 10px #888888;
@@ -72,10 +33,6 @@ dialog::backdrop {
 
 #year:hover {
   cursor: pointer;
-}
-
-.dialogBtn:hover {
-  transform: scale(1.1);
 }
 
 .add-transaction {

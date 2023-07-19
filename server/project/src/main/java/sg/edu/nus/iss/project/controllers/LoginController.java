@@ -34,6 +34,7 @@ public class LoginController {
 			HttpSession session) throws Exception {
 
 		User user = loginSvc.verifyLogin(username, password);
+
 		if (user == null) {
 			session.setAttribute("isLogin", false);
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -47,6 +48,19 @@ public class LoginController {
 							.add("profileIcon", "")
 							.build().toString());
 		}
+		if (!user.getUsername().equals(username) || !user.getPassword().equals(password)) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder()
+							.add("isLogin", false)
+							.add("userId", "guest000")
+							.add("username", "guest")
+							.add("firstname", "guest")
+							.add("lastname", "")
+							.add("profileIcon", "")
+							.build().toString());
+		}
+
 		session.setAttribute("isLogin", true);
 		session.setAttribute("user", user);
 		// testSessionId(session);

@@ -68,3 +68,7 @@ th {
   cursor: pointer;
   transform: scale(1.03);
 }
+
+.stock-screener {
+  height: 50dvh;
+}
