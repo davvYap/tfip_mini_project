@@ -80,7 +80,9 @@
     <div class="row justify-content-center align-items-center mt-3 mb-3">
       <div class="col-10">
         <section class="sign-up">
-          <div class="d-flex justify-content-center align-items-center">
+          <div
+            class="justify-content-center align-items-center d-none d-md-flex"
+          >
             <asl-google-signin-button
               type="standard"
               theme="filled_black"
@@ -93,6 +95,21 @@
             >
               Sign Up
             </p-button>
+          </div>
+
+          <div class="flex-column align-items-center d-flex d-md-none">
+            <p-button
+              class="mb-3"
+              type="button"
+              styleClass="p-button-help"
+              (onClick)="showSignUpDialog()"
+            >
+              Sign Up
+            </p-button>
+            <asl-google-signin-button
+              type="standard"
+              theme="filled_black"
+            ></asl-google-signin-button>
           </div>
         </section>
       </div>

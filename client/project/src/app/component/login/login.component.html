@@ -3,19 +3,40 @@
     class="row justify-content-center align-items-center mb-3"
     id="header-section"
   >
-    <div class="col-7 d-flex justify-content-center align-items-center">
-      <ng-lottie
-        [options]="animationOptions1"
-        (animationCreated)="onAnimate($event)"
-        [width]="'40em'"
-        [height]="'40em'"
-      >
-      </ng-lottie>
+    <div
+      class="col-8 col-md-7 d-flex justify-content-center align-items-center"
+    >
+      <div class="d-none d-md-block">
+        <ng-lottie
+          [options]="animationOptions1"
+          (animationCreated)="onAnimate($event)"
+          [width]="'40em'"
+          [height]="'40em'"
+        >
+        </ng-lottie>
+      </div>
+      <div class="d-md-none">
+        <ng-lottie
+          [options]="animationOptions1"
+          (animationCreated)="onAnimate($event)"
+          [width]="'25em'"
+          [height]="'25em'"
+        >
+        </ng-lottie>
+      </div>
     </div>
-    <div class="col-5 d-flex justify-content-start align-items-center">
+    <div
+      class="col-10 col-md-5 d-flex justify-content-start align-items-center py-5"
+    >
       <div class="d-flex flex-column align-items-start">
         <h1>am<span class="grey">.app</span></h1>
-        <p class="fs-5 font-monospace pe-5 me-5">
+        <p class="fs-5 font-monospace pe-5 me-5 d-none d-md-block">
+          A comprehensive financial application designed to help users manage
+          their investments and track their expenses. We offers a user-friendly
+          interface with robust features for monitoring investments portfolios,
+          transactions and mortgages.
+        </p>
+        <p class="fs-6 font-monospace d-md-none">
           A comprehensive financial application designed to help users manage
           their investments and track their expenses. We offers a user-friendly
           interface with robust features for monitoring investments portfolios,
@@ -54,7 +75,9 @@
   <section
     class="row justify-content-center align-items-center my-5 py-5 product-description"
   >
-    <div class="d-flex justify-content-center align-items-center">
+    <div
+      class="d-flex justify-content-center align-items-center d-none d-md-block"
+    >
       <h2>
         <span class="grey">We offer tools to manage </span
         ><span
@@ -75,6 +98,36 @@
         and etc.
       </h2>
     </div>
+
+    <div class="d-flex justify-content-center align-items-center d-md-none">
+      <div>
+        <h2 class="grey">We offer tools to manage</h2>
+        <h2>
+          <span>
+            <a href="#investment-management"
+              ><fa-icon [icon]="investmentIcon"></fa-icon> Investments,
+            </a>
+          </span>
+        </h2>
+
+        <h2>
+          <span>
+            <a href="#expense-tracker"
+              ><fa-icon [icon]="pieChartIcon"></fa-icon> Transactions,</a
+            >
+          </span>
+        </h2>
+
+        <h2>
+          <span>
+            <a href="#mortgage-calculator"
+              ><fa-icon [icon]="calculator"></fa-icon> Mortgages</a
+            >
+          </span>
+        </h2>
+        and etc.
+      </div>
+    </div>
   </section>
 
   <!-- INVESTMENT -->
@@ -82,28 +135,58 @@
     class="row justify-content-center align-items-center my-5 py-5"
     id="investment-management"
   >
-    <div class="col-5 d-flex justify-content-end align-items-center">
+    <div
+      class="col-md-7 col-10 d-flex justify-content-center align-items-center d-md-none"
+    >
+      <ng-lottie
+        [options]="animationOptions2"
+        (animationCreated)="onAnimate($event)"
+        [width]="'25em'"
+        [height]="'25em'"
+      >
+      </ng-lottie>
+    </div>
+    <div class="col-md-5 col-10 d-flex justify-content-end align-items-center">
       <div class="d-flex flex-column align-items-start">
         <h1>Investment <span class="grey">Management</span></h1>
-        <p class="fs-5 font-monospace">
-          The application enable users to manage and track investment portfolio
-          with up-to-date market data.
-        </p>
-        <p class="fs-5 font-monospace">
-          Charts were integrated and utilized for tracking conviniency to manage
-          multiple tickers at once, and access detailed historical data to
-          analyze trends and make informed investment decisions.
-        </p>
+        <!-- Desktop -->
+        <div class="d-none d-md-block">
+          <p class="fs-5 font-monospace">
+            The application enable users to manage and track investment
+            portfolio with up-to-date market data.
+          </p>
+          <p class="fs-5 font-monospace">
+            Charts were integrated and utilized for tracking conviniency to
+            manage multiple tickers at once, and access detailed historical data
+            to analyze trends and make informed investment decisions.
+          </p>
+        </div>
+
+        <!-- Mobile -->
+        <div class="d-md-none">
+          <p class="fs-6 font-monospace">
+            The application enable users to manage and track investment
+            portfolio with up-to-date market data.
+          </p>
+          <p class="fs-6 font-monospace">
+            Charts were integrated and utilized for tracking conviniency to
+            manage multiple tickers at once, and access detailed historical data
+            to analyze trends and make informed investment decisions.
+          </p>
+        </div>
         <div>
           <p-button
             label="Learn more"
             styleClass="p-button-rounded"
             class="me-2"
+            (onClick)="scrollToElement('header-section')"
           ></p-button>
         </div>
       </div>
     </div>
-    <div class="col-7 d-flex justify-content-center align-items-center">
+    <div
+      class="col-md-7 col-10 d-flex justify-content-center align-items-center d-none d-md-block"
+    >
       <ng-lottie
         [options]="animationOptions2"
         (animationCreated)="onAnimate($event)"
@@ -119,7 +202,9 @@
     class="row justify-content-center align-items-center my-5 py-5"
     id="expense-tracker"
   >
-    <div class="col-7 d-flex justify-content-center align-items-center">
+    <div
+      class="col-md-7 col-10 d-flex justify-content-center align-items-center d-none d-md-block"
+    >
       <ng-lottie
         [options]="animationOptions3"
         (animationCreated)="onAnimate($event)"
@@ -128,24 +213,54 @@
       >
       </ng-lottie>
     </div>
-    <div class="col-5 d-flex justify-content-start align-items-center">
+    <div
+      class="col-md-7 col-10 d-flex justify-content-center align-items-center d-md-none"
+    >
+      <ng-lottie
+        [options]="animationOptions3"
+        (animationCreated)="onAnimate($event)"
+        [width]="'25em'"
+        [height]="'25em'"
+      >
+      </ng-lottie>
+    </div>
+    <div
+      class="col-md-5 col-10 d-flex justify-content-start align-items-center"
+    >
       <div class="d-flex flex-column align-items-start">
         <h1>Transactions <span class="grey">Insights</span></h1>
-        <p class="fs-5 font-monospace">
-          We offers an integrated expense tracking system. Users can record and
-          categorize their expenses, set budgets, and receive personalized
-          insights into their spending habits.
-        </p>
-        <p class="fs-5 font-monospace">
-          The application provides visualizations and reports that help users
-          understand where their money is going, identify potential areas for
-          savings, and maintain financial discipline.
-        </p>
+        <!-- Desktop -->
+        <div class="d-none d-md-block">
+          <p class="fs-5 font-monospace">
+            We offers an integrated expense tracking system. Users can record
+            and categorize their expenses, set budgets, and receive personalized
+            insights into their spending habits.
+          </p>
+          <p class="fs-5 font-monospace">
+            The application provides visualizations and reports that help users
+            understand where their money is going, identify potential areas for
+            savings, and maintain financial discipline.
+          </p>
+        </div>
+        <!-- Mobile -->
+        <div class="d-md-none">
+          <p class="fs-6 font-monospace">
+            We offers an integrated expense tracking system. Users can record
+            and categorize their expenses, set budgets, and receive personalized
+            insights into their spending habits.
+          </p>
+          <p class="fs-6 font-monospace">
+            The application provides visualizations and reports that help users
+            understand where their money is going, identify potential areas for
+            savings, and maintain financial discipline.
+          </p>
+        </div>
         <div>
           <p-button
             label="Learn more"
             styleClass="p-button-rounded"
             class="me-2"
+            (onClick)="scrollToElement('header-section')"
           ></p-button>
         </div>
       </div>
@@ -157,27 +272,55 @@
     class="row justify-content-center align-items-center my-5 py-5"
     id="mortgage-calculator"
   >
-    <div class="col-5 d-flex justify-content-end align-items-center">
+    <div
+      class="col-md-7 col-10 d-flex justify-content-center align-items-center d-md-none"
+    >
+      <ng-lottie
+        [options]="animationOptions4"
+        (animationCreated)="onAnimate($event)"
+        [width]="'25em'"
+        [height]="'25em'"
+      >
+      </ng-lottie>
+    </div>
+    <div class="col-md-5 col-10 d-flex justify-content-end align-items-center">
       <div class="d-flex flex-column align-items-start">
         <h1>Mortgage <span class="grey">Portfolio</span></h1>
-        <p class="fs-5 font-monospace">
-          We help users to estimate their monthly mortgage payments based on
-          factors such as loan amount, interest rate, and loan term.
-        </p>
-        <p class="fs-5 font-monospace">
-          Quick and convenient calculations are provided, enabling users to make
-          informed decisions about their potential mortgage options.
-        </p>
+        <!-- Desktop -->
+        <div class="d-none d-md-block">
+          <p class="fs-5 font-monospace">
+            We help users to estimate their monthly mortgage payments based on
+            factors such as loan amount, interest rate, and loan term.
+          </p>
+          <p class="fs-5 font-monospace">
+            Quick and convenient calculations are provided, enabling users to
+            make informed decisions about their potential mortgage options.
+          </p>
+        </div>
+        <!-- Mobile -->
+        <div class="d-md-none">
+          <p class="fs-6 font-monospace">
+            We help users to estimate their monthly mortgage payments based on
+            factors such as loan amount, interest rate, and loan term.
+          </p>
+          <p class="fs-6 font-monospace">
+            Quick and convenient calculations are provided, enabling users to
+            make informed decisions about their potential mortgage options.
+          </p>
+        </div>
         <div>
           <p-button
             label="Learn more"
             styleClass="p-button-rounded"
             class="me-2"
+            (onClick)="scrollToElement('header-section')"
           ></p-button>
         </div>
       </div>
     </div>
-    <div class="col-7 d-flex justify-content-center align-items-center">
+    <div
+      class="col-md-7 col-10 d-flex justify-content-center align-items-center d-none d-md-block"
+    >
       <ng-lottie
         [options]="animationOptions4"
         (animationCreated)="onAnimate($event)"

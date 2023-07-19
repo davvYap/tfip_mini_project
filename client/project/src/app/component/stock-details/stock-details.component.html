@@ -9,7 +9,7 @@
     *ngIf="stockProfile; else loading"
     class="row justify-content-evenly align-items-center"
   >
-    <div class="col-5 font-color">
+    <div class="col-md-5 col-11 font-color">
       <div class="d-flex justify-content-between align-items-end">
         <h3 class="mt-2">
           {{ stockProfile.name }}
@@ -99,7 +99,7 @@
         ></p-rating>
       </div>
     </div>
-    <div class="col-6">
+    <div class="col-md-6 col-12">
       <!-- LINE CHART -->
       <div *ngIf="!skeletonLoading; else skeleton">
         <p-chart
@@ -159,7 +159,7 @@
   <div class="row row-cols-1 justify-content-center align-items-center">
     <div *ngFor="let idea of stockIdeas$ | async" class="col-10 font-color m-4">
       <div class="row">
-        <div class="col-2">
+        <div class="col-md-2 col-3">
           <div class="d-flex flex-row-reverse align-items-center">
             <p-image
               [src]="idea.profileIcon"
@@ -169,7 +169,7 @@
             ></p-image>
           </div>
         </div>
-        <div class="col-8">
+        <div class="col-md-8 col-8">
           <div class="d-flex justify-content-between align-items-center">
             <p>{{ idea.fullName }}</p>
             <p>{{ idea.date | date }}</p>

@@ -27,7 +27,7 @@
           (onClick)="notifcationIcon.toggle($event)"
         >
           <i
-            class="pi pi-bell mr-4"
+            class="pi pi-bell"
             pBadge
             style="font-size: 1.5rem"
             [value]="notificationAmount()"
@@ -41,7 +41,7 @@
     </div>
   </ng-template>
 </p-menubar>
-<p-confirmDialog [style]="{ width: '50vw' }"></p-confirmDialog>
+<p-confirmDialog [style]="getConfirmDialogWidth()"></p-confirmDialog>
 <p-overlayPanel
   #notifcationIcon
   [showTransitionOptions]="'0.3s cubic-bezier(.4, .4, 0.4, .1)'"

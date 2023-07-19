@@ -1,7 +1,11 @@
 <div class="container">
   <div class="row justify-content-center align-items-center">
-    <div class="col-10 text-center ms-3 mb-5 h1card">
-      <h1>{{ userGreeting }} {{ username() | titlecase }}</h1>
+    <div class="col-11 col-md-10 text-center mb-5 h1card">
+      <h1 class="d-none d-md-block">
+        {{ userGreeting }} {{ username() | titlecase }}
+      </h1>
+      <h1 class="d-md-none">{{ userGreeting }}</h1>
+      <h1 class="d-md-none">{{ username() | titlecase }}</h1>
       <div *ngIf="quoteOfTheDay" class="mt-3">
         <p class="mb-0 font-monospace fs-5">"{{ quoteOfTheDay }}"</p>
       </div>
@@ -10,9 +14,17 @@
       <section *ngIf="!skeletonLoading; else skeleton">
         <!-- DONUT CHART OVERALL-->
         <div class="row justify-content-evenly align-items-center m-4">
-          <div class="col-10 donutbackground">
+          <div class="col-12 col-md-10 donutbackground">
             <div class="row justify-content-evenly align-items-center">
-              <div class="col-6 dashboard-text">
+              <div class="d-md-none col-12">
+                <p-chart
+                  type="doughnut"
+                  [data]="donutDataOverall"
+                  [options]="donutOptionsOverall"
+                ></p-chart>
+              </div>
+
+              <div class="col-10 col-md-6 dashboard-text">
                 <div class="d-flex flex-column align-items-start">
                   <h3 class="mb-3">
                     Total Assets Value
@@ -64,7 +76,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-3">
+              <div class="d-none d-md-block col-md-3">
                 <p-chart
                   type="doughnut"
                   [data]="donutDataOverall"
@@ -80,16 +92,16 @@
           *ngIf="stocksCount.length > 0"
           class="row justify-content-evenly align-items-center m-4"
         >
-          <div class="col-10 donutbackground">
+          <div class="col-md-10 col-12 donutbackground">
             <div class="row justify-content-evenly align-items-center mt-2">
-              <div class="col-3">
+              <div class="col-md-3 col-12">
                 <p-chart
                   type="doughnut"
                   [data]="donutDataInvestment"
                   [options]="donutOptionsInvestment"
                 ></p-chart>
               </div>
-              <div class="col-6 dashboard-text">
+              <div class="col-md-6 col-10 dashboard-text">
                 <div class="d-flex flex-column align-items-start">
                   <h3 class="mb-3">
                     <i
@@ -151,9 +163,16 @@
           *ngIf="haveTransactions()"
           class="row justify-content-evenly align-items-center m-4"
         >
-          <div class="col-10 donutbackground">
+          <div class="col-md-10 col-12 donutbackground">
             <div class="row justify-content-evenly align-items-center">
-              <div class="col-6 dashboard-text">
+              <div class="col-12 d-md-none">
+                <p-chart
+                  type="doughnut"
+                  [data]="donutDataSavings"
+                  [options]="donutOptionsSavings"
+                ></p-chart>
+              </div>
+              <div class="col-md-6 col-10 dashboard-text">
                 <div class="d-flex flex-column align-items-start">
                   <h3 class="mb-3">
                     <p-button
@@ -228,7 +247,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-3">
+              <div class="col-md-3 d-none d-md-block">
                 <p-chart
                   type="doughnut"
                   [data]="donutDataSavings"
@@ -241,7 +260,7 @@
 
         <div class="row justify-content-evenly align-items-center g-2 m-4">
           <!-- LINE CHART -->
-          <div class="col-10 linebackground">
+          <div class="col-12 col-md-10 linebackground">
             <div class="d-flex flex-row-reverse mb-2">
               <p-button
                 (click)="showDialog()"

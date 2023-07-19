@@ -139,6 +139,7 @@ dialog::backdrop {
 .p-tabview .p-tabview-panels {
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
+  padding: 0 !important;
 }
 
 .p-icon-wrapper {

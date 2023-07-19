@@ -4,6 +4,7 @@ import {
   AfterViewInit,
   AfterContentInit,
   HostListener,
+  ElementRef,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MessageService, PrimeNGConfig } from 'primeng/api';
@@ -25,6 +26,7 @@ import { AnimationOptions } from 'ngx-lottie';
 import { AnimationItem } from 'lottie-web';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AuthenticationComponent } from '../authentication/authentication.component';
+import { BreakpointService } from 'src/app/service/breakpoint.service';
 
 @Component({
   selector: 'app-login',
@@ -82,7 +84,9 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private messageService: MessageService,
     private themeSvc: ThemeService,
     private title: Title,
-    private dialogSvc: DialogService
+    private dialogSvc: DialogService,
+    private elementRef: ElementRef,
+    private breakpointSvc: BreakpointService
   ) {}
 
   ngOnInit(): void {
@@ -91,6 +95,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
     this.getSvc.isLogin = false;
     this.loginTitle = 'Login';
     this.form = this.createForm();
+    // this.initBreakpointObserver();
+    this.breakpointSvc.initBreakpointObserver();
   }
 
   ngAfterViewInit(): void {
@@ -168,9 +174,10 @@ export class LoginComponent implements OnInit, AfterViewInit {
   }
 
   showLoginDialog() {
+    console.log(this.breakpointSvc.currentBreakpoint);
     this.dialogRef = this.dialogSvc.open(AuthenticationComponent, {
       // header: 'Login',
-      width: '50%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
@@ -193,5 +200,12 @@ export class LoginComponent implements OnInit, AfterViewInit {
         console.log('Shared');
       })
       .catch((error) => alert(`Error: ${error.message}`));
+  }
+
+  scrollToElement(id: string) {
+    const element = this.elementRef.nativeElement.querySelector('#' + id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 }

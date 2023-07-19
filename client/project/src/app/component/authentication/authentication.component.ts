@@ -11,6 +11,7 @@ import { GoogleSigninButtonDirective } from '@abacritt/angularx-social-login/pub
 import { GoogleSigninButtonModule } from '@abacritt/angularx-social-login/public-api';
 import { PostService } from 'src/app/service/post.service';
 import { GoogleUser } from 'src/app/models';
+import { BreakpointService } from 'src/app/service/breakpoint.service';
 
 @Component({
   selector: 'app-authentication',
@@ -34,7 +35,8 @@ export class AuthenticationComponent implements OnInit {
     public dialogRef: DynamicDialogRef,
     private dialogSvc: DialogService,
     private authService: SocialAuthService,
-    private postSvc: PostService
+    private postSvc: PostService,
+    private breakpointSvc: BreakpointService
   ) {}
 
   ngOnInit(): void {
@@ -51,6 +53,8 @@ export class AuthenticationComponent implements OnInit {
         this.loginGoogle();
       }
     });
+
+    this.breakpointSvc.initBreakpointObserver();
   }
 
   createForm(): FormGroup {
@@ -86,7 +90,7 @@ export class AuthenticationComponent implements OnInit {
     this.dialogRef.close();
     this.dialogRef = this.dialogSvc.open(SignUpComponent, {
       // header: 'Login',
-      width: '50%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,

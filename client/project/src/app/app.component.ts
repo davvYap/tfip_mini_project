@@ -47,6 +47,7 @@ import { SignUpComponent } from './component/sign-up/sign-up.component';
 import { EditCategoryComponent } from './component/edit-category/edit-category.component';
 import { NotificationService } from './service/notification.service';
 import { AddCategoryComponent } from './component/add-category/add-category.component';
+import { BreakpointService } from './service/breakpoint.service';
 
 @Component({
   selector: 'app-root',
@@ -113,7 +114,8 @@ export class AppComponent implements OnInit {
     private renderer: Renderer2,
     private el: ElementRef,
     private confirmationSvc: ConfirmationService,
-    private notificationSvc: NotificationService
+    private notificationSvc: NotificationService,
+    private breakpointSvc: BreakpointService
   ) {}
 
   ngOnInit(): void {
@@ -162,6 +164,8 @@ export class AppComponent implements OnInit {
         this.notificationMessages = notifications;
       }
     );
+
+    this.breakpointSvc.initBreakpointObserver();
   }
 
   getMenuItem(isLogin: boolean): MenuItem[] {
@@ -391,13 +395,18 @@ export class AppComponent implements OnInit {
     localStorage.setItem('theme', theme);
   }
 
+  getConfirmDialogWidth(): any {
+    let widthStr: string = this.breakpointSvc.currentBreakpoint;
+    return { width: widthStr };
+  }
+
   logoutConfirmation() {
+    this.sidebarVisible = false;
     this.confirmationSvc.confirm({
       message: 'Are you sure you want to leave?',
       header: 'Logout Confirmation',
       icon: 'pi pi-info-circle',
       accept: () => {
-        this.sidebarVisible = false;
         this.logout();
       },
       reject: () => {},
@@ -438,7 +447,7 @@ export class AppComponent implements OnInit {
   showLoginDialog() {
     this.dialogRef = this.dialogSvc.open(AuthenticationComponent, {
       // header: 'Login',
-      width: '50%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
@@ -452,7 +461,7 @@ export class AppComponent implements OnInit {
   showSignUpDialog() {
     this.dialogRef = this.dialogSvc.open(SignUpComponent, {
       // header: 'Login',
-      width: '50%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,

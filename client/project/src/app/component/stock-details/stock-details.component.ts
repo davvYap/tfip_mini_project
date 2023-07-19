@@ -69,7 +69,7 @@ export class StockDetailsComponent implements OnInit {
     this.breadcrumbItems = [
       { label: 'Dashboard', routerLink: '/' },
       { label: 'Portfolio', routerLink: '/investment-dashboard' },
-      { label: `${this.symbol} Company Profile` },
+      { label: `${this.symbol} Profile` },
     ];
     this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
 

@@ -703,8 +703,16 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     table.clear();
     const input1 = document.getElementById('input1') as HTMLInputElement;
     const input2 = document.getElementById('input2') as HTMLInputElement;
+    const input1Mobile = document.getElementById(
+      'input1Mobile'
+    ) as HTMLInputElement;
+    const input2Mobile = document.getElementById(
+      'input2Mobile'
+    ) as HTMLInputElement;
     input1.value = '';
     input2.value = '';
+    input1Mobile.value = '';
+    input2Mobile.value = '';
   }
 
   confirmDeleteTreeTable(event: any, symbol: string, purchaseId: string) {
