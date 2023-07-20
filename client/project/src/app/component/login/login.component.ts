@@ -191,8 +191,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
   share() {
     const data: any = {
       title: 'Welcome to am.app',
-      text: `${this.getSvc.firstname} ${this.getSvc.lastname} invites you to join am.app ! Manage all your assets in single application for free.`,
-      url: 'http://localhost:8080',
+      text: `I invites you to join am.app ! Manage all your assets in single application for free. Click link below to join.`,
+      url: 'https://afmapp-tfip-production.up.railway.app/',
     };
     navigator
       .share(data)

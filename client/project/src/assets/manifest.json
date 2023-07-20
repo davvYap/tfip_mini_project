@@ -1,8 +1,8 @@
 {
   "name": "amapp",
   "short_name": "amapp",
-  "theme_color": "#9cb8e6",
-  "background_color": "#9cb8e6",
+  "theme_color": "#080808",
+  "background_color": "#080808",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
