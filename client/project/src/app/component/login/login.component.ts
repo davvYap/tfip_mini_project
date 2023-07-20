@@ -174,7 +174,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   }
 
   showLoginDialog() {
-    console.log(this.breakpointSvc.currentBreakpoint);
+    // console.log(this.breakpointSvc.currentBreakpoint);
     this.dialogRef = this.dialogSvc.open(AuthenticationComponent, {
       // header: 'Login',
       width: this.breakpointSvc.currentBreakpoint,

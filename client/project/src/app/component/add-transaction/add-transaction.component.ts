@@ -104,7 +104,7 @@ export class AddTransactionComponent implements OnInit {
     // console.log(newDate);
     tran.date = newDate;
     tran.transactionId = id;
-    console.log(tran);
+    // console.log(tran);
 
     this.postSvc
       .addTransaction(this.getSvc.userId, tran)

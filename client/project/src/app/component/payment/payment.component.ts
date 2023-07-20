@@ -30,7 +30,7 @@ export class PaymentComponent implements OnInit {
     this.title.setTitle(`${this.getSvc.applicationName} | Payment`);
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     // PAYPAL
-    console.log(window.paypal);
+    // console.log(window.paypal);
     window.paypal
       .Buttons({
         style: {

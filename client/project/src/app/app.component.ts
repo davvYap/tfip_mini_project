@@ -191,12 +191,11 @@ export class AppComponent implements OnInit {
                 },
               ],
             },
-
-            {
-              label: 'Update',
-              icon: 'pi pi-fw pi-external-link',
-              command: () => this.triggerUpdateUsersStockValue(),
-            },
+            // {
+            //   label: 'Update',
+            //   icon: 'pi pi-fw pi-external-link',
+            //   command: () => this.triggerUpdateUsersStockValue(),
+            // },
             {
               separator: true,
             },
@@ -488,7 +487,7 @@ export class AppComponent implements OnInit {
         const user: SignUp = res;
         this.dialogRef = this.dialogSvc.open(SignUpComponent, {
           // header: 'Login',
-          width: '50%',
+          width: this.breakpointSvc.currentBreakpoint,
           // height: '90%',
           contentStyle: { overflow: 'auto' },
           baseZIndex: 10000,
@@ -536,7 +535,7 @@ export class AppComponent implements OnInit {
   newTransaction() {
     this.dialogRef = this.dialogSvc.open(AddTransactionComponent, {
       header: 'New Transaction',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
@@ -560,7 +559,7 @@ export class AppComponent implements OnInit {
   newCategory() {
     this.dialogRef = this.dialogSvc.open(AddCategoryComponent, {
       header: 'New Category',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
@@ -583,7 +582,7 @@ export class AppComponent implements OnInit {
   editCategory() {
     this.dialogRef = this.dialogSvc.open(EditCategoryComponent, {
       header: 'Edit Category',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,

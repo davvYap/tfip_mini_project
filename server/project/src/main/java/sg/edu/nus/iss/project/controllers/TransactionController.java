@@ -43,14 +43,14 @@ public class TransactionController {
 		String category = categoryForm.getFirst("category");
 		String type = categoryForm.getFirst("type");
 
-		// Check if duplicate name
+		// Check if duplicate name and type
 		List<Category> categories = transSvc.getUserCategoryJdbc(userId);
 		for (Category cat : categories) {
 			if (cat.getCategoryName().equals(category) && cat.getType().equals(type)) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 						.contentType(MediaType.APPLICATION_JSON)
 						.body(Json.createObjectBuilder()
-								.add("message", "Category exists".formatted(category))
+								.add("message", "%s (%s) category exists".formatted(category, type.toUpperCase()))
 								.build().toString());
 			}
 		}
@@ -66,7 +66,7 @@ public class TransactionController {
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(Json.createObjectBuilder()
-						.add("message", "Category %s (%s) added succesffuly".formatted(category, type))
+						.add("message", "Category %s (%s) added succesffuly".formatted(category, type.toUpperCase()))
 						.build().toString());
 	}
 
@@ -88,6 +88,19 @@ public class TransactionController {
 	public ResponseEntity<String> editUserCategoryJdbc(@PathVariable String userId, @RequestBody String catJson)
 			throws IOException {
 		Category cat = Category.convertFromJsonString(catJson);
+		// Check if duplicate name and type
+		List<Category> categories = transSvc.getUserCategoryJdbc(userId);
+		for (Category category : categories) {
+			if (category.getCategoryName().equals(cat.getCategoryName()) && category.getType().equals(cat.getType())) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.contentType(MediaType.APPLICATION_JSON)
+						.body(Json.createObjectBuilder()
+								.add("message",
+										"%s (%S) category exists".formatted(cat.getCategoryName(),
+												cat.getType().toUpperCase()))
+								.build().toString());
+			}
+		}
 		int updatedRow = transSvc.editCategoryJdbc(userId, cat.getCategoryId(), cat.getCategoryName(), cat.getType());
 
 		if (updatedRow > 0) {

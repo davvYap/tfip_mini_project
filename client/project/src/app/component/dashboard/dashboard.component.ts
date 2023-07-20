@@ -517,7 +517,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               }
               index++;
             });
-            console.log('user performance', this.portfolioPerformanceData);
+            // console.log('user performance', this.portfolioPerformanceData);
             this.portfolioPerformanceDataFinal.set(
               this.portfolioPerformanceData
             );
@@ -537,8 +537,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   initiateDonutChartOverall() {
     // const documentStyle = getComputedStyle(document.documentElement);
-    console.log('stock value', this.stocksValue());
-    console.log('savings value', this.savingsValue());
+    // console.log('stock value', this.stocksValue());
+    // console.log('savings value', this.savingsValue());
     const textColor = this.documentStyle().getPropertyValue('--text-color');
 
     this.donutDataOverall = {
@@ -602,7 +602,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // HERE USING STOCKSTOCKPRICE FOR DONUT CHART
   initiateStockCount() {
-    console.log('initate stock count for donut chart');
+    // console.log('initate stock count for donut chart');
     this.stocksCount$ = this.getSvc
       .getUserStocksCount(this.getSvc.userId)
       .pipe(

@@ -5,12 +5,12 @@
     [home]="breadcrumbHome"
   ></p-breadcrumb>
   <div class="row justify-content-center align-items-center">
-    <div class="col-8 text-center mt-3 mb-5 h1card">
+    <div class="col-md-8 col-11 text-center mt-3 mb-5 h1card">
       <h1>Mortgage Calculator</h1>
     </div>
   </div>
   <div class="row justify-content-evenly align-items-center">
-    <div class="col-5 form-card">
+    <div class="col-md-5 col-11 form-card mb-5">
       <div class="d-flex flex-column m-4">
         <label htmlFor="transactionName">Loan Amount</label>
         <p-inputNumber
@@ -118,7 +118,7 @@
       </div>
     </div>
 
-    <div class="col-4 trans-card">
+    <div class="col-md-4 col-11 trans-card">
       <div class="mortgage-data">
         <p class="font-monospace fw-bolder fs-3">
           Monthly Payment:
@@ -155,7 +155,7 @@
     *ngIf="showAmortizationChart"
     class="row justify-content-center align-items-center my-5"
   >
-    <div class="col-10 mortgage-line-card">
+    <div class="col-md-10 col-11 mortgage-line-card">
       <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
     </div>
   </div>
@@ -164,7 +164,7 @@
     *ngIf="showAmortizationTable"
     class="row justify-content-center align-items-center"
   >
-    <div class="col-10 mortgage-card">
+    <div class="col-md-10 col-11 mortgage-card">
       <p-treeTable
         id="mortgagett"
         #mortgagett
@@ -173,16 +173,19 @@
         [paginator]="true"
         [rows]="10"
         [scrollable]="true"
-        [tableStyle]="{ 'min-width': '30dvh' }"
+        [tableStyle]="{ 'min-width': '50rem' }"
         [scrollable]="true"
         scrollHeight="500px"
+        [resizableColumns]="true"
+        columnResizeMode="expand"
         [rowHover]="true"
         [showCurrentPageReport]="true"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         [rowsPerPageOptions]="[5, 10, 15, 50, mortgageData.length]"
       >
         <ng-template pTemplate="caption">
-          <div class="d-flex justify-content-between">
+          <!-- Desktop -->
+          <div class="d-none d-md-flex justify-content-between">
             <div>
               <h3>
                 <span class="principal-color">Principal</span> +
@@ -190,6 +193,25 @@
               </h3>
             </div>
             <div>
+              <span class="me-3">
+                <span> Expand all years </span>
+                <p-inputSwitch
+                  [(ngModel)]="expandTreeTable"
+                  (onChange)="toggleExpandTreeTable()"
+                ></p-inputSwitch>
+              </span>
+            </div>
+          </div>
+
+          <!-- Mobile -->
+          <div class="d-md-none">
+            <div class="d-flex justify-content-center align-items-center">
+              <h3>
+                <span class="principal-color">Principal</span> +
+                <span class="interest-color">Interest</span> = Payment
+              </h3>
+            </div>
+            <div class="d-flex justify-content-center align-items-center">
               <span class="me-3">
                 <span> Expand all years </span>
                 <p-inputSwitch
@@ -251,6 +273,12 @@
           </tr>
         </ng-template>
         <ng-template pTemplate="paginatorleft">
+          <i
+            class="pi pi-info-circle d-none d-md-block"
+            pTooltip="Amortization schedule breakdown"
+          ></i>
+        </ng-template>
+        <ng-template pTemplate="paginatorright">
           <p-splitButton
             icon="pi pi-download"
             styleClass="p-button-text"
@@ -258,12 +286,6 @@
             (onClick)="exportPdfMortgageTable()"
             [model]="mortgageExportBtnItems"
           ></p-splitButton>
-        </ng-template>
-        <ng-template pTemplate="paginatorright">
-          <i
-            class="pi pi-info-circle"
-            pTooltip="Amortization schedule breakdown"
-          ></i>
         </ng-template>
       </p-treeTable>
     </div>

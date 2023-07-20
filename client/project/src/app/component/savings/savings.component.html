@@ -67,8 +67,10 @@
   </div>
 
   <div *ngIf="transactions.length > 0; else noTransactionData">
-    <div class="row justify-content-center align-items-center g-2">
-      <div class="col-4 my-4">
+    <div
+      class="row row-cols-1 row-cols-lg-3 justify-content-center align-items-center g-2"
+    >
+      <div class="mb-4">
         <p-fieldset
           inputId="ac1"
           legend="Income"
@@ -88,7 +90,7 @@
         </p-fieldset>
       </div>
 
-      <div class="col-4 my-4">
+      <div class="mb-4">
         <p-fieldset
           inputId="ac2"
           legend="Expense"
@@ -108,7 +110,7 @@
         </p-fieldset>
       </div>
 
-      <div class="col-4 my-4">
+      <div class="mb-4">
         <p-fieldset
           inputId="ac3"
           legend="Balance"
@@ -130,7 +132,7 @@
     </div>
 
     <div class="row justify-content-evenly align-items-center g-2">
-      <div class="col-4 donutbackground m-2">
+      <div class="col-md-4 col-11 donutbackground m-2">
         <div class="d-flex flex-row-reverse"></div>
         <p-chart
           type="doughnut"
@@ -180,7 +182,7 @@
         </p-overlayPanel>
       </div>
 
-      <div class="col-7 linebackground">
+      <div class="col-md-7 col-12 linebackground">
         <div *ngIf="!skeletonLoading; else skeleton">
           <p-chart
             type="bar"
@@ -243,11 +245,11 @@
               <button
                 pButton
                 label="Clear"
-                class="p-button-outlined"
+                class="p-button-outlined p-button-warning"
                 icon="pi pi-filter-slash"
                 (click)="clear(dt1)"
               ></button>
-              <span class="p-input-icon-left ml-auto">
+              <span class="p-input-icon-left ms-2">
                 <i class="pi pi-search"></i>
                 <input
                   id="input1"

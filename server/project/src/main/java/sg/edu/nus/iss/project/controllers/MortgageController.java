@@ -124,7 +124,12 @@ public class MortgageController {
             throws IOException {
 
         boolean deleted = false;
+        // delete mortgage related regular transactions in JDBC
+        int deletedMortgageRegularTrans = mortgageSvc.deleteUserMongoRegularTransactionsJdbc(userId, mortgageId);
+
+        // delete mortgage related tansactions in JDBC
         int deletedMortgageTransactions = mortgageSvc.deleteUserMortgageTransactionsJdbc(userId, mortgageId);
+
         deleted = mortgageSvc.deleteUserMortgagePortfolioMongo(userId, mortgageId);
         if (!deleted) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)

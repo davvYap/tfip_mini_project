@@ -18,6 +18,7 @@ import { AddTransactionComponent } from '../add-transaction/add-transaction.comp
 import { AddMortgageComponent } from '../add-mortgage/add-mortgage.component';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
+import { BreakpointService } from 'src/app/service/breakpoint.service';
 
 @Component({
   selector: 'app-mortgage',
@@ -112,12 +113,12 @@ export class MortgageComponent implements OnInit {
     private exportSvc: ExportService,
     private dialogSvc: DialogService,
     private messageSvc: MessageService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private breakpointSvc: BreakpointService
   ) {}
 
   ngOnInit(): void {
     this.breadcrumbItems = [
-      { label: 'Dashboard', routerLink: '/' },
       { label: 'Mortgage', routerLink: '/mortgage-dashboard' },
       { label: 'Calculator', routerLink: '/mortgage' },
     ];
@@ -132,6 +133,7 @@ export class MortgageComponent implements OnInit {
         }, 200);
       }
     });
+    this.breakpointSvc.initBreakpointObserver();
 
     this.repaymentCategories = ['Principal', 'Interest'];
     // this.getSvc
@@ -150,7 +152,7 @@ export class MortgageComponent implements OnInit {
     //   });
 
     // USER MORTGAGE PORTFOLIO
-    console.log(this.activatedRoute.snapshot.queryParams['mortgageId']);
+    // console.log(this.activatedRoute.snapshot.queryParams['mortgageId']);
     if (this.activatedRoute.snapshot.queryParams['mortgageId']) {
       this.selectedMortgageId =
         this.activatedRoute.snapshot.queryParams['mortgageId'];
@@ -659,7 +661,7 @@ export class MortgageComponent implements OnInit {
 
     this.dialogRef = this.dialogSvc.open(AddMortgageComponent, {
       header: 'New mortgage portfolio',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
@@ -700,7 +702,7 @@ export class MortgageComponent implements OnInit {
 
     this.dialogRef = this.dialogSvc.open(AddMortgageComponent, {
       header: 'Update mortgage portfolio',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,

@@ -36,6 +36,7 @@ import { UpdateService } from 'src/app/service/update.service';
 import { DeleteService } from 'src/app/service/delete.service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { faHandPointRight } from '@fortawesome/free-regular-svg-icons';
+import { BreakpointService } from 'src/app/service/breakpoint.service';
 
 @Component({
   selector: 'app-transaction-records',
@@ -123,12 +124,12 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
     private confirmationSvc: ConfirmationService,
     private deleteSvc: DeleteService,
     private activatedRoute: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private breakpointSvc: BreakpointService
   ) {}
 
   ngOnInit(): void {
     this.breadcrumbItems = [
-      { label: 'Dashboard', routerLink: '/' },
       { label: 'Savings Dashboard', routerLink: '/savings' },
       { label: 'Transaction Records', routerLink: '/transaction-records' },
     ];
@@ -153,8 +154,12 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
     this.finalBarChartLabels = [];
 
     this.themeSvc.switchTheme$.subscribe((res) => {
-      if (res) this.initiateChartsData();
+      if (res) {
+        this.initiateChartsData();
+      }
     });
+
+    this.breakpointSvc.initBreakpointObserver();
 
     this.categories$ = this.getSvc
       .getUserCategories(this.getSvc.userId)
@@ -173,7 +178,7 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(() => {
-        console.log(this.categoriesItems);
+        // console.log(this.categoriesItems);
       });
 
     // NOTE EXPORT FUNCTION FOR TRANSACTION TABLE
@@ -250,7 +255,7 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
     this.endDate.set(endDate);
     this.typeOfRecord.set(typeOfRecord);
     this.closeDialog();
-    console.log(this.typeOfRecord());
+    // console.log(this.typeOfRecord());
     const qp: Params = { type: this.typeOfRecord() };
     this.router.navigate(['/transaction-records'], { queryParams: qp });
 
@@ -330,7 +335,7 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
           transaction.categoryId = catObj.object.categoryId;
         }
       });
-      console.log('edited transaction > ', transaction);
+      // console.log('edited transaction > ', transaction);
       this.updateSvc
         .updateTransaction(this.getSvc.userId, transaction)
         .then((msg) => {
@@ -377,7 +382,7 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
   newTransaction() {
     this.dialogRef = this.dialogSvc.open(AddTransactionComponent, {
       header: 'New Transaction',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,

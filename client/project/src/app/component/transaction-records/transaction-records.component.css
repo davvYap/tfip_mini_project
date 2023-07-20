@@ -11,7 +11,7 @@
 .donutbackground,
 .linebackground {
   background: var(--surface-overlay);
-  padding: 1rem;
+  padding: 0.5rem;
   border-radius: 10px;
   margin-bottom: 1rem;
 }

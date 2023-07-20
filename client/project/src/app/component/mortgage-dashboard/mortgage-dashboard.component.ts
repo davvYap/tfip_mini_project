@@ -14,6 +14,7 @@ import {
 import { Params, Router } from '@angular/router';
 import { DeleteService } from 'src/app/service/delete.service';
 import { DecimalPipe } from '@angular/common';
+import { BreakpointService } from 'src/app/service/breakpoint.service';
 
 @Component({
   selector: 'app-mortgage-dashboard',
@@ -43,17 +44,18 @@ export class MortgageDashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private deleteSvc: DeleteService,
     private confirmationService: ConfirmationService,
-    private decimalPipe: DecimalPipe
+    private decimalPipe: DecimalPipe,
+    private breakpointSvc: BreakpointService
   ) {}
 
   ngOnInit(): void {
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.title.setTitle(`${this.getSvc.applicationName} | Mortgage`);
     this.breadcrumbItems = [
-      { label: 'Dashboard', routerLink: '/' },
       { label: 'Mortgage', routerLink: '/mortgage-dashboard' },
     ];
     this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
+    this.breakpointSvc.initBreakpointObserver();
 
     this.showMortgageCards = true;
     this.mortgagePortfolios = [];
@@ -141,7 +143,7 @@ export class MortgageDashboardComponent implements OnInit, OnDestroy {
   addToTransaction(index: number) {
     const mortgageTrans: Transaction = {
       transactionId: '',
-      transactionName: 'Mortgage monthly repayment',
+      transactionName: `Mortgage (${this.mortgagePortfolios[index].id}) monthly repayment`,
       type: 'expense',
       date: '',
       amount: this.mortgagePortfolios[index].monthlyRepayment,
@@ -154,7 +156,7 @@ export class MortgageDashboardComponent implements OnInit, OnDestroy {
 
     this.dialogRef = this.dialogSvc.open(AddTransactionComponent, {
       header: 'New Mortgage Repayment',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
@@ -186,7 +188,7 @@ export class MortgageDashboardComponent implements OnInit, OnDestroy {
       },
       reject: () => {
         this.messageSvc.add({
-          severity: 'error',
+          severity: 'info',
           summary: 'Rejected',
           detail: 'Cancel delete',
         });

@@ -80,7 +80,7 @@ export class UpdateService {
     const qp = new HttpParams()
       .set('regTranId', regTranId)
       .append('active', active);
-    console.log('qp', qp);
+    // console.log('qp', qp);
     return lastValueFrom(
       this.http.put<MessageResponse>(
         `http://localhost:8080/api/${userId}/toggle_regular_tran`,

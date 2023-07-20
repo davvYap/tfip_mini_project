@@ -35,7 +35,6 @@ export class InvestmentComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.breadcrumbItems = [
-      { label: 'Dashboard', routerLink: '/' },
       { label: 'Portfolio', routerLink: '/investment-dashboard' },
       { label: 'New Stock', routerLink: '/investment' },
     ];
@@ -95,7 +94,7 @@ export class InvestmentComponent implements OnInit, OnDestroy {
   }
 
   onSelectStock(event: any) {
-    console.log('event >>> ', event);
+    // console.log('event >>> ', event);
     let stockSymbol: string = event;
 
     const index: number = stockSymbol.indexOf(' | ');
@@ -119,9 +118,9 @@ export class InvestmentComponent implements OnInit, OnDestroy {
     stockPurchased.name = this.stockNameTrimmed;
 
     let timeLong: number = this.investmentForm.get('date')?.value?.getTime();
-    console.log('timeLong', timeLong);
+    // console.log('timeLong', timeLong);
     stockPurchased.date = timeLong;
-    console.log('Stock >>> ', stockPurchased);
+    // console.log('Stock >>> ', stockPurchased);
 
     let userId: string = this.getSvc.userId;
     this.postSvc

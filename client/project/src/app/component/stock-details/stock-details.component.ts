@@ -67,7 +67,6 @@ export class StockDetailsComponent implements OnInit {
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.title.setTitle(`${this.getSvc.applicationName} | ${this.symbol}`);
     this.breadcrumbItems = [
-      { label: 'Dashboard', routerLink: '/' },
       { label: 'Portfolio', routerLink: '/investment-dashboard' },
       { label: `${this.symbol} Profile` },
     ];
@@ -129,7 +128,7 @@ export class StockDetailsComponent implements OnInit {
       )
       .subscribe((profile) => {
         this.stockProfile = profile;
-        console.log(profile);
+        // console.log(profile);
       });
 
     // USER IDEAS
@@ -198,7 +197,7 @@ export class StockDetailsComponent implements OnInit {
             totalIdeas++;
           });
           this.stockSentiment = sentiment / totalIdeas;
-          console.log(sentiment, totalIdeas, this.stockSentiment);
+          // console.log(sentiment, totalIdeas, this.stockSentiment);
         })
       );
   }
@@ -214,7 +213,7 @@ export class StockDetailsComponent implements OnInit {
       'firstname'
     )}  ${localStorage.getItem('lastname')}`;
     idea.profileIcon = `${localStorage.getItem('profileIcon')}`;
-    console.log(idea);
+    // console.log(idea);
     this.postSvc
       .newStockIdea(this.symbol, idea)
       .then((res) => {

@@ -81,6 +81,7 @@ public class MortgageService {
         return mortgageRepo.retrieveUserMortgagePortfolioMongo(userId);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteUserMortgagePortfolioMongo(String userId, String mortgageId) {
         return mortgageRepo.deleteUserMortgagePortfolioMongo(userId, mortgageId);
     }
@@ -88,5 +89,10 @@ public class MortgageService {
     @Transactional(rollbackFor = Exception.class)
     public int deleteUserMortgageTransactionsJdbc(String userId, String remarks) {
         return mortgageRepo.deleteUserMortgageTransactionsJdbc(userId, remarks);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteUserMongoRegularTransactionsJdbc(String userId, String remarks) {
+        return mortgageRepo.deleteUserMongoRegularTransactionsJdbc(userId, remarks);
     }
 }

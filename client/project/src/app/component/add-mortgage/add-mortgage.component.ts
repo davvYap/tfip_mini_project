@@ -79,7 +79,7 @@ export class AddMortgageComponent implements OnInit {
 
   addMortgagePortfolio() {
     const newMort = this.form.value as MortgagePortfolio;
-    console.log(newMort);
+    // console.log(newMort);
     this.postSvc
       .addUserMortgagePortfolio(this.getSvc.userId, newMort)
       .then((msg) => {

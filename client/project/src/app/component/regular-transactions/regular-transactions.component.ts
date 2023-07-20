@@ -15,6 +15,7 @@ import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
 import { UpdateService } from 'src/app/service/update.service';
 import { AddTransactionComponent } from '../add-transaction/add-transaction.component';
+import { BreakpointService } from 'src/app/service/breakpoint.service';
 
 @Component({
   selector: 'app-regular-transactions',
@@ -42,18 +43,19 @@ export class RegularTransactionsComponent implements OnInit {
     private deleteSvc: DeleteService,
     private messageSvc: MessageService,
     private updateSvc: UpdateService,
-    private dialogSvc: DialogService
+    private dialogSvc: DialogService,
+    private breakpointSvc: BreakpointService
   ) {}
 
   ngOnInit(): void {
     this.themeSvc.switchTheme(localStorage.getItem('theme') || '');
     this.title.setTitle(`${this.getSvc.applicationName} | Mortgage`);
     this.breadcrumbItems = [
-      { label: 'Dashboard', routerLink: '/' },
       { label: 'Savings Dashboard', routerLink: '/savings' },
       { label: 'Regular Transactions', routerLink: '/regular-transactions' },
     ];
     this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
+    this.breakpointSvc.initBreakpointObserver();
 
     this.regularTransactions = [];
     this.regularTransactions$ = this.getSvc
@@ -150,7 +152,7 @@ export class RegularTransactionsComponent implements OnInit {
   addTransaction() {
     this.dialogRef = this.dialogSvc.open(AddTransactionComponent, {
       header: 'New Transaction',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,

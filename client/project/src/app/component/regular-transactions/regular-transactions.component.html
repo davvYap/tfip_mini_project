@@ -29,8 +29,15 @@
                 >({{ reg.tran.categoryName }})</span
               >
             </h4>
-
-            <p class="fs-5 font-monospace">
+            <!-- Desktop -->
+            <p class="fs-5 font-monospace d-md-block d-none">
+              Next transaction:
+              {{ getDate(reg.tran.date) }}
+            </p>
+          </div>
+          <!-- Mobile -->
+          <div class="d-md-none">
+            <p class="fs-6 font-monospace">
               Next transaction:
               {{ getDate(reg.tran.date) }}
             </p>

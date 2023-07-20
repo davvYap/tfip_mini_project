@@ -163,7 +163,6 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.breadcrumbItems = [
-      { label: 'Dashboard', routerLink: '/' },
       { label: 'Portfolio', routerLink: '/investment-dashboard' },
     ];
     this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
@@ -195,7 +194,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.stockTreeTable = [];
     this.initTreeTableSignal$.subscribe((res: boolean) => {
       if (res) {
-        console.log('initiate tree table');
+        // console.log('initiate tree table');
         this.initiateTreeTable();
       } else {
         this.treeTableLoading = true;
@@ -224,7 +223,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     ];
     this.startDate = this.getSvc.getStartDateOfYear();
     this.endOfMonth = this.getEndOfMonth();
-    console.log(this.endOfMonth);
+    // console.log(this.endOfMonth);
     this.userStockData = [];
 
     // console.log(this.startDate);
@@ -420,7 +419,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       .getUserMonthlyPerformance(this.getSvc.userId, new Date().getFullYear())
       .pipe(
         switchMap((performance) => {
-          console.log('user performance', performance);
+          // console.log('user performance', performance);
           this.userStockData = performance;
           this.userStockDataLineData.set(performance);
           return of(performance);
@@ -500,9 +499,9 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(() => {
-        console.log(this.nasdaq100data, this.sp500data);
+        // console.log(this.nasdaq100data, this.sp500data);
         this.skeletonLoading = false;
-        console.log('initiate line chart');
+        // console.log('initiate line chart');
         this.initiateLineChart();
         this.getNotificationOfLineChart();
       });
@@ -1285,7 +1284,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   }
 
   onSelectStock(event: any) {
-    console.log('event >>> ', event);
+    // console.log('event >>> ', event);
     let stockSymbol: string = event;
 
     const index: number = stockSymbol.indexOf(' | ');

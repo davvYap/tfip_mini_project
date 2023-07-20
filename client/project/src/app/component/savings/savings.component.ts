@@ -44,6 +44,7 @@ import {
 import { Title } from '@angular/platform-browser';
 import { NotificationService } from 'src/app/service/notification.service';
 import { AddCategoryComponent } from '../add-category/add-category.component';
+import { BreakpointService } from 'src/app/service/breakpoint.service';
 
 @Component({
   selector: 'app-savings',
@@ -165,12 +166,12 @@ export class SavingsComponent implements OnInit, OnDestroy {
     private exportSvc: ExportService,
     private elementRef: ElementRef,
     private title: Title,
-    private notificationSvc: NotificationService
+    private notificationSvc: NotificationService,
+    private breakpointSvc: BreakpointService
   ) {}
 
   ngOnInit(): void {
     this.breadcrumbItems = [
-      { label: 'Dashboard', routerLink: '/' },
       { label: 'Savings Dashboard', routerLink: '/savings' },
     ];
     this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
@@ -188,6 +189,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
         this.initiateDonutChartData();
       }
     });
+    this.breakpointSvc.initBreakpointObserver();
 
     this.categories$ = this.getSvc
       .getUserCategories(this.getSvc.userId)
@@ -383,7 +385,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
   newTransaction() {
     this.dialogRef = this.dialogSvc.open(AddTransactionComponent, {
       header: 'New Transaction',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
@@ -407,7 +409,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
   newCategory() {
     this.dialogRef = this.dialogSvc.open(AddCategoryComponent, {
       header: 'New Category',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
@@ -486,7 +488,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
 
   getTransaction() {
     const year: number = this.yearForm.get('year')?.value;
-    console.log('year', year);
+    // console.log('year', year);
     this.thisYear.set(year);
     this.closeDialog();
     this.ngOnInit();

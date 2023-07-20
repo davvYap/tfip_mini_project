@@ -137,7 +137,7 @@ export class EditCategoryComponent implements OnInit, OnDestroy {
         this.messageSvc.add({
           severity: 'warn',
           summary: 'Failed',
-          detail: err.message,
+          detail: err.error.message,
         });
       });
   }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import com.mongodb.client.result.UpdateResult;
 
 import sg.edu.nus.iss.project.models.MortgagePortfolio;
+import sg.edu.nus.iss.project.models.RegularTransaction;
 import sg.edu.nus.iss.project.models.Transaction;
 
 import static sg.edu.nus.iss.project.repositories.DBQueries.*;
@@ -128,6 +129,30 @@ public class MortgageRepository {
             }
         }
         return totalDeleteAmount;
+    }
+
+    public int deleteUserMongoRegularTransactionsJdbc(String userId, String remarks) {
+        List<Transaction> mortTrans = getUserMortagageTransactionJdbc(userId, remarks);
+        List<String> regTranIds = new LinkedList<>();
+        int totalDeleted = 0;
+
+        // Get all regular trans ID
+        for (Transaction tran : mortTrans) {
+            String tranId = tran.getTransactionId();
+            // Get regTranId
+            SqlRowSet rs = jdbc.queryForRowSet(SQL_GET_USER_REGULAR_TRANSACTION_RELATED_TO_MORTGAGE, userId, tranId);
+            while (rs.next()) {
+                RegularTransaction regTran = RegularTransaction.convertFromResult(rs);
+                regTranIds.add(regTran.getRegularTranId());
+            }
+        }
+
+        // Delete all regular trans
+        for (String regTranId : regTranIds) {
+            int deleted = jdbc.update(SQL_DELETE_USER_REGULAR_TRANSACTION, userId, regTranId);
+            totalDeleted += deleted;
+        }
+        return totalDeleted;
     }
 
 }
