@@ -29,13 +29,9 @@ export class PostService {
     );
 
     return lastValueFrom(
-      this.http.post<MessageResponse>(
-        'http://localhost:8080/api/theme',
-        data.toString(),
-        {
-          headers: httpheader,
-        }
-      )
+      this.http.post<MessageResponse>('/api/theme', data.toString(), {
+        headers: httpheader,
+      })
     );
   }
 
@@ -50,22 +46,15 @@ export class PostService {
     );
 
     return lastValueFrom(
-      this.http.post<MessageResponse>(
-        'http://localhost:8080/api/goal',
-        data.toString(),
-        {
-          headers: httpheader,
-        }
-      )
+      this.http.post<MessageResponse>('/api/goal', data.toString(), {
+        headers: httpheader,
+      })
     );
   }
 
   addStock(userId: string, stock: PurchasedStock): Promise<MessageResponse> {
     return lastValueFrom(
-      this.http.post<MessageResponse>(
-        `http://localhost:8080/api/${userId}/addStock`,
-        stock
-      )
+      this.http.post<MessageResponse>(`/api/${userId}/addStock`, stock)
     );
   }
 
@@ -80,7 +69,7 @@ export class PostService {
       'application/x-www-form-urlencoded'
     );
     return this.http.post<MessageResponse>(
-      `http://localhost:8080/api/${userId}/add_category`,
+      `/api/${userId}/add_category`,
       data.toString(),
       { headers: httpHearders }
     );
@@ -88,31 +77,21 @@ export class PostService {
 
   addTransaction(userId: string, tran: Transaction): Promise<MessageResponse> {
     return lastValueFrom(
-      this.http.post<MessageResponse>(
-        `http://localhost:8080/api/${userId}/add_transaction`,
-        tran
-      )
+      this.http.post<MessageResponse>(`/api/${userId}/add_transaction`, tran)
     );
   }
 
   signUp(formData: FormData): Promise<MessageResponse> {
     return lastValueFrom(
-      this.http.post<MessageResponse>(
-        'http://localhost:8080/api/sign_up',
-        formData,
-        {
-          withCredentials: true,
-        }
-      )
+      this.http.post<MessageResponse>('/api/sign_up', formData, {
+        withCredentials: true,
+      })
     );
   }
 
   googleUserSignIn(user: GoogleUser): Promise<MessageResponse> {
     return lastValueFrom(
-      this.http.post<MessageResponse>(
-        'http://localhost:8080/api/google_user_sign_in',
-        user
-      )
+      this.http.post<MessageResponse>('/api/google_user_sign_in', user)
     );
   }
 
@@ -122,7 +101,7 @@ export class PostService {
   ): Promise<MessageResponse> {
     return lastValueFrom(
       this.http.post<MessageResponse>(
-        `http://localhost:8080/api/${userId}/add_mortgage_profile`,
+        `/api/${userId}/add_mortgage_profile`,
         mort
       )
     );
@@ -130,10 +109,7 @@ export class PostService {
 
   newStockIdea(symbol: string, idea: StockIdea): Promise<MessageResponse> {
     return lastValueFrom(
-      this.http.post<MessageResponse>(
-        `http://localhost:8080/api/${symbol}/new_idea`,
-        idea
-      )
+      this.http.post<MessageResponse>(`/api/${symbol}/new_idea`, idea)
     );
   }
 }

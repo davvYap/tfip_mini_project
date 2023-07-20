@@ -184,12 +184,12 @@ public class UserService {
                     saveStockMarketValueRedis(stkSymbol, marketPrice);
                 } else {
                     marketPrice = optPrice.get();
-                    System.out.println("Market price >>> " + marketPrice);
+                    // System.out.println("Market price >>> " + marketPrice);
                 }
                 totalStockValue += stockCount.getQuantity() * marketPrice;
             }
             boolean updated = userRepo.upsertUserYesterdayTotalValueMongo(userId, totalStockValue);
-            System.out.println("updated > " + updated);
+            // System.out.println("Updated > " + updated);
             if (updated)
                 updatedUser++;
             System.out.println(updated ? "UserId (%s) total stock value was updated...".formatted(userId)
@@ -415,7 +415,7 @@ public class UserService {
         }
 
         String formattedDate = yesterdayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        System.out.println("Getting yesterday date...");
+        // System.out.println("Getting yesterday date...");
         return formattedDate;
     }
 
@@ -444,7 +444,7 @@ public class UserService {
             Optional<List<Stock>> stocksByMonthOpt = retrieveUserStockByMonth(userId, limit, skip, month, year);
             if (stocksByMonthOpt.isPresent()) {
                 List<Stock> stocksByMonth = stocksByMonthOpt.get();
-                System.out.println(stocksByMonth); // HERE
+                // System.out.println(stocksByMonth);
                 allStockMap.put(month, stocksByMonth);
             }
         }

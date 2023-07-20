@@ -82,7 +82,7 @@ public class UserRepository {
                 .set("user_id", userId)
                 .set("goal", goal);
         UpdateResult upsertDoc = mongo.upsert(query, updateOps, "user_goal");
-        return upsertDoc.getModifiedCount() > 0;
+        return true;
     }
 
     public double retrieveUserGoal(String userId) {

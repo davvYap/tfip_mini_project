@@ -12,6 +12,26 @@
     </div>
     <section *ngIf="totalValue(); else newUser">
       <section *ngIf="!skeletonLoading; else skeleton">
+        <div class="row justify-content-evenly align-items-center g-2 m-4">
+          <!-- LINE CHART -->
+          <div class="col-12 col-md-10 linebackground">
+            <div class="d-flex flex-row-reverse mb-2">
+              <p-button
+                (click)="showDialog()"
+                icon="pi pi-chart-line"
+                label="Set Goal"
+                styleClass="p-button-rounded"
+                pTooltip="Set your goal here"
+              ></p-button>
+            </div>
+            <p-chart
+              type="line"
+              [data]="lineData"
+              [options]="lineOptions"
+            ></p-chart>
+          </div>
+        </div>
+
         <!-- DONUT CHART OVERALL-->
         <div class="row justify-content-evenly align-items-center m-4">
           <div class="col-12 col-md-10 donutbackground">
@@ -259,26 +279,6 @@
                 ></p-chart>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div class="row justify-content-evenly align-items-center g-2 m-4">
-          <!-- LINE CHART -->
-          <div class="col-12 col-md-10 linebackground">
-            <div class="d-flex flex-row-reverse mb-2">
-              <p-button
-                (click)="showDialog()"
-                icon="pi pi-chart-line"
-                label="Set Goal"
-                styleClass="p-button-rounded"
-                pTooltip="Set your goal here"
-              ></p-button>
-            </div>
-            <p-chart
-              type="line"
-              [data]="lineData"
-              [options]="lineOptions"
-            ></p-chart>
           </div>
         </div>
       </section>

@@ -120,11 +120,6 @@ public class UserController {
         // SAVE TO MONGO
         userSvc.upsertUserStocks(userId, stock);
 
-        // SAVE THE MARKET PRICE OF THE STOCKS TO REDIS
-        String stockMarketValueString = stockSvc.getRealStonksPrice(stock.getSymbol()).getBody();
-        double stockMarketValue = userSvc.getStonkStockPrice(stockMarketValueString);
-        userSvc.saveStockMarketValueRedis(stock.getSymbol(), stockMarketValue);
-
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder()

@@ -28,7 +28,8 @@ import sg.edu.nus.iss.project.services.SignUpService;
 import sg.edu.nus.iss.project.utils.gmail.GMailer;
 
 @Controller
-@CrossOrigin(origins = { "http://localhost:4200" }, allowCredentials = "true", allowedHeaders = "*")
+@CrossOrigin(origins = {
+        "https://afmapp-tfip-production.up.railway.app" }, allowCredentials = "true", allowedHeaders = "*")
 @RequestMapping(path = "/api")
 public class SignUpController {
 
@@ -85,6 +86,13 @@ public class SignUpController {
 
         try {
             User user = new User(username, password, email, firstname, lastname);
+            boolean userEmailExists = signUpSvc.checkUserExists(email);
+            if (userEmailExists) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Json.createObjectBuilder().add("message", "User email exists")
+                                .build().toString());
+            }
             InputStream is = file.getInputStream();
             boolean status = signUpSvc.newUserSignUp(user, is);
 
@@ -92,14 +100,6 @@ public class SignUpController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(Json.createObjectBuilder().add("message", "Sign up unsuccessful.")
-                                .build().toString());
-            }
-
-            boolean userEmailExists = signUpSvc.checkUserExists(email);
-            if (userEmailExists) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(Json.createObjectBuilder().add("message", "User email exists")
                                 .build().toString());
             }
 
@@ -131,6 +131,7 @@ public class SignUpController {
     @ResponseBody
     public ResponseEntity<String> googleUserSignIn(@RequestBody String userJson) throws Exception {
         try {
+            System.out.println("Google user sign in: " + userJson.toString());
             User googleUser = User.convertFromJsonStringGoogleUser(userJson);
             boolean googleUserExists = signUpSvc.checkGoogleUserExists(googleUser.getUserId());
             if (googleUserExists) {
@@ -230,26 +231,30 @@ public class SignUpController {
             }
 
             GMailer gMailer = new GMailer();
-            gMailer.sendMail(email, "Updated user profile", """
-                    Dear %s,
+            gMailer.sendMail(email, "Updated user profile",
+                    """
+                            Dear %s,
 
-                    We received your request to update your profile.
-                    We are glad to inform that the request was successful, your profile has been updated.
+                            We received your request to update your profile.
+                            We are glad to inform that the request was successful, your profile has been updated.
 
-                    For enquiries, please contact: +612-3456789
+                            For enquiries, please contact: +612-3456789
 
-                    Best Regards,
-                    am.app Development Team
-                    """.formatted(username));
+                            Best Regards,
+                            am.app Development Team
+                            """
+                            .formatted(username));
 
             return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Update user profile successful.").build()
+                    .body(Json.createObjectBuilder()
+                            .add("message", "Update user profile successful.").build()
                             .toString());
 
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Update user profile unsuccessful.").build()
+                    .body(Json.createObjectBuilder()
+                            .add("message", "Update user profile unsuccessful.").build()
                             .toString());
         }
     }

@@ -70,10 +70,12 @@ public class GMailer {
                 clientSecrets, Set.of(GmailScopes.GMAIL_SEND))
                 .setDataStoreFactory(new FileDataStoreFactory(Paths.get("tokens").toFile()))
                 .setAccessType("offline")
+                .setApprovalPrompt("force")
                 .build();
 
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(3338).build();
         Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+
         // return an authorized Credential Object
         return credential;
     }

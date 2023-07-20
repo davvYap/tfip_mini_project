@@ -104,10 +104,10 @@ export class AuthenticationComponent implements OnInit {
     // console.log(this.user);
     const googleUser: GoogleUser = {
       userId: this.user.id,
-      username: this.user.name,
+      username: this.user.name ? this.user.name : '',
       password: this.user.id,
-      firstname: this.user.firstName,
-      lastname: this.user.lastName,
+      firstname: this.user.firstName ? this.user.firstName : '',
+      lastname: this.user.lastName ? this.user.lastName : '',
       email: this.user.email,
     };
     this.postSvc

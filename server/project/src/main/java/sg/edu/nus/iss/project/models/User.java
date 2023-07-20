@@ -11,6 +11,7 @@ import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonReader;
+import jakarta.json.JsonString;
 
 public class User {
     private String userId;
@@ -136,12 +137,48 @@ public class User {
             try (InputStream is = new ByteArrayInputStream(js.getBytes())) {
                 JsonReader jr = Json.createReader(is);
                 JsonObject jsObj = jr.readObject();
-                us.setUserId(jsObj.getString("userId"));
-                us.setUsername(jsObj.getString("username"));
-                us.setPassword(jsObj.getString("password"));
-                us.setEmail(jsObj.getString("email"));
-                us.setFirstname(jsObj.getString("firstname"));
-                us.setLastname(jsObj.getString("lastname"));
+                JsonString userJson = jsObj.getJsonString("userId");
+                if (userJson != null) {
+                    us.setUserId(jsObj.getString("userId"));
+                } else {
+                    us.setUserId("NA");
+                }
+
+                JsonString usernameJson = jsObj.getJsonString("username");
+                if (usernameJson != null) {
+                    us.setUsername(jsObj.getString("username"));
+                } else {
+                    us.setUsername("NA");
+                }
+
+                JsonString passwordJson = jsObj.getJsonString("password");
+                if (passwordJson != null) {
+                    us.setPassword(jsObj.getString("password"));
+                } else {
+                    us.setPassword("NA");
+                }
+
+                JsonString emailJson = jsObj.getJsonString("email");
+                if (emailJson != null) {
+                    us.setEmail(jsObj.getString("email"));
+                } else {
+                    us.setEmail("NA");
+
+                }
+
+                JsonString firstnameJson = jsObj.getJsonString("firstname");
+                if (firstnameJson != null) {
+                    us.setFirstname(jsObj.getString("firstname"));
+                } else {
+                    us.setFirstname("NA");
+                }
+
+                JsonString lastnameJson = jsObj.getJsonString("lastname");
+                if (lastnameJson != null) {
+                    us.setLastname(jsObj.getString("lastname"));
+                } else {
+                    us.setLastname("NA");
+                }
                 is.close();
             }
         }
