@@ -484,23 +484,27 @@ public class UserRepository {
         return false;
     }
 
-    public boolean upsertUserRecentStockScreenerMongo(String symbol, String userId) {
+    public boolean upsertUserRecentStockScreenerMongo(String symbol, String userId, String stockName) {
         Query query = Query.query(Criteria.where("user_id").is(userId));
 
         // check the symbol list in mongo
-        List<Document> existedSymbolDocs = retrieveUserRecentStockScreenerMongo(userId);
+        List<Stock> existedStocksSearched = retrieveUserRecentStockScreenerMongo(userId);
 
         int totalDocsInMongo = 0;
 
-        if (existedSymbolDocs != null) {
+        if (existedStocksSearched != null) {
 
-            totalDocsInMongo = existedSymbolDocs.size();
+            totalDocsInMongo = existedStocksSearched.size();
             // check for existing records match symbol
-            for (Document doc : existedSymbolDocs) {
-                String s = doc.getString("symbol");
-                if (s.equals(symbol)) {
+            for (Stock stock : existedStocksSearched) {
+                if (stock.getSymbol().equals(symbol)) {
+
+                    Document docToBeRemoved = new Document();
+                    docToBeRemoved.append("name", stock.getStockName())
+                            .append("symbol", stock.getSymbol())
+                            .append("time", stock.getPurchasedDate());
                     // remove the existing record
-                    Update update = new Update().pull("symbol_searched", doc);
+                    Update update = new Update().pull("symbol_searched", docToBeRemoved);
                     mongo.updateFirst(query, update, "stocks_screener");
 
                     totalDocsInMongo--;
@@ -512,6 +516,7 @@ public class UserRepository {
         long epochTime = insertedDate.getTime();
         Document d = new Document();
         d.append("symbol", symbol)
+                .append("name", stockName)
                 .append("time", epochTime);
 
         Update udpateOps = new Update()
@@ -523,10 +528,8 @@ public class UserRepository {
         // check whether length > 4
         if (totalDocsInMongo > 4) {
             // find the oldest search and removed
-            List<Document> existedSymbolDocsLatest = retrieveUserRecentStockScreenerMongo(userId);
-            List<Stock> stocks = existedSymbolDocsLatest.stream().map(Stock::convertStockScreenerFromDocument)
-                    .toList();
-            List<Stock> mutableStocks = new ArrayList<>(stocks);
+            List<Stock> existingStocksSearchedLatest = retrieveUserRecentStockScreenerMongo(userId);
+            List<Stock> mutableStocks = new ArrayList<>(existingStocksSearchedLatest);
 
             Collections.sort(mutableStocks, Comparator.comparingLong(Stock::getPurchasedDate).reversed());
             // Last doc
@@ -534,6 +537,7 @@ public class UserRepository {
             Document lastDoc = new Document();
             lastDoc.append("symbol", olderstStock.getSymbol());
             lastDoc.append("time", olderstStock.getPurchasedDate());
+            lastDoc.append("name", olderstStock.getStockName());
 
             // delete last doc from mongo
             Update update = new Update().pull("symbol_searched", lastDoc);
@@ -542,12 +546,22 @@ public class UserRepository {
         return true;
     }
 
-    public List<Document> retrieveUserRecentStockScreenerMongo(String userId) {
+    public List<Stock> retrieveUserRecentStockScreenerMongo(String userId) {
         Query query = Query.query(Criteria.where("user_id").is(userId));
         Document d = mongo.findOne(query, Document.class, "stocks_screener");
+        List<Stock> stocks = new ArrayList<>();
         if (d != null) {
             List<Document> stockDocs = d.getList("symbol_searched", Document.class);
-            return stockDocs;
+            for (Document doc : stockDocs) {
+                Stock s = new Stock();
+                s.setSymbol(doc.getString("symbol"));
+                s.setStockName(doc.getString("name"));
+                s.setPurchasedDate(doc.getLong("time"));
+                stocks.add(s);
+            }
+            List<Stock> mutableStocks = new ArrayList<>(stocks);
+            Collections.sort(mutableStocks, Comparator.comparingLong(Stock::getPurchasedDate).reversed());
+            return mutableStocks;
         }
         return null;
     }

@@ -251,3 +251,8 @@ export interface StockIdea {
   idea: string;
   date: number;
 }
+
+export interface StockScreen {
+  name: string;
+  symbol: string;
+}

@@ -159,7 +159,7 @@
                   [columns]="portfolioTableCols"
                   [loading]="treeTableLoading"
                   [value]="stockTreeTable"
-                  [tableStyle]="{ 'min-width': '50rem' }"
+                  [tableStyle]="{ 'min-width': '80rem' }"
                   [paginator]="true"
                   filterMode="strict"
                   [globalFilterFields]="['symbol', 'name']"
@@ -210,13 +210,13 @@
                           ></p-treeTableSortIcon>
                         </span>
                       </th>
-                      <th>Name</th>
-                      <th>Quantity</th>
-                      <th>Close Price</th>
-                      <th>Cost</th>
-                      <th>Performance</th>
-                      <th>Fees</th>
-                      <th>Action</th>
+                      <th style="width: 12.5%">Name</th>
+                      <th style="width: 10%">Quantity</th>
+                      <th style="width: 15%">Close Price</th>
+                      <th style="width: 10%">Cost</th>
+                      <th style="width: 12.5%">Performance</th>
+                      <th style="width: 10%">Fees</th>
+                      <th style="width: 15%">Action</th>
                     </tr>
                   </ng-template>
                   <ng-template
@@ -340,7 +340,7 @@
                   [columns]="transactionsTableCols"
                   [value]="stocks"
                   [loading]="loading"
-                  [tableStyle]="{ 'min-width': '50rem' }"
+                  [tableStyle]="{ 'min-width': '70rem' }"
                   [globalFilterFields]="['symbol', 'name', 'quantity', 'date']"
                   [paginator]="true"
                   [rows]="5"
@@ -885,6 +885,24 @@
                       class="d-flex justify-content-center align-items-center my-4"
                     >
                       Most recent search:
+                    </div>
+                    <div class="d-flex flex-column align-items-center">
+                      <div
+                        *ngFor="
+                          let stock of userRecentStockScreenSearch$ | async
+                        "
+                      >
+                        <p-button
+                          [label]="stock.symbol"
+                          styleClass="p-button-text p-button-primary"
+                          (onClick)="
+                            navigateToStockProfile(stock.symbol, stock.name)
+                          "
+                          [pTooltip]="showRoute(stock.symbol)"
+                          tooltipPosition="right"
+                        >
+                        </p-button>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -20,6 +20,7 @@ import {
   StockLogo,
   StockPrice,
   StockQuantity,
+  StockScreen,
   StocksData,
   StockSummaryData,
   StockSummaryDataResponse,
@@ -414,6 +415,12 @@ export class GetService {
     return this.http.get<StockIdea[]>(`${this.api}/${symbol}/ideas`, {
       params: qp,
     });
+  }
+
+  getUserRecentStockSearch(userId: string): Observable<StockScreen[]> {
+    return this.http.get<StockScreen[]>(
+      `${this.api}/${userId}/recent_stock_search`
+    );
   }
 
   //NOTE EXTRA

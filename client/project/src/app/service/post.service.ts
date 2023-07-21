@@ -118,4 +118,27 @@ export class PostService {
       this.http.post<MessageResponse>(`${this.api}/${symbol}/new_idea`, idea)
     );
   }
+
+  updateUserStockScreenSearch(
+    userId: string,
+    symbol: string,
+    name: string
+  ): Promise<MessageResponse> {
+    let data = new HttpParams().set('symbol', symbol).append('name', name);
+
+    const httpheader = new HttpHeaders().set(
+      'Content-Type',
+      'application/x-www-form-urlencoded'
+    );
+
+    return lastValueFrom(
+      this.http.post<MessageResponse>(
+        `${this.api}/${userId}/recent_stock_search`,
+        data.toString(),
+        {
+          headers: httpheader,
+        }
+      )
+    );
+  }
 }

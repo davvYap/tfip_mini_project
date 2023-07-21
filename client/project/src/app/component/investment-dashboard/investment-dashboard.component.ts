@@ -32,6 +32,7 @@ import {
   StockDayPerformance,
   StockLogo,
   StockPrice,
+  StockScreen,
   StocksMonthlyPrice,
   StocksMonthlyQuantity,
   StonkStockPrice,
@@ -51,6 +52,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { NotificationService } from 'src/app/service/notification.service';
 import { Params, Router } from '@angular/router';
+import { BreakpointService } from 'src/app/service/breakpoint.service';
+import { PostService } from 'src/app/service/post.service';
 
 @Component({
   selector: 'app-investment-dashboard',
@@ -148,6 +151,8 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   stocksData$!: Subscription;
   filterStocks!: Stock[];
 
+  userRecentStockScreenSearch$!: Observable<StockScreen[]>;
+
   constructor(
     private getSvc: GetService,
     private themeSvc: ThemeService,
@@ -155,11 +160,12 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     private confirmationSvc: ConfirmationService,
     private messageSvc: MessageService,
     private dialogSvc: DialogService,
-    private updateSvc: UpdateService,
+    private postSvc: PostService,
     private exportSvc: ExportService,
     private title: Title,
     private notificationSvc: NotificationService,
-    private router: Router
+    private router: Router,
+    private breakpointSvc: BreakpointService
   ) {}
 
   ngOnInit() {
@@ -233,6 +239,12 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
 
     //NOTE Initiate Line Chart
     this.initiateLineChartData();
+
+    this.breakpointSvc.initBreakpointObserver();
+
+    this.userRecentStockScreenSearch$ = this.getSvc.getUserRecentStockSearch(
+      this.getSvc.userId
+    );
   }
 
   ngOnDestroy(): void {
@@ -850,7 +862,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.getSvc.passStock = stock;
     this.dialogRef = this.dialogSvc.open(SellStockComponent, {
       header: 'Sell Order Details',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
       maximizable: true,
@@ -875,7 +887,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.getSvc.passStock = stock;
     this.dialogRef = this.dialogSvc.open(SellStockComponent, {
       header: 'Sell Order Details',
-      width: '30%',
+      width: this.breakpointSvc.currentBreakpoint,
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
       maximizable: true,
@@ -1313,7 +1325,15 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     const stockNameTrimmed = stockSymbol.substring(index + 3, lastIndex);
     // console.log('stockselected >>> ', stockSymbolTrimmed);
     // console.log('stock name selected >>> ', stockNameTrimmed);
-
+    this.postSvc
+      .updateUserStockScreenSearch(
+        this.getSvc.userId,
+        stockSymbolTrimmed,
+        stockNameTrimmed
+      )
+      .then((res) => {
+        console.log(res.message);
+      });
     this.navigateToStockProfile(stockSymbolTrimmed, stockNameTrimmed);
   }
 }

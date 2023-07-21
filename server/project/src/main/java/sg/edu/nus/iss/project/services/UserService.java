@@ -720,18 +720,12 @@ public class UserService {
         return userRepo.deleteStockIdeaMongo(symbol, ideaId);
     }
 
-    public boolean upsertUserRecentStockScreenerMongo(String symbol, String userId) {
-        return userRepo.upsertUserRecentStockScreenerMongo(symbol, userId);
+    public boolean upsertUserRecentStockScreenerMongo(String symbol, String userId, String stockName) {
+        return userRepo.upsertUserRecentStockScreenerMongo(symbol, userId, stockName);
     }
 
-    public List<String> retrieveUserRecentStockScreenerMongo(String userId) {
-        List<Document> docs = userRepo.retrieveUserRecentStockScreenerMongo(userId);
-        List<String> symbols = new ArrayList<>();
-        for (Document doc : docs) {
-            String symbol = doc.getString("symbol");
-            symbols.add(symbol);
-        }
-        return symbols;
+    public List<Stock> retrieveUserRecentStockScreenerMongo(String userId) {
+        return userRepo.retrieveUserRecentStockScreenerMongo(userId);
     }
 
     // ***** UNUSED *****

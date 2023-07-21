@@ -9,6 +9,7 @@ import org.bson.Document;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonReader;
 
 public class Stock {
@@ -210,8 +211,15 @@ public class Stock {
             s = new Stock();
             s.setPurchasedDate(d.getLong("time"));
             s.setSymbol(d.getString("symbol"));
+            s.setStockName(d.getString("name"));
         }
         return s;
+    }
+
+    public JsonObjectBuilder toJsonObjectBuilderStockScreener() {
+        return Json.createObjectBuilder()
+                .add("name", stockName)
+                .add("symbol", symbol);
     }
 
     public StockCount toStockCount() {

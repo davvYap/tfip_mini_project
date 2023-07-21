@@ -444,7 +444,7 @@ public class UserController {
         boolean deleted = userSvc.deleteStockIdeaMongo(symbol, ideaId);
 
         if (!deleted) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Json.createObjectBuilder().add("message", "Failed to delete idea.").build().toString());
         }
@@ -452,5 +452,41 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("message", "Deleted").build().toString());
+    }
+
+    @PostMapping(path = "/{userId}/recent_stock_search")
+    @ResponseBody
+    public ResponseEntity<String> upsertUserRecentStockScreenerMongo(@PathVariable String userId,
+            @RequestBody MultiValueMap<String, String> input) {
+        String symbol = input.getFirst("symbol");
+        String stockName = input.getFirst("name");
+        System.out.println("symbol >>>" + symbol);
+        System.out.println("name >>>" + stockName);
+
+        boolean upserted = userSvc.upsertUserRecentStockScreenerMongo(symbol, userId, stockName);
+
+        if (upserted) {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "Upserted user stock screen record").build()
+                            .toString());
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("message", "Failed to upsert user stock screen record.").build()
+                        .toString());
+    }
+
+    @GetMapping(path = "/{userId}/recent_stock_search")
+    @ResponseBody
+    public ResponseEntity<String> retrieveUserRecentStockScreenerMongo(@PathVariable String userId) {
+        List<Stock> stocks = userSvc.retrieveUserRecentStockScreenerMongo(userId);
+        JsonArrayBuilder jsArr = Json.createArrayBuilder();
+        stocks.forEach(s -> jsArr.add(s.toJsonObjectBuilderStockScreener()));
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsArr.build().toString());
     }
 }
