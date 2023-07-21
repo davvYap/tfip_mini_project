@@ -39,6 +39,7 @@ import { PostService } from 'src/app/service/post.service';
 import { ThemeService } from 'src/app/service/theme.service';
 import { Title } from '@angular/platform-browser';
 import {
+  faAnglesDown,
   faFaceSmileWink,
   faHandPointRight,
   faRepeat,
@@ -55,6 +56,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   smileIcon = faFaceSmileWink;
   pointRightIcon = faHandPointRight;
   switchIcon = faRepeat;
+  downIcon = faAnglesDown;
   thisYear = signal(new Date().getFullYear());
   currMonth = signal(new Date().getMonth());
   documentStyle = signal(getComputedStyle(document.documentElement));
@@ -114,6 +116,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   guideLineDataForYearlyGoal!: number[];
   portfolioPerformanceData!: number[];
   portfolioPerformanceDataFinal: WritableSignal<number[]> = signal([]);
+  thisYearStockCurrHoldings = signal(0);
 
   savingsValueYearly = signal(0);
   savingsValue = signal(0);
@@ -465,7 +468,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }),
         switchMap((res) => {
           this.portfolioPerformanceData = res;
-          // console.log('user stock data', this.portfolioPerformanceData);
+          // console.log('user stock data', res);
+          this.thisYearStockCurrHoldings.set(res[res.length - 1]);
+          // console.log(this.thisYearStockCurrHoldings());
           return of(res);
         }),
         switchMap((res) => {
@@ -514,6 +519,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
               if (totalAccumulateBalance !== 0) {
                 this.portfolioPerformanceData[index] =
                   this.portfolioPerformanceData[index] + totalAccumulateBalance;
+                // console.log(
+                //   'individual month balance > ',
+                //   totalAccumulateBalance
+                // );
               }
               index++;
             });
@@ -717,11 +726,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
           color: this.documentStyle().getPropertyValue('--surface-ground'),
         },
       },
-      onClick: (event: any, activeElements: any) => {
-        if (activeElements.length > 0) {
-          this.router.navigate(['/investment-dashboard']);
-        }
-      },
+      // onClick: (event: any, activeElements: any) => {
+      //   if (activeElements.length > 0) {
+      //     this.router.navigate(['/investment-dashboard']);
+      //   }
+      // },
     };
   }
 
@@ -828,17 +837,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
           color: documentStyle.getPropertyValue('--surface-ground'),
         },
       },
-      onClick: (event: any, activeElements: any) => {
-        if (activeElements.length > 0) {
-          const index = activeElements[0].index;
-          console.log(index);
-          const qp: Params = {
-            type: this.savingsCategoriesRoutes[index],
-            year: this.thisYear(),
-          };
-          this.router.navigate(['/transaction-records'], { queryParams: qp });
-        }
-      },
+      // onClick: (event: any, activeElements: any) => {
+      //   if (activeElements.length > 0) {
+      //     const index = activeElements[0].index;
+      //     console.log(index);
+      //     const qp: Params = {
+      //       type: this.savingsCategoriesRoutes[index],
+      //       year: this.thisYear(),
+      //     };
+      //     this.router.navigate(['/transaction-records'], { queryParams: qp });
+      //   }
+      // },
     };
   }
 

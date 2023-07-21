@@ -72,6 +72,13 @@ public class MortgageTableMonth {
         this.balanceRemaining = balanceRemaining;
     }
 
+    @Override
+    public String toString() {
+        return "MortgageTableMonth [month=" + month + ", principal=" + principal + ", interest=" + interest
+                + ", repayment=" + repayment + ", totalInterestPaid=" + totalInterestPaid + ", balanceRemaining="
+                + balanceRemaining + "]";
+    }
+
     public JsonObjectBuilder toJsonObjectBuilder() {
         return Json.createObjectBuilder()
                 .add("year", month)

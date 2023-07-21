@@ -28,7 +28,6 @@
           [min]="0"
           [max]="2000000"
           [step]="50000"
-          (onSlideEnd)="calculate()"
           (onChange)="calculate()"
           class="mt-2"
         ></p-slider>
@@ -59,7 +58,6 @@
           [(ngModel)]="loanTerm"
           [min]="minLoanTerm"
           [max]="maxLoanTerm"
-          (onSlideEnd)="calculate()"
           class="mt-2"
           (onChange)="calculate()"
         ></p-slider>
@@ -81,7 +79,6 @@
           [(ngModel)]="interestRate"
           [min]="0"
           [max]="100"
-          (onSlideEnd)="calculate()"
           class="mt-2"
           (onChange)="calculate()"
         ></p-slider>
@@ -147,10 +144,6 @@
     </div>
   </div>
 
-  <div *ngIf="showSkeleton">
-    <p-skeleton height="50dvh"></p-skeleton>
-  </div>
-
   <div
     *ngIf="showAmortizationChart"
     class="row justify-content-center align-items-center my-5"
@@ -160,11 +153,14 @@
     </div>
   </div>
 
+  <div *ngIf="showSkeleton">
+    <p-skeleton height="50dvh"></p-skeleton>
+  </div>
   <div
     *ngIf="showAmortizationTable"
     class="row justify-content-center align-items-center"
   >
-    <div class="col-md-10 col-11 mortgage-card">
+    <div *ngIf="mortgageData" class="col-md-10 col-11 mortgage-card">
       <p-treeTable
         id="mortgagett"
         #mortgagett

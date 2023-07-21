@@ -189,18 +189,26 @@
         <!-- <p class="fs-4">Mortgages: {{ mortgageNumber() }}</p> -->
       </div>
       <div class="router-h3 mt-3">
-        <h3 *ngIf="!isGoogleUser()" (click)="showUserSettingDialog()">
-          <fa-icon [icon]="gearIcon"></fa-icon> Setting
-        </h3>
-        <h3 (click)="navigateTo('/investment-dashboard')">
-          <fa-icon [icon]="rightIcon"></fa-icon> Investment
-        </h3>
-        <h3 (click)="navigateTo('/savings')">
-          <fa-icon [icon]="rightIcon"></fa-icon> Savings
-        </h3>
-        <h3 (click)="navigateTo('/mortgage-dashboard')">
-          <fa-icon [icon]="rightIcon"></fa-icon> Mortgage
-        </h3>
+        <div class="my-3">
+          <h3 *ngIf="!isGoogleUser()" (click)="showUserSettingDialog()">
+            <fa-icon [icon]="gearIcon"></fa-icon> Setting
+          </h3>
+        </div>
+        <div class="my-3">
+          <h3 (click)="navigateTo('/investment-dashboard')">
+            <fa-icon [icon]="rightIcon"></fa-icon> Investment
+          </h3>
+        </div>
+        <div class="my-3">
+          <h3 (click)="navigateTo('/savings')">
+            <fa-icon [icon]="rightIcon"></fa-icon> Savings
+          </h3>
+        </div>
+        <div class="my-3">
+          <h3 (click)="navigateTo('/mortgage-dashboard')">
+            <fa-icon [icon]="rightIcon"></fa-icon> Mortgage
+          </h3>
+        </div>
       </div>
     </div>
   </ng-template>

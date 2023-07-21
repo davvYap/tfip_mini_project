@@ -13,6 +13,9 @@ import { lastValueFrom } from 'rxjs';
   providedIn: 'root',
 })
 export class UpdateService {
+  // api: string = 'http://localhost:8080/api';
+  api: string = '/api';
+
   constructor(private http: HttpClient) {}
 
   updateUserStock(
@@ -20,7 +23,10 @@ export class UpdateService {
     soldStock: PurchasedStock
   ): Promise<MessageResponse> {
     return lastValueFrom(
-      this.http.put<MessageResponse>(`/api/${userId}/update_stock`, soldStock)
+      this.http.put<MessageResponse>(
+        `${this.api}/${userId}/update_stock`,
+        soldStock
+      )
     );
   }
 
@@ -29,13 +35,19 @@ export class UpdateService {
     tran: Transaction
   ): Promise<MessageResponse> {
     return lastValueFrom(
-      this.http.put<MessageResponse>(`/api/${userId}/update_transaction`, tran)
+      this.http.put<MessageResponse>(
+        `${this.api}/${userId}/update_transaction`,
+        tran
+      )
     );
   }
 
   updateCategory(userId: string, cat: Categories): Promise<MessageResponse> {
     return lastValueFrom(
-      this.http.put<MessageResponse>(`/api/${userId}/update_category`, cat)
+      this.http.put<MessageResponse>(
+        `${this.api}/${userId}/update_category`,
+        cat
+      )
     );
   }
 
@@ -44,7 +56,10 @@ export class UpdateService {
     formData: FormData
   ): Promise<MessageResponse> {
     return lastValueFrom(
-      this.http.put<MessageResponse>(`/api/${userId}/edit_profile`, formData)
+      this.http.put<MessageResponse>(
+        `${this.api}/${userId}/edit_profile`,
+        formData
+      )
     );
   }
 
@@ -54,7 +69,7 @@ export class UpdateService {
   ): Promise<MessageResponse> {
     return lastValueFrom(
       this.http.put<MessageResponse>(
-        `/api/${userId}/update_mortgage_profile`,
+        `${this.api}/${userId}/update_mortgage_profile`,
         mort
       )
     );
@@ -70,7 +85,10 @@ export class UpdateService {
       .append('active', active);
     // console.log('qp', qp);
     return lastValueFrom(
-      this.http.put<MessageResponse>(`/api/${userId}/toggle_regular_tran`, qp)
+      this.http.put<MessageResponse>(
+        `${this.api}/${userId}/toggle_regular_tran`,
+        qp
+      )
     );
   }
 }

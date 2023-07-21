@@ -8,6 +8,9 @@ import { Transaction } from '../models';
   providedIn: 'root',
 })
 export class DeleteService {
+  // api: string = 'http://localhost:8080/api';
+  api: string = '/api';
+
   constructor(private http: HttpClient) {}
 
   deleteStockWithPurchaseId(
@@ -17,7 +20,7 @@ export class DeleteService {
     const qp = new HttpParams().set('purchaseId', purchaseId);
     return lastValueFrom(
       this.http.delete<MessageResponse>(
-        `/api/${userId}/delete_stock_purchaseId`,
+        `${this.api}/${userId}/delete_stock_purchaseId`,
         { params: qp }
       )
     );
@@ -29,9 +32,12 @@ export class DeleteService {
   ): Promise<MessageResponse> {
     const qp = new HttpParams().set('symbol', symbol);
     return lastValueFrom(
-      this.http.delete<MessageResponse>(`/api/${userId}/delete_stock_symbol`, {
-        params: qp,
-      })
+      this.http.delete<MessageResponse>(
+        `${this.api}/${userId}/delete_stock_symbol`,
+        {
+          params: qp,
+        }
+      )
     );
   }
 
@@ -43,9 +49,12 @@ export class DeleteService {
       .set('tranId', tran.transactionId)
       .append('catName', tran.categoryName);
     return lastValueFrom(
-      this.http.delete<MessageResponse>(`/api/${userId}/delete_transaction`, {
-        params: qp,
-      })
+      this.http.delete<MessageResponse>(
+        `${this.api}/${userId}/delete_transaction`,
+        {
+          params: qp,
+        }
+      )
     );
   }
 
@@ -56,7 +65,7 @@ export class DeleteService {
     const qp = new HttpParams().set('mortgageId', mortgageId);
     return lastValueFrom(
       this.http.delete<MessageResponse>(
-        `/api/${userId}/delete_mortgage_portfolio`,
+        `${this.api}/${userId}/delete_mortgage_portfolio`,
         { params: qp }
       )
     );
@@ -71,20 +80,21 @@ export class DeleteService {
       .set('regTranId', regTranId)
       .append('regTranName', regTranName);
     return lastValueFrom(
-      this.http.delete<MessageResponse>(`/api/${userId}/delete_regular_tran`, {
-        params: qp,
-      })
+      this.http.delete<MessageResponse>(
+        `${this.api}/${userId}/delete_regular_tran`,
+        {
+          params: qp,
+        }
+      )
     );
   }
 
   deleteStockIdea(symbol: string, ideaId: string): Promise<MessageResponse> {
     const qp = new HttpParams().set('ideaId', ideaId);
     return lastValueFrom(
-      this.http.delete<MessageResponse>(`/api/${symbol}/delete_idea`, {
+      this.http.delete<MessageResponse>(`${this.api}/${symbol}/delete_idea`, {
         params: qp,
       })
     );
   }
-
-  // http://localhost:8080
 }

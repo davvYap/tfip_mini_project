@@ -41,6 +41,10 @@ h5 {
   color: var(--text-color);
 }
 
+.new-user-card {
+  min-height: 50dvh;
+}
+
 /* .card {
   padding: 2rem;
   border-radius: 10px;

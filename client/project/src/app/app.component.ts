@@ -96,8 +96,7 @@ export class AppComponent implements OnInit {
     'arya-green',
     'arya-orange',
     'luna-pink',
-    'luna-blue',
-    'luna-green',
+    'boot-darkblue',
   ];
 
   @ViewChild('appDialog', { static: true })
@@ -340,14 +339,9 @@ export class AppComponent implements OnInit {
                   command: () => this.changeTheme(10),
                 },
                 {
-                  label: 'Luna Blue',
+                  label: 'Boot Dark Blue',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(11),
-                },
-                {
-                  label: 'Luna Green',
-                  icon: 'pi pi-fw pi-images',
-                  command: () => this.changeTheme(12),
                 },
               ],
             },
@@ -653,7 +647,7 @@ export class AppComponent implements OnInit {
         })
       )
       .subscribe(() => {
-        console.log(this.stocksValue());
+        // console.log(this.stocksValue());
       });
 
     this.getSvc
@@ -674,7 +668,7 @@ export class AppComponent implements OnInit {
         })
       )
       .subscribe(() => {
-        console.log(this.stocksValue());
+        // console.log(this.stocksValue());
       });
 
     this.getSvc

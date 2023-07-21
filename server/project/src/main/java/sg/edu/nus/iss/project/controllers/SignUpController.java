@@ -29,7 +29,8 @@ import sg.edu.nus.iss.project.utils.gmail.GMailer;
 
 @Controller
 @CrossOrigin(origins = {
-        "https://afmapp-tfip-production.up.railway.app" }, allowCredentials = "true", allowedHeaders = "*")
+        "https://afmapp-tfip-production.up.railway.app",
+        "http://localhost:4200" }, allowCredentials = "true", allowedHeaders = "*")
 @RequestMapping(path = "/api")
 public class SignUpController {
 

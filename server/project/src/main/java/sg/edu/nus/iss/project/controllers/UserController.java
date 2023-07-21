@@ -303,6 +303,7 @@ public class UserController {
                             .formatted(stkSymbol,
                                     stockCount.getQuantity(), totalStockMarketValue));
         }
+        System.out.println("Total stock value >>> " + totalStockValue);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -360,7 +361,7 @@ public class UserController {
             @RequestParam(defaultValue = "0") int skip, @RequestParam int year) throws IOException {
         System.out.println("Calling Controller API for user stock monnthly value...");
         List<Double> userStockValue = userSvc.getUserMonthlyStockValueForYear(year, userId, limit, skip);
-
+        System.out.println("user monthly stock value >>> " + userStockValue);
         JsonArrayBuilder jsArr = Json.createArrayBuilder();
         userStockValue.forEach(value -> jsArr.add(value));
 

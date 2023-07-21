@@ -44,7 +44,9 @@
           </div>
 
           <div class="d-flex justify-content-between align-items-center">
-            <p class="fs-5 font-monospace">Amount: {{ reg.tran.amount }}</p>
+            <p class="fs-5 font-monospace">
+              Amount: {{ reg.tran.amount | currency }}
+            </p>
             <div class="d-flex justify-content-evenly align-items-center">
               <p-inputSwitch
                 [(ngModel)]="reg.active"

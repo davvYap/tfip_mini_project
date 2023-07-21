@@ -82,13 +82,8 @@
                 "inject": false
               },
               {
-                "input": "src/theme/theme-luna-blue.css",
-                "bundleName": "luna-blue",
-                "inject": false
-              },
-              {
-                "input": "src/theme/theme-luna-green.css",
-                "bundleName": "luna-green",
+                "input": "src/theme/theme-bootstrap-darkblue.css",
+                "bundleName": "boot-darkblue",
                 "inject": false
               }
             ],

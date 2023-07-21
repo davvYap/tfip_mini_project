@@ -250,6 +250,8 @@ export class MortgageComponent implements OnInit {
       .then((data: MortgageLoan) => {
         this.repaymentAmountData.set([data.principal, data.totalInterest]);
         this.monthlyRepayment.set(data.monthlyRepayment);
+        // console.log(this.repaymentAmountData());
+        // console.log(this.monthlyRepayment());
       })
       .then(() => {
         this.initiateDonutChart();
@@ -343,11 +345,11 @@ export class MortgageComponent implements OnInit {
         for (let j = startingMonth; j < totalMonths; j++) {
           // NOTE check if the the curr month is December
           if ((j + 1) % 12 === 0) {
-            totalPrincipalPerYear += res[j].principal;
-            totalInterestPerYear += res[j].interest;
-            totalPaymentPerYear += res[j].repayment;
-            accTotalInterestPaid = res[j].totalInterestPaid;
-            accPrincipalBalanceRemainingPerYear = res[j].balanceRemaining;
+            totalPrincipalPerYear += res[j]?.principal;
+            totalInterestPerYear += res[j]?.interest;
+            totalPaymentPerYear += res[j]?.repayment;
+            accTotalInterestPaid = res[j]?.totalInterestPaid;
+            accPrincipalBalanceRemainingPerYear = res[j]?.balanceRemaining;
 
             // FOR LINECHART DATA
             this.mortgageLabels.push(currYear);
@@ -393,9 +395,10 @@ export class MortgageComponent implements OnInit {
             startingMonth += 12;
             currYear += 1;
           } else {
-            totalPrincipalPerYear += res[j].principal;
-            totalInterestPerYear += res[j].interest;
-            totalPaymentPerYear += res[j].repayment;
+            // console.log('currMonth >>> ', j + 1);
+            totalPrincipalPerYear += res[j]?.principal;
+            totalInterestPerYear += res[j]?.interest;
+            totalPaymentPerYear += res[j]?.repayment;
           }
         }
 
@@ -410,7 +413,7 @@ export class MortgageComponent implements OnInit {
         if (remainingMonths !== 0) {
           for (let i = totalMonths - remainingMonths; i < totalMonths; i++) {
             if (i === totalMonths - 1) {
-              console.log('i', i);
+              // console.log('i', i);
 
               totalPrincipalPerYear += res[i].principal;
               totalInterestPerYear += res[i].interest;
@@ -465,21 +468,21 @@ export class MortgageComponent implements OnInit {
 
               this.mortgageRepaymentData.push(mortgageDataEachYear);
             } else {
-              console.log('i', i);
+              // console.log('i', i);
               totalPrincipalPerYear += res[i]?.principal;
               totalInterestPerYear += res[i]?.interest;
               totalPaymentPerYear += res[i]?.repayment;
             }
           }
         }
+        // console.log(this.mortgageRepaymentData);
+        setTimeout(() => {
+          this.showSkeleton = false;
+          this.showAmortizationTable = true;
+          this.showAmortizationChart = true;
+          this.initiateLineChart();
+        }, 200);
       });
-    // console.log(this.mortgageRepaymentData);
-    setTimeout(() => {
-      this.showSkeleton = false;
-      this.showAmortizationTable = true;
-      this.showAmortizationChart = true;
-      this.initiateLineChart();
-    }, 200);
   }
 
   expandRecursive(nodes: any[]) {

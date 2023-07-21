@@ -45,7 +45,7 @@
                 ></p-chart>
               </div>
 
-              <div class="col-10 col-md-6 dashboard-text">
+              <div class="col-10 col-md-6 dashboard-text my-3">
                 <div class="d-flex flex-column align-items-start">
                   <h3 class="mb-3">
                     Total Assets Value
@@ -123,7 +123,7 @@
                   [options]="donutOptionsInvestment"
                 ></p-chart>
               </div>
-              <div class="col-md-6 col-10 dashboard-text">
+              <div class="col-md-6 col-10 dashboard-text my-3">
                 <div class="d-flex flex-column align-items-start">
                   <h3 class="mb-3">
                     <i
@@ -147,6 +147,23 @@
                     </span>
                   </h3>
 
+                  <h4 class="mt-2">
+                    Stock Holdings ({{ thisYear() }})
+                    <span
+                      class="pi pi-angle-right"
+                      style="font-size: 1.5rem"
+                    ></span>
+                    <span *ngIf="!skeletonLoading; else loading">
+                      {{ thisYearStockCurrHoldings() | currency }}
+                      <span
+                        *ngIf="thisYearStockCurrHoldings()"
+                        class="ms-2"
+                        [className]="getColor(stockChangePercentage)"
+                      >
+                        ({{ stockChangePercentage | percent : "1.2-2" }})
+                      </span>
+                    </span>
+                  </h4>
                   <h4>
                     Unrealized P&L
                     <span
@@ -195,7 +212,7 @@
                   [options]="donutOptionsSavings"
                 ></p-chart>
               </div>
-              <div class="col-md-6 col-10 dashboard-text">
+              <div class="col-md-6 col-10 dashboard-text my-3">
                 <div class="d-flex flex-column align-items-start">
                   <h3 class="mb-3">
                     <p-button
@@ -205,7 +222,7 @@
                       <fa-icon [icon]="switchIcon"></fa-icon>
                     </p-button>
                     <span *ngIf="showYearSavings">
-                      Year {{ thisYear() }} Net Savings
+                      Net Savings ({{ thisYear() }})
                       <span
                         class="pi pi-angle-right"
                         style="font-size: 1.5rem"
@@ -316,15 +333,11 @@
       <p-skeleton height="50dvh"></p-skeleton>
     </div>
   </div>
-  ></ng-template
->
+</ng-template>
 
 <ng-template #newUser>
-  <div class="row justify-content-center align-items-center my-5">
-    <div
-      class="col-10 d-flex justify-content-center align-items-center h1card"
-      [style]="{ height: '50dvh' }"
-    >
+  <div class="row justify-content-center align-items-center my-5 new-user-card">
+    <div class="col-10 d-flex justify-content-center align-items-center h1card">
       <div class="d-flex flex-column align-items-center">
         <div>
           <h3>
@@ -332,14 +345,17 @@
             <fa-icon [icon]="smileIcon"></fa-icon>
           </h3>
         </div>
-
         <div>
           <h3>
             To begin your jouney, please follow the steps below to build your
             profile:
           </h3>
         </div>
-
+        <div class="d-flex justify-content-center align-items-center mt-3">
+          <h3>
+            <fa-icon [icon]="downIcon" animation="bounce"></fa-icon>
+          </h3>
+        </div>
         <div class="my-5 d-flex flex-column justify-content-evenly">
           <div
             *ngIf="showAddGoal"
