@@ -26,15 +26,8 @@ jobs:
       run: |
         echo "Environment Variables:"
         echo "-------------------------------"
-        echo "JDBC_URI: $JDBC_URI"
-        echo "JDBC_USERNAME: $JDBC_USERNAME"
-        echo "JDBC_PASSWORD: $JDBC_PASSWORD"
-        echo "MONGO_URI: $MONGO_URI"
-        echo "RAPID_API_KEY: $RAPID_API_KEY"
-        echo "REDISHOST: $REDISHOST"
-        echo "REDISPORT: $REDISPORT"
-        echo "REDISUSER: $REDISUSER"
-        echo "REDISPASSWORD: $REDISPASSWORD"
+        echo "JDBC_USERNAME: ${{ vars.JDBC_USERNAME }}"
+        echo "REDISUSER: ${{ vars.REDISUSER }}"
 
     - name: Build with Maven, skip test
       run: mvn package -Dmaven.test.skip=true
