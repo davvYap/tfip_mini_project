@@ -32,16 +32,16 @@ jobs:
     - name: Build with Maven, skip test
       run: mvn package -Dmaven.test.skip=true
       working-directory: server/project
-      env:
-        JDBC_URI: ${{ secrets.JDBC_URI }}
-        JDBC_USERNAME: ${{ vars.JDBC_USERNAME }}
-        JDBC_PASSWORD: ${{ secrets.JDBC_PASSWORD }}
-        MONGO_URI: ${{ secrets.MONGO_URI }}
-        RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
-        REDISHOST: ${{ secrets.REDISHOST }}
-        REDISPORT: ${{ secrets.REDISPORT }}
-        REDISUSER: ${{ vars.REDISUSER }}
-        REDISPASSWORD: ${{ secrets.REDISPASSWORD }}
+#       env:
+#         JDBC_URI: ${{ secrets.JDBC_URI }}
+#         JDBC_USERNAME: ${{ vars.JDBC_USERNAME }}
+#         JDBC_PASSWORD: ${{ secrets.JDBC_PASSWORD }}
+#         MONGO_URI: ${{ secrets.MONGO_URI }}
+#         RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+#         REDISHOST: ${{ secrets.REDISHOST }}
+#         REDISPORT: ${{ secrets.REDISPORT }}
+#         REDISUSER: ${{ vars.REDISUSER }}
+#         REDISPASSWORD: ${{ secrets.REDISPASSWORD }}
 
     - name: Install Railway
       run: npm i -g @railway/cli
