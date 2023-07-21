@@ -1,0 +1,60 @@
+# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
+# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
+
+name: After git push deploy to Railway
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+#     permissions:
+#       contents: read
+#       packages: write
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+       
+    - name: Display Environment Variables in action log
+      run: |
+        echo "Environment Variables:"
+        echo "-------------------------------"
+        echo "JDBC_URI: $JDBC_URI"
+        echo "JDBC_USERNAME: $JDBC_USERNAME"
+        echo "JDBC_PASSWORD: $JDBC_PASSWORD"
+        echo "MONGO_URI: $MONGO_URI"
+        echo "RAPID_API_KEY: $RAPID_API_KEY"
+        echo "REDISHOST: $REDISHOST"
+        echo "REDISPORT: $REDISPORT"
+        echo "REDISUSER: $REDISUSER"
+        echo "REDISPASSWORD: $REDISPASSWORD"
+
+    - name: Build with Maven, skip test
+      run: mvn package -Dmaven.test.skip=true
+      working-directory: server/project
+      env:
+        JDBC_URI: ${{ secrets.JDBC_URI }}
+        JDBC_USERNAME: ${{ vars.JDBC_USERNAME }}
+        JDBC_PASSWORD: ${{ secrets.JDBC_PASSWORD }}
+        MONGO_URI: ${{ secrets.MONGO_URI }}
+        RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+        REDISHOST: ${{ secrets.REDISHOST }}
+        REDISPORT: ${{ secrets.REDISPORT }}
+        REDISUSER: ${{ vars.REDISUSER }}
+        REDISPASSWORD: ${{ secrets.REDISPASSWORD }}
+
+    - name: Install Railway
+      run: npm i -g @railway/cli
+
+    - name: Deploy
+      run: railway up
+      working-directory: server/project
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
