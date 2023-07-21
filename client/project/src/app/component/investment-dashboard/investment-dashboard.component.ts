@@ -29,6 +29,7 @@ import {
   PurchasedStocksCount,
   SoldStock,
   Stock,
+  StockDayPerformance,
   StockLogo,
   StockPrice,
   StocksMonthlyPrice,
@@ -267,18 +268,19 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
       .pipe(
         // get market price and performance
         switchMap((stockCounts: PurchasedStocksCount[]) => {
-          let observables: Observable<StonkStockPrice>[] = [];
+          let observables: Observable<Stock>[] = [];
           stockCounts.map((stockCount) => {
-            const observable = this.getSvc.getStonkStockPrice(
+            const observable = this.getSvc.getStockPriceObservable(
               stockCount.symbol
             );
             observables.push(observable);
           });
           return forkJoin(observables).pipe(
-            map((results: StonkStockPrice[]) => {
+            map((results: Stock[]) => {
               for (let i = 0; i < results.length; i++) {
                 const stock = stockCounts[i];
-                stock.marketPrice = results[i].price * stock.quantity;
+                stock.marketPrice =
+                  parseFloat(results[i].price) * stock.quantity;
                 stock.performance =
                   (stock.marketPrice - stock.cost) / stock.cost;
               }
@@ -297,6 +299,24 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
             map((results: StockLogo[]) => {
               for (let i = 0; i < results.length; i++) {
                 stockCounts[i].logo = results[i].url;
+              }
+              return stockCounts;
+            })
+          );
+        }),
+        // get stock day performance
+        switchMap((stockCounts: PurchasedStocksCount[]) => {
+          let observables: Observable<StockDayPerformance>[] = [];
+          stockCounts.map((stockCount) => {
+            const observable = this.getSvc.getStockDayPerformance(
+              stockCount.symbol
+            );
+            observables.push(observable);
+          });
+          return forkJoin(observables).pipe(
+            map((results: StockDayPerformance[]) => {
+              for (let i = 0; i < results.length; i++) {
+                stockCounts[i].dayPerformance = results[i].dayPerformance;
               }
               return stockCounts;
             })
@@ -334,6 +354,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           quantity: sc.quantity,
           cost: sc.cost / sc.quantity,
           marketPrice: sc.marketPrice / sc.quantity,
+          dayPerformance: sc.dayPerformance,
           performance: sc.performance,
           logo: sc.logo,
           fees: 0,
@@ -352,7 +373,6 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
               cost: stk.price * stk.quantity,
               marketPrice: stk.marketPrice * stk.quantity,
               performance: stk.percentage,
-              // logo: stk.logo,
               date: stk.date,
               fees: stk.fees,
               purchaseId: stk.purchaseId,

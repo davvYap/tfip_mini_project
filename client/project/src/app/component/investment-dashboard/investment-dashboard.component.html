@@ -9,566 +9,71 @@
       <h1>Portfolio Dashbooard</h1>
     </div>
 
-    <div *ngIf="stocks; else noStockData">
-      <section>
-        <div class="row justify-content-evenly align-items-center">
-          <!-- DONUT CHART -->
-          <div class="col-md-4 col-11 donutbackground">
-            <p-chart
-              type="doughnut"
-              [data]="donutData"
-              [options]="donutOptions"
-            ></p-chart>
-          </div>
-
-          <!-- LINE CHART -->
-          <div class="col-md-7 col-11 linebackground g-2">
-            <div *ngIf="!skeletonLoading; else skeleton">
+    <div *ngIf="stocksCount; else stocksLoading">
+      <div *ngIf="stocksCount.length > 0; else noStockData">
+        <section>
+          <div class="row justify-content-evenly align-items-center">
+            <!-- DONUT CHART -->
+            <div class="col-md-4 col-11 donutbackground">
               <p-chart
-                type="line"
-                [data]="lineData"
-                [options]="lineOptions"
+                type="doughnut"
+                [data]="donutData"
+                [options]="donutOptions"
               ></p-chart>
             </div>
+
+            <!-- LINE CHART -->
+            <div class="col-md-7 col-11 linebackground g-2">
+              <div *ngIf="!skeletonLoading; else skeleton">
+                <p-chart
+                  type="line"
+                  [data]="lineData"
+                  [options]="lineOptions"
+                ></p-chart>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- IMPORTANT TABLES -->
-      <section class="my-3">
-        <p-tabView>
-          <!-- STOCKS -->
-          <p-tabPanel>
-            <ng-template pTemplate="header">
-              <!-- <i class="pi pi-apple"></i> -->
-              <span class="mx-2">Overview</span>
-            </ng-template>
+        <!-- IMPORTANT TABLES -->
+        <section class="my-3">
+          <p-tabView>
+            <!-- STOCKS -->
+            <p-tabPanel>
+              <ng-template pTemplate="header">
+                <!-- <i class="pi pi-apple"></i> -->
+                <span class="mx-2">Overview</span>
+              </ng-template>
 
-            <div
-              class="row justify-content-evenly align-items-center"
-              id="unrealized-profit-row"
-            >
               <div
-                class="col-md-10 col-11 d-flex justify-content-center h3-font"
+                class="row justify-content-evenly align-items-center"
+                id="unrealized-profit-row"
               >
-                <!-- Desktop view -->
-                <h2 class="d-none d-md-block">
-                  Total Portfolio Value :
-                  <span id="unrealized-market-value">
-                    {{ totalStockMarketValue | currency : "USD" : "code" }}
-                  </span>
-                  <span id="dummy-unrealized-value">----</span>
-                </h2>
-                <!-- Mobile view -->
-                <div class="d-md-none">
-                  <h5>
-                    Portfolio Value:
+                <div
+                  class="col-md-10 col-11 d-flex justify-content-center h3-font"
+                >
+                  <!-- Desktop view -->
+                  <h2 class="d-none d-md-block">
+                    Total Portfolio Value :
                     <span id="unrealized-market-value">
                       {{ totalStockMarketValue | currency : "USD" : "code" }}
                     </span>
                     <span id="dummy-unrealized-value">----</span>
-                  </h5>
-                </div>
-                <!-- Desktop view show, mobile view hide -->
-                <span class="d-flex align-items-center ms-2 d-none d-md-inline">
-                  <p-button
-                    id="show-icon"
-                    icon="pi pi-eye"
-                    styleClass="p-button-rounded p-button-secondary p-button-text p-button-lg"
-                    (onClick)="hideProfit()"
-                  ></p-button>
-                  <p-button
-                    id="hide-icon"
-                    icon="pi pi-eye-slash"
-                    styleClass="p-button-rounded p-button-secondary p-button-text p-button-lg"
-                    (onClick)="hideProfit()"
-                  ></p-button>
-                </span>
-              </div>
-              <div class="row justify-content-evenly align-items-center">
-                <div
-                  class="col-md-10 col-11 d-flex justify-content-center h3-font"
-                >
-                  <!-- Desktop -->
-                  <h2 class="d-none d-md-block">
-                    Unrealized P&L :
-                    <span
-                      id="unrealized-profit"
-                      class="fw-lighter"
-                      [className]="getProfitColorClass(unrealizedProfit)"
-                    >
-                      <i
-                        [class]="getProfitIcon(unrealizedProfit)"
-                        style="font-size: 1.5rem"
-                      ></i>
-                      {{ unrealizedProfit | currency : "USD" : "code" }} (
-                      <span class="fw-lighter">
-                        {{
-                          unrealizedProfit /
-                            (totalStockMarketValue - unrealizedProfit)
-                            | percent : "1.2-2"
-                        }}
-                      </span>
-                      )
-                    </span>
-                    <span id="dummy-unrealized-profit"> ---- </span>
                   </h2>
-
-                  <!-- Mobile -->
-                  <div class="d-flex flex-column align-items-center d-md-none">
-                    <h5>Unrealized P&L :</h5>
+                  <!-- Mobile view -->
+                  <div class="d-md-none">
                     <h5>
-                      <span
-                        id="unrealized-profit"
-                        class="fw-lighter"
-                        [className]="getProfitColorClass(unrealizedProfit)"
-                      >
-                        {{ unrealizedProfit | currency : "USD" : "code" }} (
-                        <span class="fw-lighter">
-                          {{
-                            unrealizedProfit /
-                              (totalStockMarketValue - unrealizedProfit)
-                              | percent : "1.2-2"
-                          }}
-                        </span>
-                        )
+                      Portfolio Value:
+                      <span id="unrealized-market-value">
+                        {{ totalStockMarketValue | currency : "USD" : "code" }}
                       </span>
-                      <span id="dummy-unrealized-profit"> ---- </span>
+                      <span id="dummy-unrealized-value">----</span>
                     </h5>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- NOTE Tree Table-->
-            <div
-              class="row justify-content-center align-items-center my-2 mx-1 stock-card"
-            >
-              <div class="col-12 d-flex justify-content-center h3-font">
-                <h3>Portfolio</h3>
-              </div>
-              <p-treeTable
-                *ngIf="initTreeTableSignal(); else skeleton"
-                id="stocktt"
-                #stocktt
-                [columns]="portfolioTableCols"
-                [loading]="treeTableLoading"
-                [value]="stockTreeTable"
-                [tableStyle]="{ 'min-width': '50rem' }"
-                [paginator]="true"
-                filterMode="strict"
-                [globalFilterFields]="['symbol', 'name']"
-                [frozenColumns]="frozenCols"
-                [resizableColumns]="true"
-                columnResizeMode="expand"
-                [rows]="10"
-                [showCurrentPageReport]="true"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                [rowsPerPageOptions]="[5, 10, 15, 50, stockTreeTable.length]"
-              >
-                <ng-template pTemplate="caption">
-                  <div
-                    class="d-flex justify-content-between align-items-center"
+                  <!-- Desktop view show, mobile view hide -->
+                  <span
+                    class="d-flex align-items-center ms-2 d-none d-md-inline"
                   >
-                    <div>
-                      <button
-                        pButton
-                        pRipple
-                        label="New"
-                        icon="pi pi-plus"
-                        class="p-button-rounded p-button-info mr-2 me-3"
-                        routerLink="/investment"
-                      ></button>
-                    </div>
-                    <div class="p-input-icon-left">
-                      <i class="pi pi-search"></i>
-                      <input
-                        #treeInput
-                        id="treeInput"
-                        type="text"
-                        pInputText
-                        placeholder="Search symbol"
-                        (input)="
-                          stocktt.filterGlobal(treeInput.value, 'contains')
-                        "
-                      />
-                    </div>
-                  </div>
-                </ng-template>
-                <ng-template pTemplate="header">
-                  <tr>
-                    <th ttSortableColumn="symbol">
-                      Symbol | Date
-                      <span>
-                        <p-treeTableSortIcon
-                          field="symbol"
-                        ></p-treeTableSortIcon>
-                      </span>
-                    </th>
-                    <th>Name</th>
-                    <th>Quantity</th>
-                    <th>Cost</th>
-                    <th>Market Price</th>
-                    <th>Performance</th>
-                    <th>Action</th>
-                  </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
-                  <tr [ttRow]="rowNode" *ngIf="rowData.quantity != 0">
-                    <td *ngIf="!!!rowData.date">
-                      <p-treeTableToggler
-                        [rowNode]="rowNode"
-                      ></p-treeTableToggler>
-                      <p-avatar
-                        *ngIf="rowData.logo"
-                        [image]="rowData.logo"
-                        shape="circle"
-                      ></p-avatar>
-                      <span>
-                        <p-button
-                          [label]="rowData.symbol"
-                          styleClass="p-button-text p-button-primary"
-                          (onClick)="
-                            navigateToStockProfile(rowData.symbol, rowData.name)
-                          "
-                          [pTooltip]="showRoute(rowData.symbol)"
-                          tooltipPosition="right"
-                        >
-                        </p-button>
-                      </span>
-                    </td>
-                    <td *ngIf="rowData.date">{{ rowData.date | date }}</td>
-                    <td>{{ rowData.name }}</td>
-                    <td>{{ rowData.quantity }}</td>
-                    <td>{{ rowData.cost | currency }}</td>
-                    <td>{{ rowData.marketPrice | currency }}</td>
-                    <td [className]="getPerformanceClass(rowData.performance)">
-                      {{ rowData.performance | percent : "1.2-2" }}
-                    </td>
-                    <td>
-                      <span class="me-2">
-                        <p-button
-                          icon="pi pi-trash"
-                          type="button"
-                          styleClass="p-button-rounded p-button-danger"
-                          (onClick)="
-                            confirmDeleteTreeTable(
-                              $event,
-                              rowData.symbol,
-                              rowData.purchaseId
-                            )
-                          "
-                        ></p-button>
-                      </span>
-                      <span class="ms-1">
-                        <p-button
-                          label="Sell"
-                          type="button"
-                          styleClass="p-button-rounded p-button-success"
-                          (onClick)="sellStockCount(rowData)"
-                          [disabled]="rowData.quantity < 0"
-                        ></p-button>
-                      </span>
-                    </td>
-                  </tr>
-                </ng-template>
-                <ng-template pTemplate="paginatorleft">
-                  <p-button
-                    class="d-md-block d-none"
-                    icon="pi pi-refresh"
-                    styleClass="p-button-text"
-                    (onClick)="refreshTreeTable()"
-                  ></p-button>
-                </ng-template>
-                <ng-template pTemplate="paginatorright">
-                  <p-splitButton
-                    icon="pi pi-download"
-                    styleClass="p-button-text"
-                    pTooltip="Export pdf"
-                    (onClick)="exportPdfPortfolio()"
-                    [model]="portfolioExportBtnItems"
-                  ></p-splitButton>
-                </ng-template>
-              </p-treeTable>
-            </div>
-          </p-tabPanel>
-
-          <!-- TRANSACTIONS -->
-          <p-tabPanel>
-            <ng-template pTemplate="header">
-              <span class="mx-2">Transactions</span>
-            </ng-template>
-            <!-- PORTFOLIO TABLE -->
-            <div
-              class="row justify-content-center align-items-center my-5 mx-1 stock-card"
-            >
-              <div class="col-12 d-flex justify-content-center h3-font">
-                <h3>Stock Transactions</h3>
-              </div>
-              <p-table
-                id="dt1"
-                #dt1
-                [columns]="transactionsTableCols"
-                [value]="stocks"
-                [loading]="loading"
-                [tableStyle]="{ 'min-width': '50rem' }"
-                [globalFilterFields]="['symbol', 'name', 'quantity', 'date']"
-                [paginator]="true"
-                [rows]="5"
-                [showCurrentPageReport]="true"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                [rowsPerPageOptions]="[5, 10, 15, 50, stocks.length]"
-              >
-                <ng-template pTemplate="caption">
-                  <!-- Desktop -->
-                  <div class="justify-content-between d-none d-md-flex">
-                    <div>
-                      <button
-                        type="button"
-                        pButton
-                        pRipple
-                        icon="pi pi-file"
-                        (click)="dt1.exportCSV()"
-                        class="export-buttons"
-                        pTooltip="CSV"
-                        tooltipPosition="bottom"
-                      ></button>
-                      <button
-                        type="button"
-                        pButton
-                        pRipple
-                        icon="pi pi-file-excel"
-                        (click)="exportExcelTransaction()"
-                        class="p-button-success export-buttons"
-                        pTooltip="XLS"
-                        tooltipPosition="bottom"
-                      ></button>
-                      <button
-                        type="button"
-                        pButton
-                        pRipple
-                        icon="pi pi-file-pdf"
-                        (click)="exportPdfTransaction()"
-                        class="p-button-danger export-buttons"
-                        pTooltip="PDF"
-                        tooltipPosition="bottom"
-                      ></button>
-                    </div>
-                    <div>
-                      <button
-                        pButton
-                        label="Clear"
-                        class="p-button-outlined p-button-warning"
-                        icon="pi pi-filter-slash"
-                        (click)="clear(dt1)"
-                      ></button>
-                      <span class="p-input-icon-left ms-2">
-                        <i class="pi pi-search"></i>
-                        <input
-                          id="input1"
-                          #input1
-                          pInputText
-                          type="text"
-                          (input)="dt1.filterGlobal(input1.value, 'contains')"
-                          placeholder="Search keyword"
-                        />
-                      </span>
-                    </div>
-                  </div>
-
-                  <!-- Mobile -->
-                  <div class="d-md-none">
-                    <div
-                      class="d-flex justify-content-evenly align-items-center"
-                    >
-                      <button
-                        type="button"
-                        pButton
-                        pRipple
-                        icon="pi pi-file"
-                        (click)="dt1.exportCSV()"
-                        class="export-buttons"
-                        pTooltip="CSV"
-                        tooltipPosition="bottom"
-                      ></button>
-                      <button
-                        type="button"
-                        pButton
-                        pRipple
-                        icon="pi pi-file-excel"
-                        (click)="exportExcelTransaction()"
-                        class="p-button-success export-buttons"
-                        pTooltip="XLS"
-                        tooltipPosition="bottom"
-                      ></button>
-                      <button
-                        type="button"
-                        pButton
-                        pRipple
-                        icon="pi pi-file-pdf"
-                        (click)="exportPdfTransaction()"
-                        class="p-button-danger export-buttons"
-                        pTooltip="PDF"
-                        tooltipPosition="bottom"
-                      ></button>
-                    </div>
-                    <div
-                      class="d-flex justify-content-center align-items-center mt-3"
-                    >
-                      <button
-                        pButton
-                        label="Clear"
-                        class="p-button-outlined p-button-warning"
-                        icon="pi pi-filter-slash"
-                        (click)="clear(dt1)"
-                      ></button>
-                      <span class="p-input-icon-left ms-2">
-                        <i class="pi pi-search"></i>
-                        <input
-                          id="input1Mobile"
-                          #input1Mobile
-                          pInputText
-                          type="text"
-                          (input)="
-                            dt1.filterGlobal(input1Mobile.value, 'contains')
-                          "
-                          placeholder="Search keyword"
-                        />
-                      </span>
-                    </div>
-                  </div>
-                </ng-template>
-                <ng-template pTemplate="header">
-                  <tr>
-                    <th style="width: 12%">
-                      Symbol
-                      <p-columnFilter
-                        type="text"
-                        field="symbol"
-                        display="menu"
-                      ></p-columnFilter>
-                    </th>
-                    <th style="width: 12.5%">Name</th>
-                    <th style="width: 12.5%" pSortableColumn="date">
-                      Purchased Date <p-sortIcon field="date"></p-sortIcon>
-                    </th>
-                    <th style="width: 12%" pSortableColumn="quantity">
-                      Quantity <p-sortIcon field="quantity"></p-sortIcon>
-                    </th>
-                    <th style="width: 12.5%">Transaction Price</th>
-                    <th style="width: 12.5%">Market Price</th>
-                    <th style="width: 12%" pSortableColumn="percentage">
-                      % Change <p-sortIcon field="percentage"></p-sortIcon>
-                    </th>
-                    <th style="width: 14%">Action</th>
-                  </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-stock>
-                  <tr>
-                    <td>
-                      <span
-                        class="d-flex justify-content-evenly align-items-center"
-                      >
-                        <p-avatar
-                          [image]="stock.logo"
-                          shape="circle"
-                        ></p-avatar>
-                        <span>
-                          <p-button
-                            [label]="stock.symbol"
-                            styleClass="p-button-text p-button-primary"
-                            (onClick)="
-                              navigateToStockProfile(stock.symbol, stock.name)
-                            "
-                            [pTooltip]="showRoute(stock.symbol)"
-                            tooltipPosition="right"
-                          >
-                          </p-button>
-                          <!-- {{ stock.symbol }} -->
-                        </span>
-                      </span>
-                    </td>
-                    <td>{{ stock.name }}</td>
-                    <td>{{ stock.date | date }}</td>
-                    <td [className]="getPerformanceClass(stock.quantity)">
-                      {{ stock.quantity }}
-                    </td>
-                    <td>{{ stock.price | currency }}</td>
-                    <td>{{ stock.marketPrice | currency }}</td>
-                    <td [className]="getPerformanceClass(stock.percentage)">
-                      {{ stock.percentage | percent : "1.2-2" }}
-                    </td>
-                    <td>
-                      <span class="me-2">
-                        <p-button
-                          icon="pi pi-trash"
-                          type="button"
-                          styleClass="p-button-rounded p-button-danger"
-                          (onClick)="
-                            confirmDelete(
-                              $event,
-                              stock.purchaseId,
-                              stock.symbol
-                            )
-                          "
-                        ></p-button>
-                      </span>
-                      <span class="ms-1">
-                        <p-button
-                          label="Sell"
-                          type="button"
-                          styleClass="p-button-rounded p-button-success"
-                          (onClick)="sellStock(stock)"
-                          [disabled]="!(stock.quantity > 0)"
-                        ></p-button>
-                      </span>
-                    </td>
-                  </tr>
-                </ng-template>
-                <ng-template pTemplate="paginatorleft">
-                  <p-button
-                    class="d-none d-md-block"
-                    type="button"
-                    icon="pi pi-plus"
-                    styleClass="p-button-text"
-                    [routerLink]="'/investment'"
-                  ></p-button>
-                </ng-template>
-                <ng-template pTemplate="paginatorright">
-                  <p-button
-                    class="d-none d-md-block"
-                    type="button"
-                    icon="pi pi-refresh"
-                    styleClass="p-button-text"
-                    (onClick)="refreshTable()"
-                  ></p-button>
-                </ng-template>
-              </p-table>
-            </div>
-          </p-tabPanel>
-
-          <!-- SELL HISTORY -->
-          <p-tabPanel>
-            <ng-template pTemplate="header">
-              <span class="mx-2">History</span>
-            </ng-template>
-            <div *ngIf="soldStocks; else noSoldStocks">
-              <div class="row justify-content-evenly align-items-center">
-                <div
-                  class="col-10 d-flex justify-content-center h3-font"
-                  id="unrealized-profit-row"
-                >
-                  <h2>
-                    Realized P&L :
-                    <span
-                      id="realized-profit"
-                      [className]="getProfitColorClass(realizedProfit)"
-                    >
-                      {{ realizedProfit | currency : "USD" : "code" }}
-                    </span>
-                    <span id="dummy-realized-profit">----</span>
-                  </h2>
-                  <span class="d-flex align-items-center ms-2">
                     <p-button
                       id="show-icon"
                       icon="pi pi-eye"
@@ -583,29 +88,265 @@
                     ></p-button>
                   </span>
                 </div>
+                <div class="row justify-content-evenly align-items-center">
+                  <div
+                    class="col-md-10 col-11 d-flex justify-content-center h3-font"
+                  >
+                    <!-- Desktop -->
+                    <h2 class="d-none d-md-block">
+                      Unrealized P&L :
+                      <span
+                        id="unrealized-profit"
+                        class="fw-lighter"
+                        [className]="getProfitColorClass(unrealizedProfit)"
+                      >
+                        <i
+                          [class]="getProfitIcon(unrealizedProfit)"
+                          style="font-size: 1.5rem"
+                        ></i>
+                        {{ unrealizedProfit | currency : "USD" : "code" }} (
+                        <span class="fw-lighter">
+                          {{
+                            unrealizedProfit /
+                              (totalStockMarketValue - unrealizedProfit)
+                              | percent : "1.2-2"
+                          }}
+                        </span>
+                        )
+                      </span>
+                      <span id="dummy-unrealized-profit"> ---- </span>
+                    </h2>
+
+                    <!-- Mobile -->
+                    <div
+                      class="d-flex flex-column align-items-center d-md-none"
+                    >
+                      <h5>Unrealized P&L :</h5>
+                      <h5>
+                        <span
+                          id="unrealized-profit"
+                          class="fw-lighter"
+                          [className]="getProfitColorClass(unrealizedProfit)"
+                        >
+                          {{ unrealizedProfit | currency : "USD" : "code" }} (
+                          <span class="fw-lighter">
+                            {{
+                              unrealizedProfit /
+                                (totalStockMarketValue - unrealizedProfit)
+                                | percent : "1.2-2"
+                            }}
+                          </span>
+                          )
+                        </span>
+                        <span id="dummy-unrealized-profit"> ---- </span>
+                      </h5>
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              <!-- NOTE Tree Table-->
               <div
                 class="row justify-content-center align-items-center my-2 mx-1 stock-card"
               >
-                <div
-                  class="col-md-10 col-11 d-flex justify-content-center h3-font"
-                >
-                  <h3>Sold Stocks Transactions</h3>
+                <div class="col-12 d-flex justify-content-center h3-font">
+                  <h3>Portfolio</h3>
                 </div>
-                <p-table
-                  id="dt2"
-                  #dt2
-                  [columns]="soldTableCols"
-                  [value]="soldStocks"
+                <p-treeTable
+                  *ngIf="initTreeTableSignal(); else skeleton"
+                  id="stocktt"
+                  #stocktt
+                  [columns]="portfolioTableCols"
+                  [loading]="treeTableLoading"
+                  [value]="stockTreeTable"
+                  [tableStyle]="{ 'min-width': '50rem' }"
                   [paginator]="true"
-                  [loading]="loading"
+                  filterMode="strict"
+                  [globalFilterFields]="['symbol', 'name']"
+                  [frozenColumns]="frozenCols"
+                  [resizableColumns]="true"
+                  columnResizeMode="expand"
                   [rows]="10"
                   [showCurrentPageReport]="true"
-                  [tableStyle]="{ 'min-width': '50rem' }"
                   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                  [rowsPerPageOptions]="[10, 15, 20, 50, soldStocks.length]"
+                  [rowsPerPageOptions]="[5, 10, 15, 50, stockTreeTable.length]"
+                >
+                  <ng-template pTemplate="caption">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <button
+                          pButton
+                          pRipple
+                          label="New"
+                          icon="pi pi-plus"
+                          class="p-button-rounded p-button-info mr-2 me-3"
+                          routerLink="/investment"
+                        ></button>
+                      </div>
+                      <div class="p-input-icon-left">
+                        <i class="pi pi-search"></i>
+                        <input
+                          #treeInput
+                          id="treeInput"
+                          type="text"
+                          pInputText
+                          placeholder="Search symbol"
+                          (input)="
+                            stocktt.filterGlobal(treeInput.value, 'contains')
+                          "
+                        />
+                      </div>
+                    </div>
+                  </ng-template>
+                  <ng-template pTemplate="header">
+                    <tr>
+                      <th ttSortableColumn="symbol" style="width: 15%">
+                        Symbol | Date
+                        <span>
+                          <p-treeTableSortIcon
+                            field="symbol"
+                          ></p-treeTableSortIcon>
+                        </span>
+                      </th>
+                      <th>Name</th>
+                      <th>Quantity</th>
+                      <th>Close Price</th>
+                      <th>Cost</th>
+                      <th>Performance</th>
+                      <th>Fees</th>
+                      <th>Action</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template
+                    pTemplate="body"
+                    let-rowNode
+                    let-rowData="rowData"
+                  >
+                    <tr [ttRow]="rowNode" *ngIf="rowData.quantity != 0">
+                      <td *ngIf="!!!rowData.date">
+                        <p-treeTableToggler
+                          [rowNode]="rowNode"
+                        ></p-treeTableToggler>
+                        <p-avatar
+                          *ngIf="rowData.logo"
+                          [image]="rowData.logo"
+                          shape="circle"
+                        ></p-avatar>
+                        <span>
+                          <p-button
+                            [label]="rowData.symbol"
+                            styleClass="p-button-text p-button-primary"
+                            (onClick)="
+                              navigateToStockProfile(
+                                rowData.symbol,
+                                rowData.name
+                              )
+                            "
+                            [pTooltip]="showRoute(rowData.symbol)"
+                            tooltipPosition="right"
+                          >
+                          </p-button>
+                        </span>
+                      </td>
+                      <td *ngIf="rowData.date">{{ rowData.date | date }}</td>
+                      <td>{{ rowData.name }}</td>
+                      <td>{{ rowData.quantity }}</td>
+                      <td>
+                        <div class="d-flex justify-content-evenly">
+                          {{ rowData.marketPrice | currency }}
+                          <span
+                            [className]="
+                              getPerformanceClass(rowData.dayPerformance)
+                            "
+                          >
+                            {{ rowData.dayPerformance | percent : "1.2-2" }}
+                          </span>
+                        </div>
+                      </td>
+                      <td>{{ rowData.cost | currency }}</td>
+                      <td
+                        [className]="getPerformanceClass(rowData.performance)"
+                      >
+                        {{ rowData.performance | percent : "1.2-2" }}
+                      </td>
+                      <td>
+                        {{ rowData.fees | currency }}
+                      </td>
+                      <td>
+                        <span class="me-2">
+                          <p-button
+                            icon="pi pi-trash"
+                            type="button"
+                            styleClass="p-button-rounded p-button-danger"
+                            (onClick)="
+                              confirmDeleteTreeTable(
+                                $event,
+                                rowData.symbol,
+                                rowData.purchaseId
+                              )
+                            "
+                          ></p-button>
+                        </span>
+                        <span class="ms-1">
+                          <p-button
+                            label="Sell"
+                            type="button"
+                            styleClass="p-button-rounded p-button-success"
+                            (onClick)="sellStockCount(rowData)"
+                            [disabled]="rowData.quantity < 0"
+                          ></p-button>
+                        </span>
+                      </td>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="paginatorleft">
+                    <p-button
+                      class="d-md-block d-none"
+                      icon="pi pi-refresh"
+                      styleClass="p-button-text"
+                      (onClick)="refreshTreeTable()"
+                    ></p-button>
+                  </ng-template>
+                  <ng-template pTemplate="paginatorright">
+                    <p-splitButton
+                      icon="pi pi-download"
+                      styleClass="p-button-text"
+                      pTooltip="Export pdf"
+                      (onClick)="exportPdfPortfolio()"
+                      [model]="portfolioExportBtnItems"
+                    ></p-splitButton>
+                  </ng-template>
+                </p-treeTable>
+              </div>
+            </p-tabPanel>
+
+            <!-- TRANSACTIONS -->
+            <p-tabPanel>
+              <ng-template pTemplate="header">
+                <span class="mx-2">Transactions</span>
+              </ng-template>
+              <!-- PORTFOLIO TABLE -->
+              <div
+                class="row justify-content-center align-items-center my-5 mx-1 stock-card"
+              >
+                <div class="col-12 d-flex justify-content-center h3-font">
+                  <h3>Stock Transactions</h3>
+                </div>
+                <p-table
+                  id="dt1"
+                  #dt1
+                  [columns]="transactionsTableCols"
+                  [value]="stocks"
+                  [loading]="loading"
+                  [tableStyle]="{ 'min-width': '50rem' }"
                   [globalFilterFields]="['symbol', 'name', 'quantity', 'date']"
-                  [exportHeader]="'customExportHeader'"
+                  [paginator]="true"
+                  [rows]="5"
+                  [showCurrentPageReport]="true"
+                  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                  [rowsPerPageOptions]="[5, 10, 15, 50, stocks.length]"
                 >
                   <ng-template pTemplate="caption">
                     <!-- Desktop -->
@@ -616,7 +357,7 @@
                           pButton
                           pRipple
                           icon="pi pi-file"
-                          (click)="dt2.exportCSV()"
+                          (click)="dt1.exportCSV()"
                           class="export-buttons"
                           pTooltip="CSV"
                           tooltipPosition="bottom"
@@ -626,7 +367,7 @@
                           pButton
                           pRipple
                           icon="pi pi-file-excel"
-                          (click)="exportExcelSoldStocks()"
+                          (click)="exportExcelTransaction()"
                           class="p-button-success export-buttons"
                           pTooltip="XLS"
                           tooltipPosition="bottom"
@@ -636,7 +377,7 @@
                           pButton
                           pRipple
                           icon="pi pi-file-pdf"
-                          (click)="exportPdfSoldStocks()"
+                          (click)="exportPdfTransaction()"
                           class="p-button-danger export-buttons"
                           pTooltip="PDF"
                           tooltipPosition="bottom"
@@ -648,16 +389,16 @@
                           label="Clear"
                           class="p-button-outlined p-button-warning"
                           icon="pi pi-filter-slash"
-                          (click)="clear(dt2)"
+                          (click)="clear(dt1)"
                         ></button>
                         <span class="p-input-icon-left ms-2">
                           <i class="pi pi-search"></i>
                           <input
-                            id="input2"
-                            #input2
+                            id="input1"
+                            #input1
                             pInputText
                             type="text"
-                            (input)="dt2.filterGlobal(input2.value, 'contains')"
+                            (input)="dt1.filterGlobal(input1.value, 'contains')"
                             placeholder="Search keyword"
                           />
                         </span>
@@ -667,14 +408,14 @@
                     <!-- Mobile -->
                     <div class="d-md-none">
                       <div
-                        class="d-flex justify-content-evenly align-items-center mb-2"
+                        class="d-flex justify-content-evenly align-items-center"
                       >
                         <button
                           type="button"
                           pButton
                           pRipple
                           icon="pi pi-file"
-                          (click)="dt2.exportCSV()"
+                          (click)="dt1.exportCSV()"
                           class="export-buttons"
                           pTooltip="CSV"
                           tooltipPosition="bottom"
@@ -684,7 +425,7 @@
                           pButton
                           pRipple
                           icon="pi pi-file-excel"
-                          (click)="exportExcelSoldStocks()"
+                          (click)="exportExcelTransaction()"
                           class="p-button-success export-buttons"
                           pTooltip="XLS"
                           tooltipPosition="bottom"
@@ -694,31 +435,31 @@
                           pButton
                           pRipple
                           icon="pi pi-file-pdf"
-                          (click)="exportPdfSoldStocks()"
+                          (click)="exportPdfTransaction()"
                           class="p-button-danger export-buttons"
                           pTooltip="PDF"
                           tooltipPosition="bottom"
                         ></button>
                       </div>
                       <div
-                        class="d-flex justify-content-center align-items-center"
+                        class="d-flex justify-content-center align-items-center mt-3"
                       >
                         <button
                           pButton
                           label="Clear"
                           class="p-button-outlined p-button-warning"
                           icon="pi pi-filter-slash"
-                          (click)="clear(dt2)"
+                          (click)="clear(dt1)"
                         ></button>
                         <span class="p-input-icon-left ms-2">
                           <i class="pi pi-search"></i>
                           <input
-                            id="input2Mobile"
-                            #input2Mobile
+                            id="input1Mobile"
+                            #input1Mobile
                             pInputText
                             type="text"
                             (input)="
-                              dt2.filterGlobal(input2Mobile.value, 'contains')
+                              dt1.filterGlobal(input1Mobile.value, 'contains')
                             "
                             placeholder="Search keyword"
                           />
@@ -728,7 +469,7 @@
                   </ng-template>
                   <ng-template pTemplate="header">
                     <tr>
-                      <th style="width: 14.3%">
+                      <th style="width: 12%">
                         Symbol
                         <p-columnFilter
                           type="text"
@@ -736,19 +477,19 @@
                           display="menu"
                         ></p-columnFilter>
                       </th>
-                      <th style="width: 14.3%">Name</th>
-                      <th style="width: 14.3%" pSortableColumn="date">
-                        Sold Date <p-sortIcon field="date"></p-sortIcon>
+                      <th style="width: 12.5%">Name</th>
+                      <th style="width: 12.5%" pSortableColumn="date">
+                        Purchased Date <p-sortIcon field="date"></p-sortIcon>
                       </th>
-                      <th style="width: 14.3%" pSortableColumn="quantity">
-                        Quantity <p-sortIcon field="percentage"></p-sortIcon>
+                      <th style="width: 12%" pSortableColumn="quantity">
+                        Quantity <p-sortIcon field="quantity"></p-sortIcon>
                       </th>
-                      <th style="width: 14.3%">Sold Price</th>
-                      <th style="width: 14.3%">Net Profit</th>
-                      <th style="width: 14.3%" pSortableColumn="percentage">
-                        % ROI <p-sortIcon field="percentage"></p-sortIcon>
+                      <th style="width: 12.5%">Transaction Price</th>
+                      <th style="width: 12.5%">Market Price</th>
+                      <th style="width: 12%" pSortableColumn="percentage">
+                        % Change <p-sortIcon field="percentage"></p-sortIcon>
                       </th>
-                      <!-- <th style="width: 14%">Action</th> -->
+                      <th style="width: 14%">Action</th>
                     </tr>
                   </ng-template>
                   <ng-template pTemplate="body" let-stock>
@@ -762,27 +503,42 @@
                             shape="circle"
                           ></p-avatar>
                           <span>
-                            {{ stock.symbol }}
+                            <p-button
+                              [label]="stock.symbol"
+                              styleClass="p-button-text p-button-primary"
+                              (onClick)="
+                                navigateToStockProfile(stock.symbol, stock.name)
+                              "
+                              [pTooltip]="showRoute(stock.symbol)"
+                              tooltipPosition="right"
+                            >
+                            </p-button>
+                            <!-- {{ stock.symbol }} -->
                           </span>
                         </span>
                       </td>
                       <td>{{ stock.name }}</td>
                       <td>{{ stock.date | date }}</td>
-                      <td>{{ stock.quantity }}</td>
+                      <td [className]="getPerformanceClass(stock.quantity)">
+                        {{ stock.quantity }}
+                      </td>
                       <td>{{ stock.price | currency }}</td>
-                      <td>{{ stock.netProfit | currency }}</td>
+                      <td>{{ stock.marketPrice | currency }}</td>
                       <td [className]="getPerformanceClass(stock.percentage)">
                         {{ stock.percentage | percent : "1.2-2" }}
                       </td>
-                      <!-- <td>
+                      <td>
                         <span class="me-2">
-                          <p-confirmPopup></p-confirmPopup>
                           <p-button
                             icon="pi pi-trash"
                             type="button"
                             styleClass="p-button-rounded p-button-danger"
                             (onClick)="
-                              confirmDelete($event, stock.purchaseId, stock.symbol)
+                              confirmDelete(
+                                $event,
+                                stock.purchaseId,
+                                stock.symbol
+                              )
                             "
                           ></p-button>
                         </span>
@@ -792,9 +548,10 @@
                             type="button"
                             styleClass="p-button-rounded p-button-success"
                             (onClick)="sellStock(stock)"
+                            [disabled]="!(stock.quantity > 0)"
                           ></p-button>
                         </span>
-                      </td> -->
+                      </td>
                     </tr>
                   </ng-template>
                   <ng-template pTemplate="paginatorleft">
@@ -812,44 +569,330 @@
                       type="button"
                       icon="pi pi-refresh"
                       styleClass="p-button-text"
-                      (onClick)="refreshSoldStockTable()"
+                      (onClick)="refreshTable()"
                     ></p-button>
                   </ng-template>
                 </p-table>
               </div>
-            </div>
-          </p-tabPanel>
+            </p-tabPanel>
 
-          <p-tabPanel>
-            <ng-template pTemplate="header">
-              <!-- <i class="pi pi-apple"></i> -->
-              <span class="mx-2">Screener</span>
-            </ng-template>
-
-            <div class="row justify-content-center stock-screener">
-              <div class="col-10">
-                <div class="d-flex flex-column m-4 pt-4">
-                  <label htmlFor="symbol" class="mb-3"
-                    ><i
-                      class="pi pi-info-circle"
-                      pTooltip="Due to limitation of API, max 8 calls per minute"
-                    ></i>
-                    Ticker:</label
+            <!-- SELL HISTORY -->
+            <p-tabPanel>
+              <ng-template pTemplate="header">
+                <span class="mx-2">History</span>
+              </ng-template>
+              <div *ngIf="soldStocks; else noSoldStocks">
+                <div class="row justify-content-evenly align-items-center">
+                  <div
+                    class="col-10 d-flex justify-content-center h3-font"
+                    id="unrealized-profit-row"
                   >
-                  <p-autoComplete
-                    [style]="{ width: '100%' }"
-                    [inputStyle]="{ width: '100%' }"
-                    [suggestions]="filteredStocksSymbol"
-                    (completeMethod)="filterStock($event)"
-                    [forceSelection]="true"
-                    (onSelect)="onSelectStock($event)"
-                  ></p-autoComplete>
+                    <h2>
+                      Realized P&L :
+                      <span
+                        id="realized-profit"
+                        [className]="getProfitColorClass(realizedProfit)"
+                      >
+                        {{ realizedProfit | currency : "USD" : "code" }}
+                      </span>
+                      <span id="dummy-realized-profit">----</span>
+                    </h2>
+                    <span class="d-flex align-items-center ms-2">
+                      <p-button
+                        id="show-icon"
+                        icon="pi pi-eye"
+                        styleClass="p-button-rounded p-button-secondary p-button-text p-button-lg"
+                        (onClick)="hideProfit()"
+                      ></p-button>
+                      <p-button
+                        id="hide-icon"
+                        icon="pi pi-eye-slash"
+                        styleClass="p-button-rounded p-button-secondary p-button-text p-button-lg"
+                        (onClick)="hideProfit()"
+                      ></p-button>
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="row justify-content-center align-items-center my-2 mx-1 stock-card"
+                >
+                  <div
+                    class="col-md-10 col-11 d-flex justify-content-center h3-font"
+                  >
+                    <h3>Sold Stocks Transactions</h3>
+                  </div>
+                  <p-table
+                    id="dt2"
+                    #dt2
+                    [columns]="soldTableCols"
+                    [value]="soldStocks"
+                    [paginator]="true"
+                    [loading]="loading"
+                    [rows]="10"
+                    [showCurrentPageReport]="true"
+                    [tableStyle]="{ 'min-width': '50rem' }"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    [rowsPerPageOptions]="[10, 15, 20, 50, soldStocks.length]"
+                    [globalFilterFields]="[
+                      'symbol',
+                      'name',
+                      'quantity',
+                      'date'
+                    ]"
+                    [exportHeader]="'customExportHeader'"
+                  >
+                    <ng-template pTemplate="caption">
+                      <!-- Desktop -->
+                      <div class="justify-content-between d-none d-md-flex">
+                        <div>
+                          <button
+                            type="button"
+                            pButton
+                            pRipple
+                            icon="pi pi-file"
+                            (click)="dt2.exportCSV()"
+                            class="export-buttons"
+                            pTooltip="CSV"
+                            tooltipPosition="bottom"
+                          ></button>
+                          <button
+                            type="button"
+                            pButton
+                            pRipple
+                            icon="pi pi-file-excel"
+                            (click)="exportExcelSoldStocks()"
+                            class="p-button-success export-buttons"
+                            pTooltip="XLS"
+                            tooltipPosition="bottom"
+                          ></button>
+                          <button
+                            type="button"
+                            pButton
+                            pRipple
+                            icon="pi pi-file-pdf"
+                            (click)="exportPdfSoldStocks()"
+                            class="p-button-danger export-buttons"
+                            pTooltip="PDF"
+                            tooltipPosition="bottom"
+                          ></button>
+                        </div>
+                        <div>
+                          <button
+                            pButton
+                            label="Clear"
+                            class="p-button-outlined p-button-warning"
+                            icon="pi pi-filter-slash"
+                            (click)="clear(dt2)"
+                          ></button>
+                          <span class="p-input-icon-left ms-2">
+                            <i class="pi pi-search"></i>
+                            <input
+                              id="input2"
+                              #input2
+                              pInputText
+                              type="text"
+                              (input)="
+                                dt2.filterGlobal(input2.value, 'contains')
+                              "
+                              placeholder="Search keyword"
+                            />
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Mobile -->
+                      <div class="d-md-none">
+                        <div
+                          class="d-flex justify-content-evenly align-items-center mb-2"
+                        >
+                          <button
+                            type="button"
+                            pButton
+                            pRipple
+                            icon="pi pi-file"
+                            (click)="dt2.exportCSV()"
+                            class="export-buttons"
+                            pTooltip="CSV"
+                            tooltipPosition="bottom"
+                          ></button>
+                          <button
+                            type="button"
+                            pButton
+                            pRipple
+                            icon="pi pi-file-excel"
+                            (click)="exportExcelSoldStocks()"
+                            class="p-button-success export-buttons"
+                            pTooltip="XLS"
+                            tooltipPosition="bottom"
+                          ></button>
+                          <button
+                            type="button"
+                            pButton
+                            pRipple
+                            icon="pi pi-file-pdf"
+                            (click)="exportPdfSoldStocks()"
+                            class="p-button-danger export-buttons"
+                            pTooltip="PDF"
+                            tooltipPosition="bottom"
+                          ></button>
+                        </div>
+                        <div
+                          class="d-flex justify-content-center align-items-center"
+                        >
+                          <button
+                            pButton
+                            label="Clear"
+                            class="p-button-outlined p-button-warning"
+                            icon="pi pi-filter-slash"
+                            (click)="clear(dt2)"
+                          ></button>
+                          <span class="p-input-icon-left ms-2">
+                            <i class="pi pi-search"></i>
+                            <input
+                              id="input2Mobile"
+                              #input2Mobile
+                              pInputText
+                              type="text"
+                              (input)="
+                                dt2.filterGlobal(input2Mobile.value, 'contains')
+                              "
+                              placeholder="Search keyword"
+                            />
+                          </span>
+                        </div>
+                      </div>
+                    </ng-template>
+                    <ng-template pTemplate="header">
+                      <tr>
+                        <th style="width: 14.3%">
+                          Symbol
+                          <p-columnFilter
+                            type="text"
+                            field="symbol"
+                            display="menu"
+                          ></p-columnFilter>
+                        </th>
+                        <th style="width: 14.3%">Name</th>
+                        <th style="width: 14.3%" pSortableColumn="date">
+                          Sold Date <p-sortIcon field="date"></p-sortIcon>
+                        </th>
+                        <th style="width: 14.3%" pSortableColumn="quantity">
+                          Quantity <p-sortIcon field="percentage"></p-sortIcon>
+                        </th>
+                        <th style="width: 14.3%">Sold Price</th>
+                        <th style="width: 14.3%">Net Profit</th>
+                        <th style="width: 14.3%" pSortableColumn="percentage">
+                          % ROI <p-sortIcon field="percentage"></p-sortIcon>
+                        </th>
+                        <!-- <th style="width: 14%">Action</th> -->
+                      </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-stock>
+                      <tr>
+                        <td>
+                          <span
+                            class="d-flex justify-content-evenly align-items-center"
+                          >
+                            <p-avatar
+                              [image]="stock.logo"
+                              shape="circle"
+                            ></p-avatar>
+                            <span>
+                              {{ stock.symbol }}
+                            </span>
+                          </span>
+                        </td>
+                        <td>{{ stock.name }}</td>
+                        <td>{{ stock.date | date }}</td>
+                        <td>{{ stock.quantity }}</td>
+                        <td>{{ stock.price | currency }}</td>
+                        <td>{{ stock.netProfit | currency }}</td>
+                        <td [className]="getPerformanceClass(stock.percentage)">
+                          {{ stock.percentage | percent : "1.2-2" }}
+                        </td>
+                        <!-- <td>
+                          <span class="me-2">
+                            <p-confirmPopup></p-confirmPopup>
+                            <p-button
+                              icon="pi pi-trash"
+                              type="button"
+                              styleClass="p-button-rounded p-button-danger"
+                              (onClick)="
+                                confirmDelete($event, stock.purchaseId, stock.symbol)
+                              "
+                            ></p-button>
+                          </span>
+                          <span class="ms-1">
+                            <p-button
+                              label="Sell"
+                              type="button"
+                              styleClass="p-button-rounded p-button-success"
+                              (onClick)="sellStock(stock)"
+                            ></p-button>
+                          </span>
+                        </td> -->
+                      </tr>
+                    </ng-template>
+                    <ng-template pTemplate="paginatorleft">
+                      <p-button
+                        class="d-none d-md-block"
+                        type="button"
+                        icon="pi pi-plus"
+                        styleClass="p-button-text"
+                        [routerLink]="'/investment'"
+                      ></p-button>
+                    </ng-template>
+                    <ng-template pTemplate="paginatorright">
+                      <p-button
+                        class="d-none d-md-block"
+                        type="button"
+                        icon="pi pi-refresh"
+                        styleClass="p-button-text"
+                        (onClick)="refreshSoldStockTable()"
+                      ></p-button>
+                    </ng-template>
+                  </p-table>
                 </div>
               </div>
-            </div>
-          </p-tabPanel>
-        </p-tabView>
-      </section>
+            </p-tabPanel>
+
+            <p-tabPanel>
+              <ng-template pTemplate="header">
+                <!-- <i class="pi pi-apple"></i> -->
+                <span class="mx-2">Screener</span>
+              </ng-template>
+
+              <div class="row justify-content-center stock-screener">
+                <div class="col-10">
+                  <div class="d-flex flex-column m-4 pt-4">
+                    <label htmlFor="symbol" class="mb-3"
+                      ><i
+                        class="pi pi-info-circle"
+                        pTooltip="Due to limitation of API, max 8 calls per minute"
+                      ></i>
+                      Ticker:</label
+                    >
+                    <p-autoComplete
+                      [style]="{ width: '100%' }"
+                      [inputStyle]="{ width: '100%' }"
+                      [suggestions]="filteredStocksSymbol"
+                      (completeMethod)="filterStock($event)"
+                      [forceSelection]="true"
+                      (onSelect)="onSelectStock($event)"
+                    ></p-autoComplete>
+
+                    <div
+                      class="d-flex justify-content-center align-items-center my-4"
+                    >
+                      Most recent search:
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </p-tabPanel>
+          </p-tabView>
+        </section>
+      </div>
     </div>
   </div>
   <p-toast></p-toast>
@@ -901,6 +944,19 @@
         </div>
       </div>
     </div>
+  </div>
+</ng-template>
+
+<ng-template #stocksLoading>
+  <div
+    class="d-flex justify-content-center align-items-center m-5 loading-spinner"
+  >
+    <p-progressSpinner
+      styleClass="w-4rem h-4rem"
+      strokeWidth="8"
+      fill="var(--surface-ground)"
+      animationDuration=".5s"
+    ></p-progressSpinner>
   </div>
 </ng-template>
 

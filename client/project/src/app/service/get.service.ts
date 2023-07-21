@@ -15,6 +15,7 @@ import {
   SoldStock,
   Stock,
   StockCompanyProfile,
+  StockDayPerformance,
   StockIdea,
   StockLogo,
   StockPrice,
@@ -138,11 +139,14 @@ export class GetService {
     return this.http.get<Stock>(`${this.api}/${symbol}/price`);
   }
 
+  getStockDayPerformance(symbol: string): Observable<StockDayPerformance> {
+    return this.http.get<StockDayPerformance>(
+      `${this.api}/${symbol}/day_performance`
+    );
+  }
+
   getStonkStockPrice(symbol: string): Observable<StonkStockPrice> {
-    let qp = new HttpParams().set('userId', this.userId);
-    return this.http.get<StonkStockPrice>(`${this.api}/${symbol}/stonkprice`, {
-      params: qp,
-    });
+    return this.http.get<StonkStockPrice>(`${this.api}/${symbol}/stonkprice`);
   }
 
   getUserStocksMongo(userId: string): Observable<PurchasedStock[]> {

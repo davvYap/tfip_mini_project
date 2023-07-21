@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -716,6 +718,20 @@ public class UserService {
 
     public boolean deleteStockIdeaMongo(String symbol, String ideaId) {
         return userRepo.deleteStockIdeaMongo(symbol, ideaId);
+    }
+
+    public boolean upsertUserRecentStockScreenerMongo(String symbol, String userId) {
+        return userRepo.upsertUserRecentStockScreenerMongo(symbol, userId);
+    }
+
+    public List<String> retrieveUserRecentStockScreenerMongo(String userId) {
+        List<Document> docs = userRepo.retrieveUserRecentStockScreenerMongo(userId);
+        List<String> symbols = new ArrayList<>();
+        for (Document doc : docs) {
+            String symbol = doc.getString("symbol");
+            symbols.add(symbol);
+        }
+        return symbols;
     }
 
     // ***** UNUSED *****

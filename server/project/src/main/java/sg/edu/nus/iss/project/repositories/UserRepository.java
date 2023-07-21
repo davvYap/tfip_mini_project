@@ -9,6 +9,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -480,6 +482,74 @@ public class UserRepository {
             return true;
         }
         return false;
+    }
+
+    public boolean upsertUserRecentStockScreenerMongo(String symbol, String userId) {
+        Query query = Query.query(Criteria.where("user_id").is(userId));
+
+        // check the symbol list in mongo
+        List<Document> existedSymbolDocs = retrieveUserRecentStockScreenerMongo(userId);
+
+        int totalDocsInMongo = 0;
+
+        if (existedSymbolDocs != null) {
+
+            totalDocsInMongo = existedSymbolDocs.size();
+            // check for existing records match symbol
+            for (Document doc : existedSymbolDocs) {
+                String s = doc.getString("symbol");
+                if (s.equals(symbol)) {
+                    // remove the existing record
+                    Update update = new Update().pull("symbol_searched", doc);
+                    mongo.updateFirst(query, update, "stocks_screener");
+
+                    totalDocsInMongo--;
+                }
+            }
+        }
+
+        Date insertedDate = new Date();
+        long epochTime = insertedDate.getTime();
+        Document d = new Document();
+        d.append("symbol", symbol)
+                .append("time", epochTime);
+
+        Update udpateOps = new Update()
+                .set("user_id", userId)
+                .push("symbol_searched", d);
+
+        UpdateResult upsertDoc = mongo.upsert(query, udpateOps, "stocks_screener");
+
+        // check whether length > 4
+        if (totalDocsInMongo > 4) {
+            // find the oldest search and removed
+            List<Document> existedSymbolDocsLatest = retrieveUserRecentStockScreenerMongo(userId);
+            List<Stock> stocks = existedSymbolDocsLatest.stream().map(Stock::convertStockScreenerFromDocument)
+                    .toList();
+            List<Stock> mutableStocks = new ArrayList<>(stocks);
+
+            Collections.sort(mutableStocks, Comparator.comparingLong(Stock::getPurchasedDate).reversed());
+            // Last doc
+            Stock olderstStock = mutableStocks.get(mutableStocks.size() - 1);
+            Document lastDoc = new Document();
+            lastDoc.append("symbol", olderstStock.getSymbol());
+            lastDoc.append("time", olderstStock.getPurchasedDate());
+
+            // delete last doc from mongo
+            Update update = new Update().pull("symbol_searched", lastDoc);
+            mongo.updateFirst(query, update, "stocks_screener");
+        }
+        return true;
+    }
+
+    public List<Document> retrieveUserRecentStockScreenerMongo(String userId) {
+        Query query = Query.query(Criteria.where("user_id").is(userId));
+        Document d = mongo.findOne(query, Document.class, "stocks_screener");
+        if (d != null) {
+            List<Document> stockDocs = d.getList("symbol_searched", Document.class);
+            return stockDocs;
+        }
+        return null;
     }
 
     // NOTE EXTRA

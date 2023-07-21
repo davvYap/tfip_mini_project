@@ -23,32 +23,32 @@
         ></p-image>
       </div>
       <div class="d-flex justify-content-between align-items-center">
-        <p class="fs-5 font-monospace">Country:</p>
-        <p class="fs-5 font-monospace">{{ stockProfile.country }}</p>
+        <p class="fs-6 font-monospace">Country:</p>
+        <p class="fs-6 font-monospace">{{ stockProfile.country }}</p>
       </div>
       <div class="d-flex justify-content-between align-items-center">
-        <p class="fs-5 font-monospace">Industry:</p>
-        <p class="fs-5 font-monospace">{{ stockProfile.industry }}</p>
+        <p class="fs-6 font-monospace">Industry:</p>
+        <p class="fs-6 font-monospace">{{ stockProfile.industry }}</p>
       </div>
       <div
         *ngIf="stockProfile.companyOfficers.length > 0"
         class="d-flex justify-content-between align-items-center"
       >
-        <p class="fs-5 font-monospace">CEO:</p>
-        <p class="fs-5 font-monospace">
+        <p class="fs-6 font-monospace">CEO:</p>
+        <p class="fs-6 font-monospace">
           {{ stockProfile.companyOfficers[0].name }}
         </p>
       </div>
       <div class="d-flex justify-content-between align-items-center">
-        <p class="fs-5 font-monospace">Employees:</p>
-        <p class="fs-5 font-monospace">
+        <p class="fs-6 font-monospace">Employees:</p>
+        <p class="fs-6 font-monospace">
           {{ stockProfile.fulltimeEmployees | number }}
         </p>
       </div>
       <div class="d-flex justify-content-between align-items-center">
-        <p class="fs-5 font-monospace">Website:</p>
+        <p class="fs-6 font-monospace">Website:</p>
         <a
-          class="fs-5 font-monospace"
+          class="fs-6 font-monospace"
           [href]="stockProfile.website"
           target="_blank"
         >
@@ -56,27 +56,30 @@
         </a>
       </div>
       <div class="d-flex justify-content-between align-items-center">
-        <p class="fs-5 font-monospace">Close Price:</p>
-        <p class="fs-5 font-monospace">
+        <p class="fs-6 font-monospace">Close Price:</p>
+        <p class="fs-6 font-monospace">
           {{ stockProfile.closePrice | currency }}
+          <span [className]="getPerformanceClass(stockProfile.dayPerformance)">
+            {{ stockProfile.dayPerformance | percent : "1.2-2" }}
+          </span>
         </p>
       </div>
       <div class="d-flex justify-content-between align-items-center">
-        <p class="fs-5 font-monospace">52 Week Range:</p>
-        <p class="fs-5 font-monospace">
+        <p class="fs-6 font-monospace">52 Week Range:</p>
+        <p class="fs-6 font-monospace">
           {{ stockProfile.stockSummaryData.fiftyTwoWeekLow | currency }} -
           {{ stockProfile.stockSummaryData.fiftyTwoWeekHigh | currency }}
         </p>
       </div>
       <div class="d-flex justify-content-between align-items-center">
-        <p class="fs-5 font-monospace">PE Ratio (TTM):</p>
-        <p class="fs-5 font-monospace">
+        <p class="fs-6 font-monospace">PE Ratio (TTM):</p>
+        <p class="fs-6 font-monospace">
           {{ stockProfile.stockSummaryData.trailingPE | number }}
         </p>
       </div>
       <div class="d-flex justify-content-between align-items-center">
-        <p class="fs-5 font-monospace">Volume:</p>
-        <p class="fs-5 font-monospace">
+        <p class="fs-6 font-monospace">Volume:</p>
+        <p class="fs-6 font-monospace">
           {{ stockProfile.stockSummaryData.volume | number }}
         </p>
       </div>
@@ -84,14 +87,14 @@
         *ngIf="stockProfile.stockSummaryData.marketCap > 0"
         class="d-flex justify-content-between align-items-center"
       >
-        <p class="fs-5 font-monospace">Market Cap:</p>
-        <p class="fs-5 font-monospace">
+        <p class="fs-6 font-monospace">Market Cap:</p>
+        <p class="fs-6 font-monospace">
           {{ stockProfile.stockSummaryData.marketCap / 1000000000 | number }}
           B
         </p>
       </div>
       <div class="d-flex justify-content-between align-items-center">
-        <p class="fs-5 font-monospace">Sentiment:</p>
+        <p class="fs-6 font-monospace">Sentiment:</p>
         <p-rating
           [(ngModel)]="stockSentiment"
           [readonly]="true"
@@ -99,7 +102,7 @@
         ></p-rating>
       </div>
     </div>
-    <div class="col-md-6 col-12">
+    <div class="col-md-6 col-12 mt-2">
       <!-- LINE CHART -->
       <div *ngIf="!skeletonLoading; else skeleton">
         <p-chart

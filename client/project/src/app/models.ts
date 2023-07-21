@@ -23,6 +23,10 @@ export interface Stock {
   price: string;
 }
 
+export interface StockDayPerformance {
+  dayPerformance: number;
+}
+
 export interface StockLogo {
   url: string;
 }
@@ -71,6 +75,7 @@ export interface PurchasedStocksCount {
   marketPrice: number;
   performance: number;
   logo: string;
+  dayPerformance: number;
 }
 export interface UserSettings {
   theme: string;
@@ -216,6 +221,7 @@ export interface StockCompanyProfile {
   logo: string;
   closePrice: number;
   stockSummaryData: StockSummaryData;
+  dayPerformance: number;
 }
 
 export interface CompanyOfficers {

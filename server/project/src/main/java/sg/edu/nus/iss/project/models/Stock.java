@@ -204,6 +204,16 @@ public class Stock {
         return s;
     }
 
+    public static Stock convertStockScreenerFromDocument(Document d) {
+        Stock s = null;
+        if (d != null) {
+            s = new Stock();
+            s.setPurchasedDate(d.getLong("time"));
+            s.setSymbol(d.getString("symbol"));
+        }
+        return s;
+    }
+
     public StockCount toStockCount() {
         StockCount sc = new StockCount();
         sc.setSymbol(symbol);

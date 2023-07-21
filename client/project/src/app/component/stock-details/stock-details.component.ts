@@ -8,6 +8,7 @@ import { Observable, forkJoin, map, of, switchMap, tap } from 'rxjs';
 import {
   Stock,
   StockCompanyProfile,
+  StockDayPerformance,
   StockIdea,
   StockPrice,
   StockSummaryDataResponse,
@@ -124,6 +125,20 @@ export class StockDetailsComponent implements OnInit {
               return profile;
             })
           );
+        }),
+        // get stock day performance
+        switchMap((profile) => {
+          let observables: Observable<StockDayPerformance>[] = [];
+
+          const observable = this.getSvc.getStockDayPerformance(profile.symbol);
+          observables.push(observable);
+
+          return forkJoin(observables).pipe(
+            map((results: StockDayPerformance[]) => {
+              profile.dayPerformance = results[0].dayPerformance;
+              return profile;
+            })
+          );
         })
       )
       .subscribe((profile) => {
@@ -176,6 +191,9 @@ export class StockDetailsComponent implements OnInit {
     }
     // return sp.reverse();
     return sp;
+  }
+  getPerformanceClass(performance: number): string {
+    return performance > 0 ? 'positive' : 'negative';
   }
 
   createForm(): FormGroup {

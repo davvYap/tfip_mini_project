@@ -92,13 +92,23 @@ public class StockController {
                         .toString());
     }
 
-    // @GetMapping(path = "/{symbol}/price_database")
-    // public ResponseEntity<String> getStockPriceFromDatabase(@PathVariable String
-    // symbol) {
-    // // check redis whether the latest market price is there
-    // Optional<Double> optPrice = userSvc.retrieveStockMarketValueRedis(symbol);
-    // if()
-    // }
+    @GetMapping(path = "/{symbol}/day_performance")
+    public ResponseEntity<String> getStockDayPerformance(@PathVariable String symbol) {
+        // retrieve from mongo
+        Optional<List<StockPrice>> mongoOpt = userSvc.retrieveStockMonthlyPerformanceMongo(symbol.toUpperCase());
+        if (mongoOpt.isPresent()) {
+            List<StockPrice> spList = mongoOpt.get();
+            double currPrice = spList.get(spList.size() - 1).getClosePrice();
+            double yesterdayPrice = spList.get(spList.size() - 2).getClosePrice();
+            double dayPerformance = (currPrice - yesterdayPrice) / yesterdayPrice;
+            return ResponseEntity.status(HttpStatus.OK)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("dayPerformance", dayPerformance).build().toString());
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("dayPerformance", 0).build().toString());
+    }
 
     @GetMapping(path = "/{symbol}/logo")
     public ResponseEntity<String> getStockLogo(@PathVariable String symbol) throws IOException {
@@ -130,7 +140,7 @@ public class StockController {
     }
 
     @GetMapping(path = "/{symbol}/stonkprice")
-    public ResponseEntity<String> getStonkStockPrice(@PathVariable String symbol, @RequestParam String userId) {
+    public ResponseEntity<String> getStonkStockPrice(@PathVariable String symbol) {
 
         Optional<Double> optPrice = userSvc.retrieveStockMarketValueRedis(symbol);
         if (optPrice.isPresent()) {
