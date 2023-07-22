@@ -13,3 +13,11 @@ h3 {
 .user-password:hover {
   cursor: zoom-in;
 }
+
+.w-3rem {
+  width: 2rem;
+}
+
+.h-3rem {
+  height: 2rem;
+}

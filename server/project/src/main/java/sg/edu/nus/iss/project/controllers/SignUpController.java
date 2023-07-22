@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.json.Json;
 import jakarta.servlet.http.HttpSession;
 import sg.edu.nus.iss.project.models.User;
+import sg.edu.nus.iss.project.services.EmailSenderService;
 import sg.edu.nus.iss.project.services.SignUpService;
 import sg.edu.nus.iss.project.utils.gmail.GMailer;
 
@@ -37,6 +38,9 @@ public class SignUpController {
     @Autowired
     private SignUpService signUpSvc;
 
+    @Autowired
+    private EmailSenderService emailSenderSvc;
+
     @GetMapping(path = "/sign_up/captcha")
     @ResponseBody
     public ResponseEntity<String> generateCaptcha(HttpSession session, @RequestParam String username,
@@ -44,8 +48,8 @@ public class SignUpController {
 
         // CHECK IF DUPLICATE USERNAME
         boolean duplicateUsername = signUpSvc.checkUsernameDuplicate(username);
-        System.out.println("Duplicate username >>> " + username);
         if (duplicateUsername) {
+            System.out.println("Duplicate username >>> " + username);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Json.createObjectBuilder().add("message", "Username exists, please pick others.").build()
@@ -64,8 +68,8 @@ public class SignUpController {
 
         String captcha = UUID.randomUUID().toString().substring(0, 6);
         session.setAttribute("captcha", captcha.toUpperCase());
-        GMailer gmailer = new GMailer();
-        gmailer.sendMail(email, "Registration Code", """
+
+        emailSenderSvc.sendMail(email, "Registration Code", """
                 Dear %s,
 
                 This is your 6-digit registration code: %s
@@ -73,6 +77,16 @@ public class SignUpController {
                 Best Regards,
                 am.app Development Team
                 """.formatted(username, captcha.toUpperCase()));
+
+        // GMailer gmailer = new GMailer();
+        // gmailer.sendMail(email, "Registration Code", """
+        // Dear %s,
+
+        // This is your 6-digit registration code: %s
+
+        // Best Regards,
+        // am.app Development Team
+        // """.formatted(username, captcha.toUpperCase()));
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("message", "Captcha sent to email").build()
@@ -114,8 +128,7 @@ public class SignUpController {
                                 .build().toString());
             }
 
-            GMailer gMailer = new GMailer();
-            gMailer.sendMail(email, "Welcome to am.app", """
+            emailSenderSvc.sendMail(email, "Welcome to am.app", """
                     Dear %s,
 
                     Thank you for signing up with us. Have a great journey ahead.
@@ -125,6 +138,18 @@ public class SignUpController {
                     Best Regards,
                     am.app Development Team
                     """.formatted(username));
+
+            // GMailer gMailer = new GMailer();
+            // gMailer.sendMail(email, "Welcome to am.app", """
+            // Dear %s,
+
+            // Thank you for signing up with us. Have a great journey ahead.
+
+            // For enquiries, please contact: +612-3456789
+
+            // Best Regards,
+            // am.app Development Team
+            // """.formatted(username));
 
             return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
                     .body(Json.createObjectBuilder().add("message", "Sign up successful.").build()
@@ -166,8 +191,8 @@ public class SignUpController {
                                 .build()
                                 .toString());
             }
-            GMailer gMailer = new GMailer();
-            gMailer.sendMail(googleUser.getEmail(), "Welcome to am.app", """
+
+            emailSenderSvc.sendMail(googleUser.getEmail(), "Welcome to am.app", """
                     Dear %s,
 
                     Thank you for signing up with us. Have a great journey ahead.
@@ -177,6 +202,17 @@ public class SignUpController {
                     Best Regards,
                     am.app Development Team
                     """.formatted(googleUser.getUsername()));
+            // GMailer gMailer = new GMailer();
+            // gMailer.sendMail(googleUser.getEmail(), "Welcome to am.app", """
+            // Dear %s,
+
+            // Thank you for signing up with us. Have a great journey ahead.
+
+            // For enquiries, please contact: +612-3456789
+
+            // Best Regards,
+            // am.app Development Team
+            // """.formatted(googleUser.getUsername()));
             return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
                     .body(Json.createObjectBuilder()
                             .add("message", "Google user sign up successful.").build()

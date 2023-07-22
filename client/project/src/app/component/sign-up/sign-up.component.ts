@@ -44,6 +44,7 @@ export class SignUpComponent implements OnInit {
   showCaptcha: boolean = false;
   captchaError: string | undefined;
   isSignUp!: boolean;
+  showSignUpLoading: boolean = false;
 
   @ViewChild('captchaInput', { static: false })
   captchaInput!: ElementRef;
@@ -211,11 +212,10 @@ export class SignUpComponent implements OnInit {
 
   confirmDetails() {
     const newUser = this.form.value as SignUp;
+    this.showCaptcha = true;
     this.getSvc
       .getCaptcha(newUser.username, newUser.email)
-      .then((res) => {
-        this.showCaptcha = true;
-      })
+      .then((res) => {})
       .catch((err) => {
         console.log(err.error.message);
         this.captchaError = err.error.message;
@@ -236,6 +236,8 @@ export class SignUpComponent implements OnInit {
     formData.append('email', newUser.email);
     formData.append('file', this.uploadedFile);
     formData.append('captcha', captcha);
+
+    this.showSignUpLoading = true;
     this.postSvc
       .signUp(formData)
       .then((res) => {

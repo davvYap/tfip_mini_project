@@ -260,13 +260,21 @@
           <span class="ms-2 fw-bolder">Confirm</span>
         </p-button>
         <p-button
-          *ngIf="showCaptcha"
+          *ngIf="showCaptcha && !showSignUpLoading"
           styleClass=" p-button-text"
           (onClick)="signUp()"
         >
           <fa-icon [icon]="loginIcon"></fa-icon>
           <span class="ms-2 fw-bolder">Sign Up</span>
         </p-button>
+        <div *ngIf="showSignUpLoading">
+          <p-progressSpinner
+            styleClass="w-3rem h-3rem"
+            strokeWidth="8"
+            fill="var(--surface-ground)"
+            animationDuration=".5s"
+          ></p-progressSpinner>
+        </div>
       </div>
       <!-- USER SETTING -->
       <div *ngIf="!isSignUp" class="d-flex flex-row-reverse align-items-center">
