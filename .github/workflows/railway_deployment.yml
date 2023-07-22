@@ -50,6 +50,7 @@ jobs:
         GOOGLE_OAUTH_CLIENT_JSON: ${{ secrets.GOOGLE_OAUTH_CLIENT }}
       run: |
         echo "${GOOGLE_OAUTH_CLIENT_JSON}" > server/project/src/main/resources/client_secret.json
+        echo "Inserted Google OAuth Client Json details into json file"
 
     - name: Build with Maven, skip test
       run: mvn package -Dmaven.test.skip=true
