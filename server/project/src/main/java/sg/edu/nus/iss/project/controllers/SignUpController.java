@@ -42,6 +42,16 @@ public class SignUpController {
     public ResponseEntity<String> generateCaptcha(HttpSession session, @RequestParam String username,
             @RequestParam String email) throws Exception {
 
+        // CHECK IF DUPLICATE USERNAME
+        boolean duplicateUsername = signUpSvc.checkUsernameDuplicate(username);
+        System.out.println("Duplicate username >>> " + username);
+        if (duplicateUsername) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Json.createObjectBuilder().add("message", "Username exists, please pick others.").build()
+                            .toString());
+        }
+
         // CHECK IF USER EXISTS
         boolean userExists = signUpSvc.checkUserExists(email);
         System.out.println("User exits >>> " + userExists);

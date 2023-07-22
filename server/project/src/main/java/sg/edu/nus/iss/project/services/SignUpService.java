@@ -22,6 +22,10 @@ public class SignUpService {
         return signUpRepo.checkUserExists(email);
     }
 
+    public boolean checkUsernameDuplicate(String username) {
+        return signUpRepo.checkUsernameDuplicate(username);
+    }
+
     public boolean checkGoogleUserExists(String userId) {
         return signUpRepo.checkGoogleUserExists(userId);
     }

@@ -113,6 +113,10 @@ public class DBQueries {
 			select * from users where email = ?;
 			""";
 
+	public static final String SQL_CHECK_USERNAME_DUPLICATE = """
+			select * from users where username = ?;
+			""";
+
 	public static final String SQL_CHECK_GOOGLE_USER_EXISTS = """
 			select * from users where user_id = ?;
 			""";

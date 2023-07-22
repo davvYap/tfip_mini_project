@@ -26,6 +26,17 @@ public class SignUpRepository {
         return rowAffected > 0;
     }
 
+    public boolean checkUsernameDuplicate(String username) {
+        SqlRowSet rs = jdbc.queryForRowSet(SQL_CHECK_USERNAME_DUPLICATE, username);
+        while (rs.next()) {
+            System.out.println(rs.getString("user_id"));
+            if (rs.getString("user_id") != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean checkUserExists(String email) {
         SqlRowSet rs = jdbc.queryForRowSet(SQL_CHECK_USER_EXISTS, email);
         while (rs.next()) {
