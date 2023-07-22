@@ -3,5 +3,5 @@
 *.docx
 *.pdf
 *.bat
-server/project/src/main/resources/*.json
+# server/project/src/main/resources/*.json
 server/project/tokens

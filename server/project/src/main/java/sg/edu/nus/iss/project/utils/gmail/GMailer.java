@@ -63,6 +63,7 @@ public class GMailer {
                 "/client_secret.json");
 
         if (is == null) {
+            System.out.println("GOOGLE CLIENT JSON FILE NOT FOUND !");
             throw new FileNotFoundException();
         }
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory, new InputStreamReader(is));
