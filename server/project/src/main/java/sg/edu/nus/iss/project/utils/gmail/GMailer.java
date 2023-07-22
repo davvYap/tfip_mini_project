@@ -1,11 +1,14 @@
 package sg.edu.nus.iss.project.utils.gmail;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -15,7 +18,6 @@ import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
-
 import static javax.mail.Message.RecipientType.*;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -38,8 +40,8 @@ public class GMailer {
     private static final String TEST_EMAIL_ADDRESS = "davvyap@gmail.com";
     private static final String TEST_RECEIVE_EMAIL_ADDRESS = "dongguyap@gmail.com";
 
-    // @Value("${google.oauth2.json.file}")
-    // private String googleOauthFileName;
+    // @Value("${google.project.id}")
+    // private String googleProjectId;
 
     // field
     private final Gmail service;
@@ -53,17 +55,17 @@ public class GMailer {
                 .build();
     }
 
-    private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, GsonFactory jsonFactory)
+    private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT,
+            GsonFactory jsonFactory)
             throws IOException {
         // load client secret
         InputStream is = GMailer.class.getResourceAsStream(
-                "/client_secret_993725644664-jkg33lmipdriq4sbucr9irceo1583l61.apps.googleusercontent.com.json");
+                "/client_secret.json");
 
         if (is == null) {
             throw new FileNotFoundException();
         }
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory,
-                new InputStreamReader(is));
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory, new InputStreamReader(is));
 
         // Build flow and trigger user authorization request
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, jsonFactory,
@@ -74,7 +76,8 @@ public class GMailer {
                 .build();
 
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(3338).build();
-        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        Credential credential = new AuthorizationCodeInstalledApp(flow,
+                receiver).authorize("user");
 
         // return an authorized Credential Object
         return credential;
