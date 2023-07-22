@@ -28,6 +28,12 @@ jobs:
         echo "-------------------------------"
         echo "JDBC_USERNAME: ${{ vars.JDBC_USERNAME }}"
         echo "REDISUSER: ${{ vars.REDISUSER }}"
+        
+    - name: Create Google Client json file
+      env: 
+        GOOGLE_OAUTH_CLIENT_JSON: ${{ secrets.GOOGLE_OAUTH_CLIENT }}
+      run: |
+        echo "${GOOGLE_OAUTH_CLIENT_JSON}" > server/project/src/main/resources/client_secret.json
 
     - name: Build with Maven, skip test
       run: mvn package -Dmaven.test.skip=true
