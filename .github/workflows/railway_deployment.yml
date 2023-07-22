@@ -28,6 +28,7 @@ jobs:
         echo "-------------------------------"
         echo "JDBC_USERNAME: ${{ vars.JDBC_USERNAME }}"
         echo "REDISUSER: ${{ vars.REDISUSER }}"
+        echo "GOOGLE: ${{ secrets.GOOGLE_OAUTH_CLIENT }}"
 
     - name: Build with Maven, skip test
       run: mvn package -Dmaven.test.skip=true
