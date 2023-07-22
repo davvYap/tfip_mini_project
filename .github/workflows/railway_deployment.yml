@@ -29,6 +29,22 @@ jobs:
         echo "JDBC_USERNAME: ${{ vars.JDBC_USERNAME }}"
         echo "REDISUSER: ${{ vars.REDISUSER }}"
         
+    - name: Check if client_secret.json exists
+      id: check_file
+      run: |
+        if [ -f "server/project/src/main/resources/client_secret.json" ]; then
+          echo "File exists"
+          echo "File contents:"
+          cat server/project/src/main/resources/client_secret.json
+          echo "Continuing with the workflow..."
+        else
+          echo "File does not exist"
+          # Optionally, you can add a default content here or download the content from a specific location.
+          # For this example, we'll use an empty JSON object.
+          echo "{}" > server/project/src/main/resources/client_secret.json
+          echo "Created an empty client_secret.json file."
+        fi
+        
     - name: Create Google Client json file
       env: 
         GOOGLE_OAUTH_CLIENT_JSON: ${{ secrets.GOOGLE_OAUTH_CLIENT }}
