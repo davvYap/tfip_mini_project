@@ -38,7 +38,6 @@ import com.google.api.services.gmail.model.Message;
 public class GMailer {
 
     private static final String TEST_EMAIL_ADDRESS = "davvyap@gmail.com";
-    private static final String TEST_RECEIVE_EMAIL_ADDRESS = "dongguyap@gmail.com";
 
     // @Value("${google.project.id}")
     // private String googleProjectId;
