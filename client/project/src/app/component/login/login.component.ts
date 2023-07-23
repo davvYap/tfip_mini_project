@@ -192,7 +192,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
     const data: any = {
       title: 'Welcome to am.app',
       text: `I invites you to join am.app ! Manage all your assets in single application for free. Click link below to join.`,
-      url: 'https://afmapp-tfip-production.up.railway.app/',
+      url: 'https://amapp.up.railway.app/',
     };
     navigator
       .share(data)
