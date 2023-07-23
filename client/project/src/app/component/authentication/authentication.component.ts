@@ -27,6 +27,7 @@ export class AuthenticationComponent implements OnInit {
   form!: FormGroup;
   user!: SocialUser;
   loggedIn!: any;
+  googleLogInShowLoading: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -47,9 +48,10 @@ export class AuthenticationComponent implements OnInit {
     this.authService.authState.subscribe((user) => {
       this.user = user;
       this.loggedIn = user != null;
-      console.log(this.user);
+      // console.log(this.user);
       if (this.user) {
         console.log('user login');
+        this.googleLogInShowLoading = true;
         this.loginGoogle();
       }
     });

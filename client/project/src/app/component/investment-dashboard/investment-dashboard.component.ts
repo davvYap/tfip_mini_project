@@ -20,6 +20,7 @@ import {
   switchMap,
   of,
   forkJoin,
+  tap,
 } from 'rxjs';
 import {
   Column,
@@ -99,6 +100,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   stockPrice$!: Subscription;
   completeStocksSignal: WritableSignal<boolean> = signal(false);
   completeStocksCountSignal: WritableSignal<boolean> = signal(false);
+  showEmptyStocks: boolean = false;
 
   skeletonLoading: boolean = true;
   lineData!: any;
@@ -191,7 +193,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     // HERE FOR STOCK COUNT
     this.stockCountDonutSymbol = [];
     this.categoriesColor = [];
-    this.stocksCount = [];
+    // this.stocksCount = [];
     this.initiateStockCount();
 
     // HERE FOR PORTFOLIO TABLE
@@ -278,6 +280,12 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.stocksCount$ = this.getSvc
       .getUserStocksCount(this.getSvc.userId)
       .pipe(
+        tap((stockCounts: PurchasedStocksCount[]) => {
+          this.stocksCount = [];
+          if (stockCounts.length === 0) {
+            this.showEmptyStocks = true;
+          }
+        }),
         // get market price and performance
         switchMap((stockCounts: PurchasedStocksCount[]) => {
           let observables: Observable<Stock>[] = [];
@@ -523,7 +531,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
                 stockPrice,
                 endOfMonth
               );
-              // console.log('nasdaq100', performance);
+              console.log('nasdaq100', performance);
               this.nasdaq100data = performance;
               return performance;
             })

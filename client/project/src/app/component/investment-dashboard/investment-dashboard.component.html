@@ -10,7 +10,7 @@
     </div>
 
     <div *ngIf="stocksCount; else stocksLoading">
-      <div *ngIf="stocksCount.length > 0; else noStockData">
+      <div *ngIf="!showEmptyStocks; else noStockData">
         <section>
           <div class="row justify-content-evenly align-items-center">
             <!-- DONUT CHART -->

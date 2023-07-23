@@ -181,9 +181,31 @@ public class UserService {
                 // check redis whether the latest market price is there
                 Optional<Double> optPrice = retrieveStockMarketValueRedis(stkSymbol);
                 if (optPrice.isEmpty()) {
-                    ResponseEntity<String> realStonkPrice = stockSvc.getRealStonksPrice(stkSymbol);
-                    marketPrice = getStonkStockPrice(realStonkPrice.getBody());
-                    saveStockMarketValueRedis(stkSymbol, marketPrice);
+                    // check mongo
+                    Optional<List<StockPrice>> mongoOpt = retrieveStockMonthlyPerformanceMongo(stkSymbol);
+                    if (mongoOpt.isEmpty()) {
+                        System.out.println("Called Twelve API for stock price at User Service");
+                        ResponseEntity<String> res = stockSvc.getStockPrice(stkSymbol, 10);
+                        if (res.getStatusCode().isError()) {
+                            continue;
+                        }
+                        String body = res.getBody();
+                        double newStockPrice = 0.0;
+                        try (InputStream is = new ByteArrayInputStream(body.getBytes())) {
+                            JsonReader reader = Json.createReader(is);
+                            JsonObject jsObj = reader.readObject();
+                            String newStockPriceString = jsObj.getString("price");
+                            newStockPrice = Double.parseDouble(newStockPriceString);
+                        }
+                        marketPrice = newStockPrice;
+                    } else {
+                        List<StockPrice> spList = mongoOpt.get();
+                        marketPrice = spList.get(spList.size() - 1).getClosePrice();
+                    }
+                    // ResponseEntity<String> realStonkPrice =
+                    // stockSvc.getRealStonksPrice(stkSymbol);
+                    // marketPrice = getStonkStockPrice(realStonkPrice.getBody());
+                    // saveStockMarketValueRedis(stkSymbol, marketPrice);
                 } else {
                     marketPrice = optPrice.get();
                     // System.out.println("Market price >>> " + marketPrice);

@@ -72,7 +72,7 @@ public class StockController {
                     newStockPrice = Double.parseDouble(newStockPriceString);
                 }
                 userSvc.saveStockMarketValueRedis(stkSymbol, newStockPrice);
-                return stockSvc.getStockPrice(stkSymbol, outputsize);
+                return res;
             }
             List<StockPrice> spList = mongoOpt.get();
             marketPrice = spList.get(spList.size() - 1).getClosePrice();

@@ -78,7 +78,10 @@
     </div>
 
     <div class="row justify-content-center align-items-center mt-3 mb-3">
-      <div class="col-10">
+      <div
+        *ngIf="!googleLogInShowLoading; else googleLogInLoading"
+        class="col-10"
+      >
         <section class="sign-up">
           <div
             class="justify-content-center align-items-center d-none d-md-flex"
@@ -130,3 +133,16 @@
     </div>
   </div>
 </div>
+
+<ng-template #googleLogInLoading>
+  <div
+    class="d-flex justify-content-center align-items-center m-5 loading-spinner"
+  >
+    <p-progressSpinner
+      styleClass="w-4rem h-4rem"
+      strokeWidth="8"
+      fill="var(--surface-ground)"
+      animationDuration=".5s"
+    ></p-progressSpinner>
+  </div>
+</ng-template>
