@@ -531,7 +531,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
                 stockPrice,
                 endOfMonth
               );
-              console.log('nasdaq100', performance);
+              // console.log('nasdaq100', performance);
               this.nasdaq100data = performance;
               return performance;
             })
