@@ -185,10 +185,11 @@ public class TransactionController {
 	public ResponseEntity<String> deleteTransactionJdbc(@PathVariable String userId, @RequestParam String tranId,
 			@RequestParam String catName) {
 
-		// check if there is regular transaction link to this transaction
+		// check if there is recursive transaction link to this transaction
 		List<RegularTransaction> reguTrans = transSvc.getUserRegularTransactionsJdbc(userId);
 		for (RegularTransaction regularTransaction : reguTrans) {
 			if (regularTransaction.getTranId().equals(tranId)) {
+				System.out.println("Attempt to delete transaction link to recursive transaction");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 						.contentType(MediaType.APPLICATION_JSON)
 						.body(Json.createObjectBuilder()

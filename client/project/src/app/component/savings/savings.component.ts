@@ -151,6 +151,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
   yearForm!: FormGroup;
 
   emptyIcon = faFolderOpen;
+  showEmptyTransaction: boolean = false;
 
   constructor(
     private router: Router,
@@ -243,7 +244,6 @@ export class SavingsComponent implements OnInit, OnDestroy {
     }));
 
     // NOTE Initiate transaction donut chart
-    this.transactions = [];
     this.initiateDonutChartData();
 
     // NOTE Initiate bar chart
@@ -500,6 +500,12 @@ export class SavingsComponent implements OnInit, OnDestroy {
     this.transactions$ = this.getSvc
       .getUserTransaction(this.getSvc.userId, this.thisYear().toString())
       .pipe(
+        tap((trans: Transaction[]) => {
+          this.transactions = [];
+          if (trans.length === 0) {
+            this.showEmptyTransaction = true;
+          }
+        }),
         map((trans: Transaction[]) => {
           trans.map((tran) => {
             // console.log(tran);

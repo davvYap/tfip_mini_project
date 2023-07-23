@@ -52,7 +52,7 @@ export class RegularTransactionsComponent implements OnInit {
     this.title.setTitle(`${this.getSvc.applicationName} | Mortgage`);
     this.breadcrumbItems = [
       { label: 'Savings Dashboard', routerLink: '/savings' },
-      { label: 'Regular Transactions', routerLink: '/regular-transactions' },
+      { label: 'Recursive Transactions', routerLink: '/regular-transactions' },
     ];
     this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
     this.breakpointSvc.initBreakpointObserver();
@@ -150,15 +150,28 @@ export class RegularTransactionsComponent implements OnInit {
   }
 
   addTransaction() {
+    const newRecTran: Transaction = {
+      transactionId: '',
+      transactionName: '',
+      type: '',
+      date: '',
+      amount: 0.0,
+      remarks: '',
+      categoryName: '',
+      categoryId: '',
+      dateNum: 0,
+      regular: true,
+    };
+
     this.dialogRef = this.dialogSvc.open(AddTransactionComponent, {
-      header: 'New Transaction',
+      header: 'New Recursive Transaction',
       width: this.breakpointSvc.currentBreakpoint,
       // height: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
       maximizable: true,
       dismissableMask: true,
-      data: { mortgageMonthlyPayment: null },
+      data: { mortgageMonthlyPayment: newRecTran },
     });
 
     this.dialogRef.onClose.subscribe((msg) => {

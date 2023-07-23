@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable, Subscription, map } from 'rxjs';
+import { Observable, Subscription, map, tap } from 'rxjs';
 import {
   Categories,
   Column,
@@ -111,6 +111,8 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
   barChartOptions!: any;
   finalBarChartLabels!: string[];
   finalBarChartData!: number[];
+
+  showEmptyTransaction: boolean = false;
 
   constructor(
     private themeSvc: ThemeService,
@@ -216,7 +218,6 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
 
     // NOTE Initiate donut and bar chart
     // get user transactions
-    this.transactions = [];
     this.initiateChartsData();
   }
 
@@ -309,6 +310,13 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
             setTimeout(() => {
               this.ngOnInit();
             }, 500);
+          })
+          .catch((err) => {
+            this.messageSvc.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: err.error.message,
+            });
           });
       },
       reject: () => {
@@ -411,6 +419,12 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
         this.endDate()
       )
       .pipe(
+        tap((trans) => {
+          this.transactions = [];
+          if (trans.length === 0) {
+            this.showEmptyTransaction = true;
+          }
+        }),
         map((trans: Transaction[]) => {
           trans.map((tran) => {
             if (

@@ -77,6 +77,10 @@ h5 {
   border-radius: 16px; */
 }
 
+.loading-spinner {
+  min-height: 50dvh;
+}
+
 #applicationMenubar {
   position: sticky;
   top: 0;

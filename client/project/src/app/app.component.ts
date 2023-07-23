@@ -235,7 +235,7 @@ export class AppComponent implements OnInit {
                   command: () => this.editCategory(),
                 },
                 {
-                  label: 'Regular',
+                  label: 'Recursive',
                   icon: 'pi pi-fw pi-calendar ',
                   routerLink: '/regular-transactions',
                 },
