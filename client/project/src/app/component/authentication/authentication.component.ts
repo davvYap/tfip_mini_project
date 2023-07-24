@@ -121,6 +121,7 @@ export class AuthenticationComponent implements OnInit {
       })
       .catch((err) => {
         console.log(err);
+        this.googleLogInShowLoading = false;
         this.imgSrc = '/assets/images/user.png';
         this.imgClass = 'user-img-shake';
         this.loginTitle = err.error.message;

@@ -52,7 +52,7 @@ export class RegularTransactionsComponent implements OnInit {
     this.title.setTitle(`${this.getSvc.applicationName} | Mortgage`);
     this.breadcrumbItems = [
       { label: 'Savings Dashboard', routerLink: '/savings' },
-      { label: 'Recursive Transactions', routerLink: '/regular-transactions' },
+      { label: 'Recurring Transactions', routerLink: '/regular-transactions' },
     ];
     this.breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
     this.breakpointSvc.initBreakpointObserver();

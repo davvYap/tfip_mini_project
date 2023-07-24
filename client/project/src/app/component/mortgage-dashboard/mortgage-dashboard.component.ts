@@ -89,7 +89,7 @@ export class MortgageDashboardComponent implements OnInit, OnDestroy {
 
   getImgSrc(i: number): string {
     const rand = this.getImgSrcIndexRecursive(i + 1);
-    return `/assets/images/house-${rand}.jpg`;
+    return `/assets/images/mortgage/house-${rand}.jpg`;
   }
 
   getImgSrcIndexRecursive(i: number): number {
