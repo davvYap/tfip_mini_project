@@ -23,18 +23,18 @@ jobs:
         echo "-------------------------------"
         echo "JDBC_USERNAME: ${{ vars.JDBC_USERNAME }}"
         echo "REDISUSER: ${{ vars.REDISUSER }}"
-        
 
     - name: Set up Node.Js
       uses: actions/setup-node@v3
       with:
         node-version: 18
         
-    - name: Install Angular CLI & Node Dependencies
+    - name: Install Angular CLI globally
+      run: npm install -g @angular/cli
+
+    - name: Install Node Dependencies
       working-directory: client/project
-      run: |
-        npm install -g @angular/cli
-        npm ci
+      run: npm ci
 
     - name: Build Angular app
       run: ng build
@@ -44,7 +44,6 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-
 
     - name: Build with Maven, skip test
       run: mvn package -Dmaven.test.skip=true
