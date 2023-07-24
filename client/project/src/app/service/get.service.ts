@@ -539,8 +539,15 @@ export class GetService {
       currDate.getDay() === 6
     ) {
       currDate.setDate(currDate.getDate() - 1);
-      // console.log('currDate2', currDate);
     }
+    const formattedDate = `${currDate.getFullYear()}-${(currDate.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${currDate.getDate().toString().padStart(2, '0')}`;
+    return formattedDate;
+  }
+
+  getTodaysDate(): string {
+    const currDate = new Date();
     const formattedDate = `${currDate.getFullYear()}-${(currDate.getMonth() + 1)
       .toString()
       .padStart(2, '0')}-${currDate.getDate().toString().padStart(2, '0')}`;

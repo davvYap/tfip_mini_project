@@ -470,10 +470,10 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           const observable = this.getSvc.getStockMonthlyPrice(
             'VOO',
             this.startDate,
-            this.getCurrentDate()
+            this.getSvc.getTodaysDate()
           );
           observables.push(observable);
-
+          // console.log('voo date', this.getSvc.getTodaysDate());
           return forkJoin(observables).pipe(
             map((stockPrices: StockPrice[][]) => {
               const stockPrice: StockPrice[] = stockPrices[0];
@@ -507,10 +507,10 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           const observable = this.getSvc.getStockMonthlyPrice(
             'QQQ',
             this.startDate,
-            this.getCurrentDate()
+            this.getSvc.getTodaysDate()
           );
           observables.push(observable);
-
+          // console.log('qqq date', this.getSvc.getTodaysDate());
           return forkJoin(observables).pipe(
             map((stockPrices: StockPrice[][]) => {
               const stockPrice: StockPrice[] = stockPrices[0];

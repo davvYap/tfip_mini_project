@@ -276,12 +276,24 @@
           ></p-progressSpinner>
         </div>
       </div>
-      <!-- USER SETTING -->
+      <!--UPDATE USER SETTING -->
       <div *ngIf="!isSignUp" class="d-flex flex-row-reverse align-items-center">
-        <p-button styleClass=" p-button-text" (onClick)="updateUserProfile()">
+        <p-button
+          *ngIf="!showUpdateUserLoading"
+          styleClass=" p-button-text"
+          (onClick)="updateUserProfile()"
+        >
           <fa-icon [icon]="loginIcon"></fa-icon>
           <span class="ms-2 fw-bolder">Update</span>
         </p-button>
+        <div *ngIf="showUpdateUserLoading">
+          <p-progressSpinner
+            styleClass="w-3rem h-3rem"
+            strokeWidth="8"
+            fill="var(--surface-ground)"
+            animationDuration=".5s"
+          ></p-progressSpinner>
+        </div>
       </div>
     </section>
   </div>
