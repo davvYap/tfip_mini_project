@@ -277,20 +277,33 @@ public class SignUpController {
                                 .build().toString());
             }
 
-            GMailer gMailer = new GMailer();
-            gMailer.sendMail(email, "Updated user profile",
-                    """
-                            Dear %s,
+            emailSenderSvc.sendMail(email, "Updated user profile", """
+                    Dear %s,
 
-                            We received your request to update your profile.
-                            We are glad to inform that the request was successful, your profile has been updated.
+                    We received your request to update your profile.
+                    We are glad to inform that the request was successful.
 
-                            For enquiries, please contact: +612-3456789
+                    For enquiries, please contact: +612-3456789
 
-                            Best Regards,
-                            am.app Development Team
-                            """
-                            .formatted(username));
+                    Best Regards,
+                    am.app Development Team
+                    """.formatted(username));
+
+            // GMailer gMailer = new GMailer();
+            // gMailer.sendMail(email, "Updated user profile",
+            // """
+            // Dear %s,
+
+            // We received your request to update your profile.
+            // We are glad to inform that the request was successful, your profile has been
+            // updated.
+
+            // For enquiries, please contact: +612-3456789
+
+            // Best Regards,
+            // am.app Development Team
+            // """
+            // .formatted(username));
 
             return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
                     .body(Json.createObjectBuilder()
