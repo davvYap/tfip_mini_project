@@ -144,6 +144,11 @@ export interface Transaction {
   regular: boolean;
 }
 
+export interface SimpleTransaction {
+  categoryName: string;
+  amount: number;
+}
+
 export interface categoryOptionItem<T = any> {
   label: string;
   value: string;

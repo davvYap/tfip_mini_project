@@ -15,6 +15,7 @@ import {
   Categories,
   Column,
   ExportColumn,
+  SimpleTransaction,
   Transaction,
   categoryOptionItem,
 } from 'src/app/models';
@@ -411,6 +412,13 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
     });
   }
 
+  sortCategoriesByAmount(trans: SimpleTransaction[]): SimpleTransaction[] {
+    const sorted = trans.sort((a, b) => {
+      return b.amount - a.amount;
+    });
+    return sorted;
+  }
+
   initiateChartsData() {
     this.transactions$ = this.getSvc
       .getUserTransactionBasedOnDates(
@@ -468,30 +476,51 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
             );
           } else if (this.typeOfRecord() === this.typeOfRecord()) {
             this.categoriesDonutData.set([]);
-            trans.map((tran) => {
-              if (tran.type === this.typeOfRecord()) {
-                // check if the data already include this transaction category
-                if (!this.categories.includes(tran.categoryName)) {
-                  this.categories.push(tran.categoryName);
-                  this.categoriesDonutData.mutate((categoriesArray) =>
-                    categoriesArray.push(tran.amount)
-                  );
-                  const latestIndex = this.categories.length;
-                  this.categoriesColor.push(this.getSvc.getColors(latestIndex));
-                  this.finalBarChartLabels.push(tran.categoryName);
-                  this.finalBarChartData.push(tran.amount);
-                } else {
-                  const catNameIndex: number = this.categories.indexOf(
-                    tran.categoryName
-                  );
-                  this.categoriesDonutData()[catNameIndex] += tran.amount;
-                  this.finalBarChartData[catNameIndex] += tran.amount;
+            const copyTrans: Transaction[] = structuredClone(trans);
+            let simpleTrans: SimpleTransaction[] = [];
+            let categoryTypes: string[] = [];
+            copyTrans.map((tran) => {
+              if (
+                !categoryTypes.includes(tran.categoryName) &&
+                tran.type === this.typeOfRecord()
+              )
+                categoryTypes.push(tran.categoryName);
+            });
+            // console.log('categories > ', categoryTypes);
+            let totalCatAmount = 0;
+            categoryTypes.map((catName: string) => {
+              for (let i = 0; i < copyTrans.length; i++) {
+                if (copyTrans[i].categoryName === catName) {
+                  totalCatAmount += copyTrans[i].amount;
                 }
-                totalIncome += tran.amount;
-                totalExpense += tran.amount;
-                this.totalIncome.set(totalIncome);
-                this.totalExpense.set(totalExpense);
               }
+              const consolidateTran: SimpleTransaction = {
+                categoryName: catName,
+                amount: totalCatAmount,
+              };
+              simpleTrans.push(consolidateTran);
+              totalCatAmount = 0;
+            });
+            // console.log('simpleTrans', simpleTrans);
+            const sortedTrans = this.sortCategoriesByAmount(simpleTrans);
+            // console.log('sorted trans', sortedTrans);
+
+            // get colors
+            for (let i = 0; i < sortedTrans.length; i++) {
+              this.categoriesColor.push(this.getSvc.getColors(i));
+            }
+
+            sortedTrans.map((tran) => {
+              this.categories.push(tran.categoryName);
+              this.categoriesDonutData.mutate((categoriesArray) =>
+                categoriesArray.push(tran.amount)
+              );
+              this.finalBarChartLabels.push(tran.categoryName);
+              this.finalBarChartData.push(tran.amount);
+              totalIncome += tran.amount;
+              totalExpense += tran.amount;
+              this.totalIncome.set(totalIncome);
+              this.totalExpense.set(totalExpense);
             });
           }
         })
