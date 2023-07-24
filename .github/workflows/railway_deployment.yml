@@ -32,8 +32,10 @@ jobs:
     - name: Install Angular CLI globally
       run: npm install -g @angular/cli
 
+    - name: Set working directory to Angular project
+      run: cd client/project
+
     - name: Install Node Dependencies
-      working-directory: client/project
       run: npm ci
 
     - name: Build Angular app
