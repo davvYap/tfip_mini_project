@@ -60,6 +60,9 @@ jobs:
 #         REDISUSER: ${{ vars.REDISUSER }}
 #         REDISPASSWORD: ${{ secrets.REDISPASSWORD }}
 
+    - name: Create target directory
+      run: mkdir -p server/project/src/main/resources/static
+
     - name: Copy Angular build output to server project static directory
       run: |
         cp -r client/project/dist/project/* server/project/src/main/resources/static/
