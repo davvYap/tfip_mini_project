@@ -66,7 +66,7 @@ public class LoginController {
 		session.setAttribute("isLogin", true);
 		session.setAttribute("user", user);
 		// testSessionId(session);
-		System.out.println("Login...");
+		System.out.println("%s Login...".formatted(username));
 		// GMailer gmailer = new GMailer();
 		// gmailer.sendMail("Sign Up Successful", """
 		// Dear %s,

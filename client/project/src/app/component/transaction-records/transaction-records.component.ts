@@ -503,7 +503,7 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
             });
             // console.log('simpleTrans', simpleTrans);
             const sortedTrans = this.sortCategoriesByAmount(simpleTrans);
-            // console.log('sorted trans', sortedTrans);
+            console.log('sorted trans', sortedTrans);
 
             // get colors
             for (let i = 0; i < sortedTrans.length; i++) {
