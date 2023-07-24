@@ -205,7 +205,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.title.setTitle(`${this.getSvc.applicationName} | Dashboard`);
     // this.themeSvc.initiateChartSetting();
     this.username.set(
-      `${localStorage.getItem('firstname')} ${localStorage.getItem('lastname')}`
+      `${
+        localStorage.getItem('firstname')
+          ? localStorage.getItem('firstname')
+          : ''
+      } ${
+        localStorage.getItem('lastname') ? localStorage.getItem('lastname') : ''
+      }`
     );
     this.goalForm = this.createGoalForm();
 

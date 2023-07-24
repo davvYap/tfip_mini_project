@@ -140,9 +140,15 @@ export class AppComponent implements OnInit {
         } else {
           this.imgSrc = profileIcon;
         }
-        this.userFullname = `${localStorage.getItem(
-          'firstname'
-        )} ${localStorage.getItem('lastname')}`;
+        this.userFullname = `${
+          localStorage.getItem('firstname')
+            ? localStorage.getItem('firstname')
+            : ''
+        } ${
+          localStorage.getItem('lastname')
+            ? localStorage.getItem('lastname')
+            : ''
+        }`;
       } else {
         this.imgSrc = '';
         this.isLogin.set(false);
