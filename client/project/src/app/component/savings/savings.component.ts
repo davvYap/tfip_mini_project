@@ -748,4 +748,18 @@ export class SavingsComponent implements OnInit, OnDestroy {
     }
     this.notificationSvc.newNotification$.next(totalNotifcationMessages);
   }
+
+  minusYear(): void {
+    const year = this.thisYear() - 1;
+    this.thisYear.set(year);
+    this.showEmptyTransaction = false;
+    this.ngOnInit();
+  }
+
+  plusYear(): void {
+    const year = this.thisYear() + 1;
+    this.thisYear.set(year);
+    this.showEmptyTransaction = false;
+    this.ngOnInit();
+  }
 }

@@ -5,19 +5,38 @@
     [home]="breadcrumbHome"
   ></p-breadcrumb>
   <div class="row justify-content-center align-items-center g-2">
-    <div class="col-10 text-center mt-3 mb-5 h1card">
-      <h1>
-        Savings Dashbooard
-        <span
-          id="year"
-          class="fw-bolder"
-          pTooltip="Press to change year"
-          (click)="showDialog()"
-        >
-          {{ thisYear() }}
-          <fa-icon [icon]="editIcon"></fa-icon>
-        </span>
-      </h1>
+    <div
+      class="col-md-10 col-11 d-flex justify-content-between align-items-center mt-3 mb-5 h1card"
+    >
+      <div>
+        <p-button
+          icon="pi pi-caret-left"
+          styleClass="p-button-rounded p-button-text"
+          (onClick)="minusYear()"
+        ></p-button>
+      </div>
+      <div class="text-center">
+        <h1>
+          Savings Dashbooard
+          <span
+            id="year"
+            class="fw-bolder"
+            pTooltip="Press to change year"
+            (click)="showDialog()"
+          >
+            {{ thisYear() }}
+            <fa-icon [icon]="editIcon"></fa-icon>
+          </span>
+        </h1>
+      </div>
+      <div>
+        <p-button
+          icon="pi pi-caret-right"
+          styleClass="p-button-rounded p-button-text"
+          (onClick)="plusYear()"
+        ></p-button>
+      </div>
+
       <dialog #appDialog id="dialogModal">
         <header>
           <h2 class="header">Select records</h2>
