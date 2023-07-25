@@ -124,6 +124,9 @@ export class InvestmentComponent implements OnInit, OnDestroy {
       case 'KRX':
         stockSymbolTrimmed = `${stockSymbol.substring(0, index)}.KS`;
         break;
+      case 'SGX':
+        stockSymbolTrimmed = `${stockSymbol.substring(0, index)}.SI`;
+        break;
       default:
         stockSymbolTrimmed = stockSymbol.substring(0, index);
         break;
