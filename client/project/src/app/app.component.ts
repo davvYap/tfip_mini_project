@@ -363,7 +363,7 @@ export class AppComponent implements OnInit {
           ],
         },
         {
-          label: 'Coffee',
+          label: 'Support',
           icon: 'pi pi-fw pi-paypal',
           routerLink: '/payment',
         },
