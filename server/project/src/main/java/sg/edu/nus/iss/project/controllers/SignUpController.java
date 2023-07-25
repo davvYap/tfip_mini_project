@@ -68,11 +68,10 @@ public class SignUpController {
 
         String captcha = UUID.randomUUID().toString().substring(0, 6);
         session.setAttribute("captcha", captcha.toUpperCase());
-
-        emailSenderSvc.sendMail(email, "Registration Code", """
+        emailSenderSvc.sendHtmlMail(email, "Registration Code", """
                 Dear %s,
 
-                This is your 6-digit registration code: %s
+                This is your 6-digit registration code: <h1>%s</h1>
 
                 Best Regards,
                 am.app Development Team
@@ -277,11 +276,11 @@ public class SignUpController {
                                 .build().toString());
             }
 
-            emailSenderSvc.sendMail(email, "Updated user profile", """
+            emailSenderSvc.sendHtmlMail(email, "Updated user profile", """
                     Dear %s,
 
                     We received your request to update your profile.
-                    We are glad to inform that the request was successful.
+                    We are glad to inform that the request was <h5>successful</h5>.
 
                     For enquiries, please contact: +612-3456789
 
