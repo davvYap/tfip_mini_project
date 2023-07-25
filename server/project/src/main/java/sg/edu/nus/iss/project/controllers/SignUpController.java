@@ -280,7 +280,7 @@ public class SignUpController {
                     Dear %s,
 
                     We received your request to update your profile.
-                    We are glad to inform that the request was <h5>successful</h5>.
+                    We are glad to inform that the request was <h3>successful</h3>.
 
                     For enquiries, please contact: +612-3456789
 
