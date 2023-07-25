@@ -491,6 +491,7 @@ export class SavingsComponent implements OnInit, OnDestroy {
     // console.log('year', year);
     this.thisYear.set(year);
     this.closeDialog();
+    this.showEmptyTransaction = false;
     this.ngOnInit();
     // setTimeout(() => {
     // }, 2000);

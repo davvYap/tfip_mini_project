@@ -257,6 +257,7 @@ export class TransactionRecordsComponent implements OnInit, OnDestroy {
     this.endDate.set(endDate);
     this.typeOfRecord.set(typeOfRecord);
     this.closeDialog();
+    this.showEmptyTransaction = false;
     // console.log(this.typeOfRecord());
     const qp: Params = { type: this.typeOfRecord() };
     this.router.navigate(['/transaction-records'], { queryParams: qp });
