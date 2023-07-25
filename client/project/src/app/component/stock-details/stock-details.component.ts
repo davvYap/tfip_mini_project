@@ -10,6 +10,7 @@ import {
   StockCompanyProfile,
   StockDayPerformance,
   StockIdea,
+  StockMonthlyPrice,
   StockPrice,
   StockSummaryDataResponse,
 } from 'src/app/models';
@@ -193,20 +194,13 @@ export class StockDetailsComponent implements OnInit {
     return sp;
   }
 
-  getStockMonthlyPrice(
-    stockPrices: StockPrice[],
-    endOfMonth: string[]
-  ): number[] {
+  getStockMonthlyPrice(prices: number[]): number[] {
     let sp: number[] = [];
     // const firstPurchasePrice: number =
     //   stockPrices[stockPrices.length - 1].close;
-    const firstPurchasePrice: number = stockPrices[0].close;
-    for (let i = 0; i < stockPrices.length; i++) {
-      const stockPrice = stockPrices[i];
-      for (let j = 0; j < endOfMonth.length; j++) {
-        if (stockPrice.date === endOfMonth[j]) {
-          sp.push(stockPrice.close);
-        }
+    for (let i = 0; i < prices.length; i++) {
+      if (prices[i] > 0) {
+        sp.push(prices[i]);
       }
     }
     // return sp.reverse();
@@ -294,7 +288,8 @@ export class StockDetailsComponent implements OnInit {
   }
 
   initiateLineChartData() {
-    let observables: Observable<StockPrice[]>[] = [];
+    // let observables: Observable<StockPrice[]>[] = [];
+    let observables: Observable<StockMonthlyPrice>[] = [];
     const observable = this.getSvc.getStockMonthlyPrice(
       this.symbol,
       this.getStartDate(),
@@ -304,36 +299,12 @@ export class StockDetailsComponent implements OnInit {
 
     forkJoin(observables)
       .pipe(
-        map((stockPrices: StockPrice[][]) => {
-          const stockPrice: StockPrice[] = stockPrices[0];
-          for (let i = 0; i < stockPrice.length; i++) {
-            const stock = stockPrice[i];
-            const date = stock.date.substring(0, 10);
-            stock.date = date;
-          }
-          let endOfMonth: string[] = [...this.endOfMonth];
-          let count = 0;
-          endOfMonth.map((date) => {
-            if (date === this.getCurrentDate()) count++;
-          });
-          if (count === 0) {
-            endOfMonth.push(this.getCurrentDate());
-          }
-          // console.log('end of month ', endOfMonth);
-
-          // const performance: number[] = this.getStockMonthlyPerformance(
-          //   stockPrice,
-          //   endOfMonth
-          // );
-
-          const monthlyPrice: number[] = this.getStockMonthlyPrice(
-            stockPrice,
-            endOfMonth
-          );
-          this.stockData = monthlyPrice;
+        map((prices: StockMonthlyPrice[]) => {
+          const stockPrices: StockMonthlyPrice = prices[0];
+          const pricesArr: number[] = stockPrices.monthlyPrices;
+          this.stockData = this.getStockMonthlyPrice(pricesArr);
           this.skeletonLoading = false;
           this.initiateLineChart();
-          // console.log('stocks data > ', this.stockData);
         })
       )
       .subscribe();
@@ -413,3 +384,24 @@ export class StockDetailsComponent implements OnInit {
     };
   }
 }
+
+// DEPRECATED
+// getStockMonthlyPrice(
+//   stockPrices: StockPrice[],
+//   endOfMonth: string[]
+// ): number[] {
+//   let sp: number[] = [];
+//   // const firstPurchasePrice: number =
+//   //   stockPrices[stockPrices.length - 1].close;
+//   const firstPurchasePrice: number = stockPrices[0].close;
+//   for (let i = 0; i < stockPrices.length; i++) {
+//     const stockPrice = stockPrices[i];
+//     for (let j = 0; j < endOfMonth.length; j++) {
+//       if (stockPrice.date === endOfMonth[j]) {
+//         sp.push(stockPrice.close);
+//       }
+//     }
+//   }
+//   // return sp.reverse();
+//   return sp;
+// }

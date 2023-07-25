@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
+import javax.print.attribute.standard.Media;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,8 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
+import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import sg.edu.nus.iss.project.models.StockPrice;
 import sg.edu.nus.iss.project.models.StockProfile;
@@ -58,8 +62,8 @@ public class StockController {
             // CHECK MONGO
             Optional<List<StockPrice>> mongoOpt = userSvc.retrieveStockMonthlyPerformanceMongo(stkSymbol);
             if (mongoOpt.isEmpty()) {
-                System.out.println("Called Twelve API for stock price at Stock Controller");
-                ResponseEntity<String> res = stockSvc.getStockPrice(stkSymbol, outputsize);
+                // Check YH FINANCE
+                ResponseEntity<String> res = stockSvc.getStockPriceYHFinance(stkSymbol);
                 if (res.getStatusCode().isError()) {
                     return res;
                 }
@@ -68,11 +72,33 @@ public class StockController {
                 try (InputStream is = new ByteArrayInputStream(body.getBytes())) {
                     JsonReader reader = Json.createReader(is);
                     JsonObject jsObj = reader.readObject();
-                    String newStockPriceString = jsObj.getString("price");
-                    newStockPrice = Double.parseDouble(newStockPriceString);
+                    JsonNumber newStockPriceJsonNumber = jsObj.getJsonNumber("price");
+                    if (newStockPriceJsonNumber != null) {
+                        newStockPrice = newStockPriceJsonNumber.doubleValue();
+                    }
                 }
                 userSvc.saveStockMarketValueRedis(stkSymbol, newStockPrice);
-                return res;
+                return ResponseEntity.status(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Json.createObjectBuilder().add("price", String.valueOf(newStockPrice)).build()
+                                .toString());
+
+                // Check Twelve API
+                // System.out.println("Called Twelve API for stock price at Stock Controller");
+                // ResponseEntity<String> res = stockSvc.getStockPrice(stkSymbol, outputsize);
+                // if (res.getStatusCode().isError()) {
+                // return res;
+                // }
+                // String body = res.getBody();
+                // double newStockPrice = 0.0;
+                // try (InputStream is = new ByteArrayInputStream(body.getBytes())) {
+                // JsonReader reader = Json.createReader(is);
+                // JsonObject jsObj = reader.readObject();
+                // String newStockPriceString = jsObj.getString("price");
+                // newStockPrice = Double.parseDouble(newStockPriceString);
+                // }
+                // userSvc.saveStockMarketValueRedis(stkSymbol, newStockPrice);
+                // return res;
             }
             List<StockPrice> spList = mongoOpt.get();
             marketPrice = spList.get(spList.size() - 1).getClosePrice();
@@ -122,11 +148,16 @@ public class StockController {
                     try (InputStream is = new ByteArrayInputStream(body.getBytes())) {
                         JsonReader reader = Json.createReader(is);
                         JsonObject jsObj = reader.readObject();
-                        String url = jsObj.getString("url");
-                        if (url.isEmpty() || url.isBlank()) {
-                            logoUrl = "/assets/images/na.png";
+                        JsonString urlStr = jsObj.getJsonString("url");
+                        if (urlStr != null) {
+                            String url = jsObj.getString("url");
+                            if (url.isEmpty() || url.isBlank()) {
+                                logoUrl = "/assets/images/na.png";
+                            } else {
+                                logoUrl = url;
+                            }
                         } else {
-                            logoUrl = url;
+                            logoUrl = "/assets/images/na.png";
                         }
                     }
                 }
@@ -160,27 +191,30 @@ public class StockController {
     public ResponseEntity<String> getMonthlyPrice(@PathVariable String symbol, @RequestParam String sdate,
             @RequestParam String edate) throws IOException {
 
+        String formattedSymbol = symbol.toUpperCase();
         // CHECK FROM MONGO
-        Optional<List<StockPrice>> pricesOpt = userSvc.retrieveStockMonthlyPerformanceMongo(symbol);
+        Optional<List<StockPrice>> pricesOpt = userSvc.retrieveStockMonthlyPerformanceMongo(formattedSymbol);
         if (pricesOpt.isPresent()) {
             List<StockPrice> prices = pricesOpt.get();
+
+            // HERE
+            List<Double> stockMonthlyClosePrice = stockSvc.getStockMonthlyClosePrice(prices);
             JsonArrayBuilder jsArr = Json.createArrayBuilder();
-
-            for (StockPrice stockPrice : prices) {
-                jsArr.add(stockPrice.toJsonObjectBuilder());
+            for (Double price : stockMonthlyClosePrice) {
+                jsArr.add(price);
             }
-
+            Double stockYearStartingClosePrice = stockSvc.getStockYearFirstClosePrice(prices);
             return ResponseEntity.status(HttpStatus.OK)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(jsArr.build().toString());
+                    .body(Json.createObjectBuilder().add("firstClosePrice", stockYearStartingClosePrice)
+                            .add("monthlyPrices", jsArr).build().toString());
         }
 
-        ResponseEntity<String> response = stockSvc.getStockMonthlyPrice(symbol, sdate, edate);
+        ResponseEntity<String> response = stockSvc.getStockMonthlyPrice(formattedSymbol, sdate, edate);
+        List<StockPrice> spList = new LinkedList<>();
         if (!response.getStatusCode().isError()) {
-            System.out.println("Calling YH FINANCE from CLIENT SIDE for %s".formatted(symbol));
+            System.out.println("Calling YH FINANCE MONTHLY PRICE from CLIENT SIDE for %s".formatted(formattedSymbol));
             String res = response.getBody();
-
-            List<StockPrice> spList = new LinkedList<>();
 
             if (res != null && !res.isEmpty()) {
                 try (InputStream is = new ByteArrayInputStream(res.getBytes())) {
@@ -195,10 +229,18 @@ public class StockController {
                 }
             }
             // SAVE TO MONGO
-            userSvc.insertStockMonthlyPerformanceMongo(symbol, spList);
+            userSvc.insertStockMonthlyPerformanceMongo(formattedSymbol, spList);
         }
-
-        return response;
+        List<Double> stockMonthlyClosePrice = stockSvc.getStockMonthlyClosePrice(spList);
+        JsonArrayBuilder jsArr = Json.createArrayBuilder();
+        for (Double price : stockMonthlyClosePrice) {
+            jsArr.add(price);
+        }
+        Double stockYearStartingClosePrice = stockSvc.getStockYearFirstClosePrice(spList);
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("firstClosePrice", stockYearStartingClosePrice)
+                        .add("monthlyPrices", jsArr).build().toString());
     }
 
     @GetMapping(path = "/{symbol}/company_profile")

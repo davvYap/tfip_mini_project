@@ -5,6 +5,7 @@ import {
   LoginStatus,
   MessageResponse,
   MortgagePortfolio,
+  PaymentInfo,
   PurchasedStock,
   SignUp,
   StockIdea,
@@ -134,6 +135,34 @@ export class PostService {
     return lastValueFrom(
       this.http.post<MessageResponse>(
         `${this.api}/${userId}/recent_stock_search`,
+        data.toString(),
+        {
+          headers: httpheader,
+        }
+      )
+    );
+  }
+
+  postUserPaymentPaypal(
+    userId: string,
+    payment: PaymentInfo
+  ): Promise<MessageResponse> {
+    let data = new HttpParams()
+      .set('paymentId', payment.paymentId)
+      .append('email', payment.email)
+      .append('fullName', payment.fullName)
+      .append('address', payment.address)
+      .append('currencyCode', payment.currencyCode)
+      .append('amount', payment.amount);
+
+    const httpheader = new HttpHeaders().set(
+      'Content-Type',
+      'application/x-www-form-urlencoded'
+    );
+
+    return lastValueFrom(
+      this.http.post<MessageResponse>(
+        `${this.api}/${userId}/payment`,
         data.toString(),
         {
           headers: httpheader,

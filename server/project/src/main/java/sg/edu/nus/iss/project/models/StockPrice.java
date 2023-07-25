@@ -1,5 +1,7 @@
 package sg.edu.nus.iss.project.models;
 
+import java.time.LocalDate;
+
 import org.bson.Document;
 
 import jakarta.json.Json;
@@ -11,6 +13,7 @@ public class StockPrice {
     private double closePrice;
     private long volume;
     private String symbol;
+    private LocalDate localDate;
 
     public String getDate() {
         return date;
@@ -42,6 +45,14 @@ public class StockPrice {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    public LocalDate getLocalDate() {
+        return localDate;
+    }
+
+    public void setLocalDate(LocalDate localDate) {
+        this.localDate = localDate;
     }
 
     public static StockPrice convertFromJsonObject(JsonObject js) {

@@ -89,8 +89,8 @@ export class AppComponent implements OnInit {
     'nano',
     'md-light-indigo',
     'fluent-light',
-    'mdc-dark-deeppurple',
     'rhea',
+    'mdc-dark-deeppurple',
     'viva-dark',
     'lara-dark-teal',
     'arya-green',
@@ -310,12 +310,15 @@ export class AppComponent implements OnInit {
                   command: () => this.changeTheme(3),
                 },
                 {
-                  label: 'MDC Dark Purple',
+                  label: 'Rhea',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(4),
                 },
                 {
-                  label: 'Rhea',
+                  separator: true,
+                },
+                {
+                  label: 'MDC Dark Purple',
                   icon: 'pi pi-fw pi-images',
                   command: () => this.changeTheme(5),
                 },

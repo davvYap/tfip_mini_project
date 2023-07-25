@@ -261,3 +261,17 @@ export interface StockScreen {
   name: string;
   symbol: string;
 }
+
+export interface PaymentInfo {
+  paymentId: string;
+  fullName: string;
+  email: string;
+  address: string;
+  amount: string;
+  currencyCode: string;
+}
+
+export interface StockMonthlyPrice {
+  firstClosePrice: number;
+  monthlyPrices: number[];
+}

@@ -25,6 +25,7 @@ import sg.edu.nus.iss.project.models.Stock;
 import sg.edu.nus.iss.project.models.StockCount;
 import sg.edu.nus.iss.project.models.StockIdea;
 import sg.edu.nus.iss.project.models.StockPrice;
+import sg.edu.nus.iss.project.services.EmailSenderService;
 import sg.edu.nus.iss.project.services.StockService;
 import sg.edu.nus.iss.project.services.UserService;
 
@@ -41,7 +42,7 @@ public class UserController {
     private UserService userSvc;
 
     @Autowired
-    private StockService stockSvc;
+    private EmailSenderService emailSenderSvc;
 
     @GetMapping(path = "/theme")
     @ResponseBody
@@ -498,5 +499,39 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsArr.build().toString());
+    }
+
+    @PostMapping(path = "/{userId}/payment")
+    @ResponseBody
+    public ResponseEntity<String> userPayPalPaymentComplete(@PathVariable String userId,
+            @RequestBody MultiValueMap<String, String> details) {
+        String paymentId = details.getFirst("paymentId");
+        String email = details.getFirst("email");
+        String fullName = details.getFirst("fullName");
+        String amount = details.getFirst("amount");
+        String currencyCode = details.getFirst("currencyCode");
+        String address = details.getFirst("address");
+
+        emailSenderSvc.sendMail(email, "Payment Received", """
+                Dear %s,
+
+                Thank you for your support. We had received your payment :)
+                Below is your invoice details.
+
+                Invoice No. : %s
+                Name        : %s
+                Email       : %s
+                Address     : %s
+                Amount Paid : %s %s
+
+                Stay tuned for more features!
+
+                Best Regards,
+                am.app Development Team
+                """.formatted(fullName, paymentId, fullName, email, address, currencyCode, amount));
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Json.createObjectBuilder().add("message", "Payment received.").build().toString());
     }
 }

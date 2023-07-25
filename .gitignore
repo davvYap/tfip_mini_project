@@ -1,7 +1,8 @@
 *.txt
-*.sql
+# *.sql
 *.docx
 *.pdf
 *.bat
 # server/project/src/main/resources/*.json
 server/project/tokens
+query/*.sql

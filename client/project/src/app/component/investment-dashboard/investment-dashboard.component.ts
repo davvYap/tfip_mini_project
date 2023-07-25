@@ -32,6 +32,7 @@ import {
   Stock,
   StockDayPerformance,
   StockLogo,
+  StockMonthlyPrice,
   StockPrice,
   StockScreen,
   StocksMonthlyPrice,
@@ -466,7 +467,8 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         }),
         switchMap((performance) => {
           //NOTE GET VOO MONTHLY PERFORMANCE
-          let observables: Observable<StockPrice[]>[] = [];
+          // let observables: Observable<StockPrice[]>[] = [];
+          let observables: Observable<StockMonthlyPrice>[] = [];
           const observable = this.getSvc.getStockMonthlyPrice(
             'VOO',
             this.startDate,
@@ -475,27 +477,10 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           observables.push(observable);
           // console.log('voo date', this.getSvc.getTodaysDate());
           return forkJoin(observables).pipe(
-            map((stockPrices: StockPrice[][]) => {
-              const stockPrice: StockPrice[] = stockPrices[0];
-              for (let i = 0; i < stockPrice.length; i++) {
-                const stock = stockPrice[i];
-                const date = stock.date.substring(0, 10);
-                stock.date = date;
-              }
-              let endOfMonth: string[] = [...this.endOfMonth];
-              let count = 0;
-              endOfMonth.map((date) => {
-                if (date === this.getCurrentDate()) count++;
-              });
-              if (count === 0) {
-                endOfMonth.push(this.getCurrentDate());
-              }
-
-              const performance: number[] = this.getStockMonthlyPerformance(
-                stockPrice,
-                endOfMonth
-              );
-              // console.log('sp500', performance);
+            map((prices: StockMonthlyPrice[]) => {
+              const stockPrices: StockMonthlyPrice = prices[0];
+              const performance: number[] =
+                this.getStockMonthlyPerformance(stockPrices);
               this.sp500data = performance;
               return performance;
             })
@@ -503,7 +488,8 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
         }),
         switchMap((performance) => {
           //NOTE GET QQQ MONTHLY PERFORMANCE
-          let observables: Observable<StockPrice[]>[] = [];
+          // let observables: Observable<StockPrice[]>[] = [];
+          let observables: Observable<StockMonthlyPrice>[] = [];
           const observable = this.getSvc.getStockMonthlyPrice(
             'QQQ',
             this.startDate,
@@ -512,26 +498,10 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
           observables.push(observable);
           // console.log('qqq date', this.getSvc.getTodaysDate());
           return forkJoin(observables).pipe(
-            map((stockPrices: StockPrice[][]) => {
-              const stockPrice: StockPrice[] = stockPrices[0];
-              for (let i = 0; i < stockPrice.length; i++) {
-                const stock = stockPrice[i];
-                const date = stock.date.substring(0, 10);
-                stock.date = date;
-              }
-              let endOfMonth: string[] = [...this.endOfMonth];
-              let count = 0;
-              endOfMonth.map((date) => {
-                if (date === this.getCurrentDate()) count++;
-              });
-              if (count === 0) {
-                endOfMonth.push(this.getCurrentDate());
-              }
-              const performance: number[] = this.getStockMonthlyPerformance(
-                stockPrice,
-                endOfMonth
-              );
-              // console.log('nasdaq100', performance);
+            map((prices: StockMonthlyPrice[]) => {
+              const stockPrices: StockMonthlyPrice = prices[0];
+              const performance: number[] =
+                this.getStockMonthlyPerformance(stockPrices);
               this.nasdaq100data = performance;
               return performance;
             })
@@ -663,22 +633,15 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     return this.getSvc.getEndOfMonthFinal();
   }
 
-  getStockMonthlyPerformance(
-    stockPrices: StockPrice[],
-    endOfMonth: string[]
-  ): number[] {
+  getStockMonthlyPerformance(stockMontlyPrice: StockMonthlyPrice): number[] {
     let sp: number[] = [];
     // const firstPurchasePrice: number =
     //   stockPrices[stockPrices.length - 1].close;
-    const firstPurchasePrice: number = stockPrices[0].close;
-    for (let i = 0; i < stockPrices.length; i++) {
-      const stockPrice = stockPrices[i];
-      for (let j = 0; j < endOfMonth.length; j++) {
-        if (stockPrice.date === endOfMonth[j]) {
-          sp.push(
-            ((stockPrice.close - firstPurchasePrice) / firstPurchasePrice) * 100
-          );
-        }
+    const firstPurchasePrice: number = stockMontlyPrice.firstClosePrice;
+    const prices: number[] = stockMontlyPrice.monthlyPrices;
+    for (let i = 0; i < prices.length; i++) {
+      if (prices[i] > 0) {
+        sp.push(((prices[i] - firstPurchasePrice) / firstPurchasePrice) * 100);
       }
     }
     // return sp.reverse();
@@ -1300,6 +1263,7 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.stocksData$ = this.getSvc.getStocks(query).subscribe({
       next: (res) => {
         this.filterStocks = res.data;
+        // console.log('selected stock >>> ', res.data);
         for (let i = 0; i < this.filterStocks.length; i++) {
           let stock = this.filterStocks[i];
           if (stock.symbol.toLowerCase().indexOf(query.toLowerCase()) == 0) {
@@ -1324,13 +1288,38 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
   }
 
   onSelectStock(event: any) {
-    // console.log('event >>> ', event);
     let stockSymbol: string = event;
-
+    // console.log('selected stock symbol > ', stockSymbol);
+    const leftBracketIndex = stockSymbol.lastIndexOf('(');
+    const rightBracketIndex = stockSymbol.lastIndexOf(')');
+    const exchange = stockSymbol.substring(
+      leftBracketIndex + 1,
+      rightBracketIndex
+    );
+    // console.log('exchange', exchange);
     const index: number = stockSymbol.indexOf(' | ');
     const lastIndex: number = stockSymbol.lastIndexOf(' (');
-    const stockSymbolTrimmed = stockSymbol.substring(0, index);
     const stockNameTrimmed = stockSymbol.substring(index + 3, lastIndex);
+    let stockSymbolTrimmed = '';
+
+    switch (exchange) {
+      case 'HKEX':
+        stockSymbolTrimmed = `${stockSymbol.substring(0, index)}.HK`;
+        break;
+      case 'TWSE':
+        stockSymbolTrimmed = `${stockSymbol.substring(0, index)}.TWO`;
+        break;
+      case 'JPX':
+        stockSymbolTrimmed = `${stockSymbol.substring(0, index)}.T`;
+        break;
+      case 'KRX':
+        stockSymbolTrimmed = `${stockSymbol.substring(0, index)}.KS`;
+        break;
+      default:
+        stockSymbolTrimmed = stockSymbol.substring(0, index);
+        break;
+    }
+
     // console.log('stockselected >>> ', stockSymbolTrimmed);
     // console.log('stock name selected >>> ', stockNameTrimmed);
     this.postSvc
@@ -1345,3 +1334,26 @@ export class InvestmentDashboardComponent implements OnInit, OnDestroy {
     this.navigateToStockProfile(stockSymbolTrimmed, stockNameTrimmed);
   }
 }
+
+// DEPRECATED
+// getStockMonthlyPerformance(
+//   stockPrices: StockPrice[],
+//   endOfMonth: string[]
+// ): number[] {
+//   let sp: number[] = [];
+//   // const firstPurchasePrice: number =
+//   //   stockPrices[stockPrices.length - 1].close;
+//   const firstPurchasePrice: number = stockPrices[0].close;
+//   for (let i = 0; i < stockPrices.length; i++) {
+//     const stockPrice = stockPrices[i];
+//     for (let j = 0; j < endOfMonth.length; j++) {
+//       if (stockPrice.date === endOfMonth[j]) {
+//         sp.push(
+//           ((stockPrice.close - firstPurchasePrice) / firstPurchasePrice) * 100
+//         );
+//       }
+//     }
+//   }
+//   // return sp.reverse();
+//   return sp;
+// }

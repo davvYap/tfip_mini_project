@@ -18,6 +18,7 @@ import {
   StockDayPerformance,
   StockIdea,
   StockLogo,
+  StockMonthlyPrice,
   StockPrice,
   StockQuantity,
   StockScreen,
@@ -211,16 +212,31 @@ export class GetService {
     );
   }
 
+  // getStockMonthlyPrice(
+  //   symbol: string,
+  //   sdate: string,
+  //   edate: string
+  // ): Observable<StockPrice[]> {
+  //   let qp = new HttpParams().set('sdate', sdate).append('edate', edate);
+
+  //   return this.http.get<StockPrice[]>(`${this.api}/${symbol}/monthly_price`, {
+  //     params: qp,
+  //   });
+  // }
+
   getStockMonthlyPrice(
     symbol: string,
     sdate: string,
     edate: string
-  ): Observable<StockPrice[]> {
+  ): Observable<StockMonthlyPrice> {
     let qp = new HttpParams().set('sdate', sdate).append('edate', edate);
 
-    return this.http.get<StockPrice[]>(`${this.api}/${symbol}/monthly_price`, {
-      params: qp,
-    });
+    return this.http.get<StockMonthlyPrice>(
+      `${this.api}/${symbol}/monthly_price`,
+      {
+        params: qp,
+      }
+    );
   }
 
   getUserStockByMonth(

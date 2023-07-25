@@ -97,12 +97,39 @@ export class InvestmentComponent implements OnInit, OnDestroy {
     // console.log('event >>> ', event);
     let stockSymbol: string = event;
 
+    const leftBracketIndex = stockSymbol.lastIndexOf('(');
+    const rightBracketIndex = stockSymbol.lastIndexOf(')');
+    const exchange = stockSymbol.substring(
+      leftBracketIndex + 1,
+      rightBracketIndex
+    );
+
     const index: number = stockSymbol.indexOf(' | ');
     const lastIndex: number = stockSymbol.lastIndexOf(' (');
-    this.stockSymbolTrimmed = stockSymbol.substring(0, index);
     this.stockNameTrimmed = stockSymbol.substring(index + 3, lastIndex);
     // console.log('stockselected >>> ', this.stockNameTrimmed);
     let stockPrice: number = 0;
+
+    let stockSymbolTrimmed = '';
+    switch (exchange) {
+      case 'HKEX':
+        stockSymbolTrimmed = `${stockSymbol.substring(0, index)}.HK`;
+        break;
+      case 'TWSE':
+        stockSymbolTrimmed = `${stockSymbol.substring(0, index)}.TWO`;
+        break;
+      case 'JPX':
+        stockSymbolTrimmed = `${stockSymbol.substring(0, index)}.T`;
+        break;
+      case 'KRX':
+        stockSymbolTrimmed = `${stockSymbol.substring(0, index)}.KS`;
+        break;
+      default:
+        stockSymbolTrimmed = stockSymbol.substring(0, index);
+        break;
+    }
+    this.stockSymbolTrimmed = stockSymbolTrimmed;
+    // console.log(this.stockSymbolTrimmed);
 
     this.getSvc.getStockPrice(this.stockSymbolTrimmed).then((res) => {
       stockPrice = Number(res.price);
