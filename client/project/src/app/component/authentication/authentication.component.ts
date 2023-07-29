@@ -10,7 +10,7 @@ import { SocialUser } from '@abacritt/angularx-social-login';
 import { GoogleSigninButtonDirective } from '@abacritt/angularx-social-login/public-api';
 import { GoogleSigninButtonModule } from '@abacritt/angularx-social-login/public-api';
 import { PostService } from 'src/app/service/post.service';
-import { GoogleUser } from 'src/app/models';
+import { GoogleUser, UserAuth } from 'src/app/models';
 import { BreakpointService } from 'src/app/service/breakpoint.service';
 
 @Component({
@@ -69,8 +69,13 @@ export class AuthenticationComponent implements OnInit {
   login(): void {
     const username: string = this.form.get('username')?.value;
     const password: string = this.form.get('password')?.value;
-    this.getSvc
-      .verifyLogin(username, password)
+
+    const user: UserAuth = {
+      username: username,
+      password: password,
+    };
+    this.postSvc
+      .authenticateUser(user)
       .then((res) => {
         this.getSvc.initiateLoginProcedure(res);
         this.router.navigate(['/dashboard']);
@@ -80,7 +85,21 @@ export class AuthenticationComponent implements OnInit {
         this.imgSrc = '/assets/images/user.png';
         this.imgClass = 'user-img-shake';
         this.loginTitle = 'Invalid username or password';
+        console.log(err);
       });
+
+    // this.getSvc
+    //   .verifyLogin(username, password)
+    //   .then((res) => {
+    //     this.getSvc.initiateLoginProcedure(res);
+    //     this.router.navigate(['/dashboard']);
+    //     this.dialogRef.close(res.username);
+    //   })
+    //   .catch((err) => {
+    //     this.imgSrc = '/assets/images/user.png';
+    //     this.imgClass = 'user-img-shake';
+    //     this.loginTitle = 'Invalid username or password';
+    //   });
   }
 
   resetLoginPage() {

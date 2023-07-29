@@ -112,6 +112,21 @@ public class User {
         return doc;
     }
 
+    public static User convertFromJsonStringAuth(String js) throws IOException {
+        User us = null;
+        if (js != null) {
+            us = new User();
+            try (InputStream is = new ByteArrayInputStream(js.getBytes())) {
+                JsonReader jr = Json.createReader(is);
+                JsonObject jsObj = jr.readObject();
+                us.setUsername(jsObj.getString("username"));
+                us.setPassword(jsObj.getString("password"));
+                is.close();
+            }
+        }
+        return us;
+    }
+
     public static User convertFromJsonString(String js) throws IOException {
         User us = null;
         if (js != null) {

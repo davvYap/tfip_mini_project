@@ -19,10 +19,6 @@ export const loginGuard: CanActivateFn = (route, state) => {
     // themeSvc.switchTheme(localStorage.getItem('theme') || '');
     return true;
   }
-  getSvc.checkLoginStatus().then((res) => {
-    isLogin = res.isLogin;
-    getSvc.isLogin = res.isLogin;
-  });
 
   if (getSvc.isLogin) {
     return true;

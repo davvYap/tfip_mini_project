@@ -26,6 +26,10 @@ public class LoginService {
         return loginRepo.verifyLogin(username, password);
     }
 
+    public Optional<User> findUserByUsername(String username) {
+        return loginRepo.findUserByUsername(username);
+    }
+
     public String getUserProfileIcon(String userId) {
         Optional<byte[]> profileIconOpt = loginRepo.getUserProfileIcon(userId);
         if (profileIconOpt.isEmpty()) {

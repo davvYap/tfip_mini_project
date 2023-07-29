@@ -8,8 +8,8 @@ import { Transaction } from '../models';
   providedIn: 'root',
 })
 export class DeleteService {
-  // api: string = 'http://localhost:8080/api';
-  api: string = '/api';
+  api: string = 'http://localhost:8080/api';
+  // api: string = '/api';
 
   constructor(private http: HttpClient) {}
 

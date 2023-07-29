@@ -6,6 +6,11 @@ export interface SignUp {
   email: string;
 }
 
+export interface UserAuth {
+  username: string;
+  password: string;
+}
+
 export interface LoginStatus {
   isLogin: boolean;
   userId: string;
@@ -13,6 +18,7 @@ export interface LoginStatus {
   firstname: string;
   lastname: string;
   profileIcon: string;
+  token: string;
 }
 
 export interface Stock {
@@ -85,6 +91,7 @@ export interface UserSettings {
 export interface MessageResponse {
   message: string;
   value: number;
+  token: string;
 }
 
 export interface StockPrice {

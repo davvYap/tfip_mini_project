@@ -39,6 +39,17 @@ public class LoginRepository {
         return null;
     }
 
+    public Optional<User> findUserByUsername(String username) {
+        SqlRowSet rs = jdbc.queryForRowSet(SQL_GET_USER_BY_USERNAME, username);
+
+        while (rs.next()) {
+            User u = User.convertFromResult(rs);
+            return Optional.of(u);
+        }
+
+        return Optional.empty();
+    }
+
     public Optional<byte[]> getUserProfileIcon(String userId) {
         Optional<byte[]> profileIconOpt = jdbc.query(SQL_GET_USER_PROFILE_ICON, (ResultSet rs) -> {
             if (!rs.next()) {

@@ -6,51 +6,54 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import jakarta.servlet.http.HttpSession;
+import sg.edu.nus.iss.project.Security.JwtService;
 import sg.edu.nus.iss.project.models.Quote;
 import sg.edu.nus.iss.project.models.User;
+import sg.edu.nus.iss.project.models.UserPrincipal;
 import sg.edu.nus.iss.project.services.LoginService;
 import sg.edu.nus.iss.project.utils.gmail.GMailer;
 
 @Controller
 @CrossOrigin(origins = {
 		"https://afmapp-tfip-production.up.railway.app", "https://amapp.up.railway.app",
-		"http://localhost:4200" }, allowCredentials = "true", allowedHeaders = "*")
+		"http://localhost:4200" })
 @RequestMapping(path = "/api")
 public class LoginController {
 
 	@Autowired
 	private LoginService loginSvc;
 
-	@GetMapping(path = "/login")
-	@ResponseBody
-	public ResponseEntity<String> verifyLogin(@RequestParam String username, @RequestParam String password,
-			HttpSession session) throws Exception {
+	@Autowired
+	private JwtService jwtService;
 
+	@Autowired
+	private AuthenticationManager authManager;
+
+	@PostMapping(path = "/auth/login")
+	@ResponseBody
+	public ResponseEntity<String> verifyLogin(@RequestBody String request) throws Exception {
+
+		User authUser = User.convertFromJsonStringAuth(request);
+		String username = authUser.getUsername();
+		String password = authUser.getPassword();
+		System.out.println("User login : " + username);
 		User user = loginSvc.verifyLogin(username, password);
 
 		if (user == null) {
-			session.setAttribute("isLogin", false);
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.contentType(MediaType.APPLICATION_JSON)
-					.body(Json.createObjectBuilder()
-							.add("isLogin", false)
-							.add("userId", "guest000")
-							.add("username", "guest")
-							.add("firstname", "guest")
-							.add("lastname", "")
-							.add("profileIcon", "")
-							.build().toString());
-		}
-		if (!user.getUsername().equals(username) || !user.getPassword().equals(password)) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 					.contentType(MediaType.APPLICATION_JSON)
 					.body(Json.createObjectBuilder()
@@ -63,20 +66,29 @@ public class LoginController {
 							.build().toString());
 		}
 
-		session.setAttribute("isLogin", true);
-		session.setAttribute("user", user);
-		// testSessionId(session);
-		System.out.println("%s Login...".formatted(username));
-		// GMailer gmailer = new GMailer();
-		// gmailer.sendMail("Sign Up Successful", """
-		// Dear %s,
+		if (!user.getUsername().equals(username) ||
+				!user.getPassword().equals(password)) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(Json.createObjectBuilder()
+							.add("isLogin", false)
+							.add("userId", "guest000")
+							.add("username", "guest")
+							.add("firstname", "guest")
+							.add("lastname", "")
+							.add("profileIcon", "")
+							.build().toString());
+		}
 
-		// Thank you for signing up to Assets Management Application ! Begin your
-		// journey with us.
+		// Authentication authentication = authManager
+		// .authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
-		// Best Regards,
-		// am.app Developer Team
-		// """.formatted(username));
+		// UserPrincipal up = (UserPrincipal) authentication.getPrincipal();
+		// // At this stage, the user already authenticated
+		// System.out.println("authenticated user principal : " + up);
+		// User u = loginSvc.findUserByUsername(username).get();
+		// UserPrincipal userPrincipal = UserPrincipal.convertFromUserClass(u);
+		// String jwtToken = jwtService.generateToken(userPrincipal);
 
 		// GET USER PROFILE ICON
 		String profileIconBase64 = loginSvc.getUserProfileIcon(user.getUserId());
@@ -90,36 +102,9 @@ public class LoginController {
 						.add("isLogin", true)
 						.add("userId", user.getUserId())
 						.add("username", user.getUsername())
+						.add("profileIcon", profileIconBase64)
 						.add("firstname", user.getFirstname())
 						.add("lastname", user.getLastname())
-						.add("profileIcon", profileIconBase64)
-						.build().toString());
-	}
-
-	// CHECK IF USER IS LOGIN
-	@GetMapping(path = "/isLogin")
-	@ResponseBody
-	public ResponseEntity<String> isLogin(HttpSession session) {
-
-		// testSessionId(session);
-		System.out.println("Check login...");
-		Boolean isLogin = (Boolean) session.getAttribute("isLogin");
-		User user = (User) session.getAttribute("user");
-		System.out.println("username from /api/isLogin >>> " + isLogin);
-		if (isLogin == null || user == null) {
-			return ResponseEntity.status(HttpStatus.OK)
-					.contentType(MediaType.APPLICATION_JSON)
-					.body(Json.createObjectBuilder()
-							.add("isLogin", false)
-							.add("userId", "guest000")
-							.build().toString());
-		}
-
-		return ResponseEntity.status(HttpStatus.OK)
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(Json.createObjectBuilder()
-						.add("isLogin", isLogin)
-						.add("userId", user.getUserId())
 						.build().toString());
 
 	}
@@ -153,12 +138,5 @@ public class LoginController {
 		return ResponseEntity.status(HttpStatus.OK)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(Json.createArrayBuilder().add(Json.createObjectBuilder().add("q", quote)).build().toString());
-	}
-
-	// EXTRA
-	private void testSessionId(HttpSession session) {
-		System.out.println("session id >>> " + session.getId());
-		System.out.println("creation time >>> " + session.getCreationTime());
-		System.out.println("session max inactive interval >>> " + session.getMaxInactiveInterval());
 	}
 }

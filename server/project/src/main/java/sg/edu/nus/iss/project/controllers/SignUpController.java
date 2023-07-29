@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.json.Json;
 import jakarta.servlet.http.HttpSession;
+import sg.edu.nus.iss.project.Security.JwtService;
 import sg.edu.nus.iss.project.models.User;
+import sg.edu.nus.iss.project.models.UserPrincipal;
 import sg.edu.nus.iss.project.services.EmailSenderService;
 import sg.edu.nus.iss.project.services.SignUpService;
 import sg.edu.nus.iss.project.utils.gmail.GMailer;
@@ -40,6 +43,12 @@ public class SignUpController {
 
     @Autowired
     private EmailSenderService emailSenderSvc;
+
+    @Autowired
+    PasswordEncoder pwdEncoder;
+
+    @Autowired
+    JwtService jwtService;
 
     @GetMapping(path = "/sign_up/captcha")
     @ResponseBody
@@ -110,6 +119,12 @@ public class SignUpController {
 
         try {
             User user = new User(username, password, email, firstname, lastname);
+            // ENCODING PASSWORD
+            user.setPassword(pwdEncoder.encode(password));
+
+            String userId = UUID.randomUUID().toString().substring(0, 8);
+            user.setUserId(userId);
+
             boolean userEmailExists = signUpSvc.checkUserExists(email);
             if (userEmailExists) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -127,6 +142,10 @@ public class SignUpController {
                                 .build().toString());
             }
 
+            // GENERATE JWT TOKEN AND RETURN TO CLIENT
+            UserPrincipal newUp = UserPrincipal.convertFromUserClass(user);
+            String jwtToken = jwtService.generateToken(newUp);
+
             emailSenderSvc.sendMail(email, "Welcome to am.app", """
                     Dear %s,
 
@@ -138,20 +157,8 @@ public class SignUpController {
                     am.app Development Team
                     """.formatted(username));
 
-            // GMailer gMailer = new GMailer();
-            // gMailer.sendMail(email, "Welcome to am.app", """
-            // Dear %s,
-
-            // Thank you for signing up with us. Have a great journey ahead.
-
-            // For enquiries, please contact: +612-3456789
-
-            // Best Regards,
-            // am.app Development Team
-            // """.formatted(username));
-
             return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
-                    .body(Json.createObjectBuilder().add("message", "Sign up successful.").build()
+                    .body(Json.createObjectBuilder().add("token", jwtToken).build()
                             .toString());
 
         } catch (IOException e) {
@@ -316,6 +323,11 @@ public class SignUpController {
                             .add("message", "Update user profile unsuccessful.").build()
                             .toString());
         }
+    }
+
+    @GetMapping(path = "/hello")
+    public ResponseEntity<String> sayHello() {
+        return ResponseEntity.ok("hello testing JWT");
     }
 
 }

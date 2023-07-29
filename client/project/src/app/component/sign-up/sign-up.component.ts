@@ -9,7 +9,7 @@ import {
   faCheck,
 } from '@fortawesome/free-solid-svg-icons';
 import { FileUploadEvent } from 'primeng/fileupload';
-import { LoginStatus, SignUp } from 'src/app/models';
+import { LoginStatus, SignUp, UserAuth } from 'src/app/models';
 import { PostService } from 'src/app/service/post.service';
 import {
   DialogService,
@@ -244,9 +244,15 @@ export class SignUpComponent implements OnInit {
       .then((res) => {
         this.dialogRef.close();
         // console.log(res.message);
-        this.getSvc
-          .verifyLogin(newUser.username, newUser.password)
-          .then((res: LoginStatus) => {
+        const user: UserAuth = {
+          username: newUser.username,
+          password: newUser.password,
+        };
+        console.log(res);
+        localStorage.setItem('token', res.token);
+        this.postSvc
+          .authenticateUser(user)
+          .then((res) => {
             this.getSvc.initiateLoginProcedure(res);
             this.router.navigate(['/dashboard']);
             this.dialogRef.close(res.username);
@@ -254,6 +260,17 @@ export class SignUpComponent implements OnInit {
           .catch((err) => {
             console.log(err);
           });
+
+        // this.getSvc
+        //   .verifyLogin(newUser.username, newUser.password)
+        //   .then((res: LoginStatus) => {
+        //     this.getSvc.initiateLoginProcedure(res);
+        //     this.router.navigate(['/dashboard']);
+        //     this.dialogRef.close(res.username);
+        //   })
+        //   .catch((err) => {
+        //     console.log(err);
+        //   });
       })
       .catch((err) => {
         // console.log(err.error.message);

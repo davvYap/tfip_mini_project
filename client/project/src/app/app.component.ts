@@ -434,18 +434,6 @@ export class AppComponent implements OnInit {
     this.ngOnInit();
   }
 
-  checkLoginStatus(): void {
-    this.getSvc
-      .checkLoginStatus()
-      .then((res: LoginStatus) => {
-        console.log('user login >>> ', res.isLogin);
-        console.log('userId >>> ', res.userId);
-      })
-      .catch((err) => {
-        console.log('user login >>> ', err.isLogin);
-      });
-  }
-
   showLoginDialog() {
     this.dialogRef = this.dialogSvc.open(AuthenticationComponent, {
       // header: 'Login',

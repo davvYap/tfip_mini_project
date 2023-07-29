@@ -13,8 +13,8 @@ import { lastValueFrom } from 'rxjs';
   providedIn: 'root',
 })
 export class UpdateService {
-  // api: string = 'http://localhost:8080/api';
-  api: string = '/api';
+  api: string = 'http://localhost:8080/api';
+  // api: string = '/api';
 
   constructor(private http: HttpClient) {}
 

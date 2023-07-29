@@ -10,6 +10,7 @@ import {
   SignUp,
   StockIdea,
   Transaction,
+  UserAuth,
 } from '../models';
 import { Observable, lastValueFrom } from 'rxjs';
 
@@ -17,10 +18,16 @@ import { Observable, lastValueFrom } from 'rxjs';
   providedIn: 'root',
 })
 export class PostService {
-  // api: string = 'http://localhost:8080/api';
-  api: string = '/api';
+  api: string = 'http://localhost:8080/api';
+  // api: string = '/api';
 
   constructor(private http: HttpClient) {}
+
+  authenticateUser(user: UserAuth): Promise<LoginStatus> {
+    return lastValueFrom(
+      this.http.post<LoginStatus>(`${this.api}/auth/login`, user)
+    );
+  }
 
   updateUserTheme(userId: string, theme: string): Promise<MessageResponse> {
     let data = new HttpParams()

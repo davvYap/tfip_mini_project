@@ -311,5 +311,4 @@ public class StockController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("summaryDetail", jsObj).build().toString());
     }
-
 }

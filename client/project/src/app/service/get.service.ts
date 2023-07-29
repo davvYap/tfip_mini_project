@@ -47,8 +47,8 @@ export class GetService {
   passStock!: PurchasedStock;
   applicationName: string = 'amapp';
 
-  // api: string = 'http://localhost:8080/api';
-  api: string = '/api';
+  api: string = 'http://localhost:8080/api';
+  // api: string = '/api';
 
   monthsString = [
     'Jan',
@@ -75,14 +75,6 @@ export class GetService {
     return lastValueFrom(
       this.http.get<LoginStatus>(`${this.api}/login`, {
         params: qp,
-        withCredentials: true,
-      })
-    );
-  }
-
-  checkLoginStatus(): Promise<LoginStatus> {
-    return lastValueFrom(
-      this.http.get<LoginStatus>(`${this.api}/isLogin`, {
         withCredentials: true,
       })
     );
@@ -453,6 +445,7 @@ export class GetService {
     localStorage.setItem('firstname', loginStatus.firstname);
     localStorage.setItem('lastname', loginStatus.lastname);
     localStorage.setItem('profileIcon', loginStatus.profileIcon);
+    localStorage.setItem('token', loginStatus.token);
   }
 
   initiateGoogleLoginProcedure(googleUser: SocialUser) {

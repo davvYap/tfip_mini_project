@@ -14,6 +14,10 @@ public class DBQueries {
 			select * from users where user_id = ?;
 			""";
 
+	public static final String SQL_GET_USER_BY_USERNAME = """
+			select * from users where username = ?;
+			""";
+
 	public static final String SQL_EDIT_USER_PROFILE = """
 			update users set firstname = ?, lastname = ?, email = ?, username = ?, password = ?, profile_pic = ? where user_id = ?;
 			""";
