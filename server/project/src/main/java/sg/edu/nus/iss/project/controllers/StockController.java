@@ -3,7 +3,12 @@ package sg.edu.nus.iss.project.controllers;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import javax.print.attribute.standard.Media;
 
@@ -11,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +34,7 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
+import reactor.core.publisher.Flux;
 import sg.edu.nus.iss.project.models.StockPrice;
 import sg.edu.nus.iss.project.models.StockProfile;
 import sg.edu.nus.iss.project.services.StockService;
@@ -311,4 +319,66 @@ public class StockController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Json.createObjectBuilder().add("summaryDetail", jsObj).build().toString());
     }
+
+    // SERVER SENT EVENT
+    @GetMapping(path = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> getSSE() throws IOException {
+        Stream<String> lines = Files.lines(Path.of("C:/Users/davvy/tfip2023/project/server/project/pom.xml"));
+
+        AtomicInteger counter = new AtomicInteger(1);
+
+        return Flux.fromStream(lines)
+                .filter(line -> !line.isBlank())
+                .map(line -> ServerSentEvent.<String>builder()
+                        .id(String.valueOf(counter.getAndIncrement()))
+                        .data(line)
+                        .event("lineEvent")
+                        .retry(Duration.ofMillis(1000))
+                        .build())
+                .delayElements(Duration.ofMillis(300));
+    }
+
+    @GetMapping(path = "/sse/alternative", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> getSSEAlternative() throws IOException {
+        Stream<String> lines = Files.lines(Path.of("C:/Users/davvy/tfip2023/project/server/project/pom.xml"));
+
+        return Flux.fromStream(lines)
+                .filter(line -> !line.isBlank())
+                .delayElements(Duration.ofMillis(300));
+    }
+
+    @GetMapping(path = "/real-time-price", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> getStockRealTimePriceTwelveData(@RequestParam String symbol) throws IOException {
+        System.out.println("symbol accepted >>> " + symbol);
+        return Flux.interval(Duration.ofSeconds(10))
+                .map(ignore -> {
+                    String price = "0.0";
+                    try {
+                        price = fetchRealTimePrice(symbol);
+                        System.out.println("price >>> " + price);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return price;
+                })
+                .delayElements(Duration.ofMillis(100));
+    }
+
+    public String fetchRealTimePrice(String symbol) throws IOException {
+        ResponseEntity<String> res = stockSvc.getStockPrice(symbol, 30);
+        String realTimePrice = "0.0";
+        if (!res.getStatusCode().isError()) {
+            String body = res.getBody();
+            try (InputStream is = new ByteArrayInputStream(body.getBytes())) {
+                JsonReader reader = Json.createReader(is);
+                JsonObject jsObj = reader.readObject();
+                JsonString jsStr = jsObj.getJsonString("price");
+                if (jsStr != null) {
+                    realTimePrice = jsObj.getString("price");
+                }
+            }
+        }
+        return realTimePrice;
+    }
+
 }

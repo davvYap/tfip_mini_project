@@ -1,0 +1,49 @@
+<div class="container">
+  <div
+    class="row row-cols-1 justify-content-center align-items-center height-50"
+  >
+    <div class="col">
+      <form [formGroup]="form">
+        <div class="d-flex flex-column m-4">
+          <label htmlFor="id">Ticker:</label>
+          <input
+            pInputText
+            id="id"
+            formControlName="symbol"
+            placeholder="AAPL"
+            autofocus
+          />
+        </div>
+        <div class="d-flex justify-content-evenly m-4">
+          <span class="p-buttonset">
+            <button
+              pButton
+              pRipple
+              label="Cancel"
+              icon="pi pi-times"
+              (click)="stopSse()"
+              [disabled]="!symbol"
+            ></button>
+            <button
+              pButton
+              pRipple
+              type="submit"
+              label="Get"
+              icon="pi pi-search"
+              (click)="getPrice()"
+              [disabled]="form.invalid"
+            ></button>
+          </span>
+        </div>
+      </form>
+    </div>
+    <div class="col" *ngIf="symbol">
+      <div class="d-flex justify-content-center">
+        <h3>Ticker: {{ symbol }}</h3>
+      </div>
+      <div class="d-flex justify-content-center">
+        <h3>Price: {{ stockPrice() }}</h3>
+      </div>
+    </div>
+  </div>
+</div>

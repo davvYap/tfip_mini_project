@@ -39,6 +39,7 @@ import { PaymentComponent } from './component/payment/payment.component';
 import { StockDetailsComponent } from './component/stock-details/stock-details.component';
 import { RegularTransactionsComponent } from './component/regular-transactions/regular-transactions.component';
 import { AddCategoryComponent } from './component/add-category/add-category.component';
+import { RealTimePriceComponent } from './component/real-time-price/real-time-price.component';
 
 // Export this function
 export function playerFactory(): any {
@@ -67,6 +68,7 @@ export function playerFactory(): any {
     StockDetailsComponent,
     RegularTransactionsComponent,
     AddCategoryComponent,
+    RealTimePriceComponent,
   ],
   imports: [
     BrowserModule,

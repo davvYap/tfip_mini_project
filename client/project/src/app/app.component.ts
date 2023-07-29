@@ -190,9 +190,10 @@ export class AppComponent implements OnInit {
                   routerLink: '/investment',
                 },
                 {
-                  label: 'Crypto',
+                  label: 'Real-time',
                   icon: 'pi pi-fw pi-bitcoin',
-                  disabled: true,
+                  routerLink: '/realtime-price',
+                  disabled: false,
                 },
               ],
             },

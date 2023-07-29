@@ -14,6 +14,7 @@ import { MortgageDashboardComponent } from './component/mortgage-dashboard/mortg
 import { PaymentComponent } from './component/payment/payment.component';
 import { RegularTransactionsComponent } from './component/regular-transactions/regular-transactions.component';
 import { StockDetailsComponent } from './component/stock-details/stock-details.component';
+import { RealTimePriceComponent } from './component/real-time-price/real-time-price.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [loginGuard] },
@@ -71,6 +72,11 @@ const routes: Routes = [
   {
     path: 'payment',
     component: PaymentComponent,
+    canActivate: [loginGuard],
+  },
+  {
+    path: 'realtime-price',
+    component: RealTimePriceComponent,
     canActivate: [loginGuard],
   },
   { path: 'logout', component: LogoutComponent },
