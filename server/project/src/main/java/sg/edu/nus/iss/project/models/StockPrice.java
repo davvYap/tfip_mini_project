@@ -7,13 +7,22 @@ import org.bson.Document;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 public class StockPrice {
     private String date;
     private double closePrice;
     private long volume;
     private String symbol;
     private LocalDate localDate;
+
+    public StockPrice(double closePrice, String symbol) {
+        this.closePrice = closePrice;
+        this.symbol = symbol;
+    }
 
     public String getDate() {
         return date;

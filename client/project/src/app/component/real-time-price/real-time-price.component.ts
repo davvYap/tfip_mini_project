@@ -65,6 +65,27 @@ export class RealTimePriceComponent implements OnInit, OnDestroy {
     });
   }
 
+  getPriceSseEmitter(): void {
+    const symbol = this.form.get('symbol')?.value;
+    this.symbol = symbol;
+    this.sseSvc.closeConnection();
+    console.log('symbol :', symbol);
+    this.stockPrice$ = this.sseSvc
+      .getStockRealTimePriceSseEmitter(symbol)
+      .subscribe({
+        next: (data: string) => {
+          console.log('data passed from sse service: ', data);
+          this.stockPrice.set(parseFloat(data));
+          console.log('component price: ', this.stockPrice());
+          this.count++;
+          this.changeDetectorRef.detectChanges();
+        },
+        error: (error) => {
+          console.log('Error:', error);
+        },
+      });
+  }
+
   stopSse() {
     this.sseSvc.closeConnection();
   }

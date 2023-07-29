@@ -7,6 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -52,6 +56,8 @@ public class StockController {
 
     @Autowired
     private UserService userSvc;
+
+    private final ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(1);
 
     @GetMapping(path = "/stocks")
     public ResponseEntity<String> getStockDataTwelveData(@RequestParam String symbol,
@@ -362,6 +368,56 @@ public class StockController {
                     return price;
                 })
                 .delayElements(Duration.ofMillis(100));
+    }
+
+    // NOTE Angular cant read the response
+    @GetMapping(path = "/real-time-price-ndjson", produces = MediaType.APPLICATION_NDJSON_VALUE)
+    public Flux<StockPrice> getStockRealTimePriceTwelveDataNdJson(@RequestParam String symbol) throws IOException {
+        System.out.println("symbol accepted >>> " + symbol);
+        return Flux.interval(Duration.ofSeconds(2))
+                .map(sequence -> {
+                    StockPrice s = new StockPrice();
+                    s.setSymbol(symbol);
+                    s.setClosePrice(199.95);
+                    System.out.println("sp >>> " + s);
+                    return s;
+                });
+    }
+
+    // NOTE Angular cant read the response
+    @GetMapping(path = "/real-time-price-json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<String> getStockRealTimePriceTwelveDataJson(@RequestParam String symbol) throws IOException {
+        System.out.println("symbol accepted >>> " + symbol);
+        return Flux.interval(Duration.ofSeconds(2))
+                .map(sequence -> {
+                    StockPrice s = new StockPrice();
+                    s.setSymbol(symbol);
+                    s.setClosePrice(199.95);
+                    String json = Json.createObjectBuilder()
+                            .add("symbol", symbol)
+                            .add("price", s.getClosePrice())
+                            .build().toString();
+                    System.out.println("sp >>> " + json);
+                    return json;
+                });
+    }
+
+    @GetMapping(path = "/real-time-price-sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter getStockRealTimePriceTwelveDataSseEmitter(@RequestParam String symbol) throws IOException {
+        System.out.println("symbol accepted >>> " + symbol);
+        SseEmitter emitter = new SseEmitter();
+
+        scheduledThreadPool.scheduleAtFixedRate(() -> {
+            String price;
+            try {
+                price = fetchRealTimePrice(symbol);
+                emitter.send(price);
+            } catch (Exception e) {
+                emitter.completeWithError(e); // In case of an error, complete the SSE with an error
+            }
+        }, 0, 10, TimeUnit.SECONDS);
+
+        return emitter;
     }
 
     public String fetchRealTimePrice(String symbol) throws IOException {

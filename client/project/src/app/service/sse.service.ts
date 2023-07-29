@@ -1,12 +1,13 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SseService {
   private eventSource!: EventSource;
+
   constructor(private http: HttpClient) {}
 
   public getStockRealTimePrice(symbol: string): Observable<string> {
@@ -19,6 +20,44 @@ export class SseService {
     return new Observable<string>((observer) => {
       this.eventSource!.onmessage = (event) => {
         console.log('event data from sse service: ', event.data);
+        observer.next(event.data);
+      };
+
+      this.eventSource!.onerror = (error) => {
+        observer.error('error occured: ' + error);
+      };
+    });
+  }
+
+  // NOTE Unable to read results from sse server
+  public getStockRealTimePriceNdJson(symbol: string): Observable<string> {
+    console.log('new sse connection...', symbol);
+
+    const qp = new HttpParams().append('symbol', symbol);
+    const urlWithQueryParams = `http://localhost:8080/api/real-time-price-json?${qp.toString()}`;
+    this.eventSource = new EventSource(urlWithQueryParams);
+
+    return new Observable<string>((observer) => {
+      this.eventSource!.onmessage = (event) => {
+        console.log('event data from sse service: ', event);
+        observer.next(event.data);
+      };
+
+      this.eventSource!.onerror = (error) => {
+        observer.error('error occured: ' + error);
+      };
+    });
+  }
+
+  public getStockRealTimePriceSseEmitter(symbol: string): Observable<string> {
+    console.log('new sse connection...', symbol);
+    const qp = new HttpParams().append('symbol', symbol);
+    const urlWithQueryParams = `http://localhost:8080/api/real-time-price-sse?${qp.toString()}`;
+    this.eventSource = new EventSource(urlWithQueryParams);
+
+    return new Observable<string>((observer) => {
+      this.eventSource!.onmessage = (event) => {
+        console.log('event data from sse service: ', event);
         observer.next(event.data);
       };
 
