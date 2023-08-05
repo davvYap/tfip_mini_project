@@ -10,6 +10,11 @@
     <link id="app-theme" rel="stylesheet" type="text/css" href="mira.css" />
     <link rel="manifest" href="/assets/manifest.json" />
     <script src="https://www.paypal.com/sdk/js?currency=SGD&client-id=AdUY4ff-z1Y4D1Hnmuaunig_v_UJJjYCup9GLSW4H2bY-On0U34vAdh01H3R9ehvrQZh7lYHWKLpmLCm"></script>
+    <script>
+      if (global === undefined) {
+        var global = window;
+      }
+    </script>
   </head>
   <body>
     <app-root class="app-root"></app-root>

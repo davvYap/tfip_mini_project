@@ -15,6 +15,7 @@ import { PaymentComponent } from './component/payment/payment.component';
 import { RegularTransactionsComponent } from './component/regular-transactions/regular-transactions.component';
 import { StockDetailsComponent } from './component/stock-details/stock-details.component';
 import { RealTimePriceComponent } from './component/real-time-price/real-time-price.component';
+import { ChatRoomComponent } from './component/chat-room/chat-room.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [loginGuard] },
@@ -77,6 +78,11 @@ const routes: Routes = [
   {
     path: 'realtime-price',
     component: RealTimePriceComponent,
+    canActivate: [loginGuard],
+  },
+  {
+    path: 'chatroom',
+    component: ChatRoomComponent,
     canActivate: [loginGuard],
   },
   { path: 'logout', component: LogoutComponent },

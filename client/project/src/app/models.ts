@@ -282,3 +282,9 @@ export interface StockMonthlyPrice {
   firstClosePrice: number;
   monthlyPrices: number[];
 }
+
+export interface ChatMessage {
+  content: string;
+  sender: string;
+  senderId: string;
+}

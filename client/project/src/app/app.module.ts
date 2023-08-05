@@ -40,6 +40,7 @@ import { StockDetailsComponent } from './component/stock-details/stock-details.c
 import { RegularTransactionsComponent } from './component/regular-transactions/regular-transactions.component';
 import { AddCategoryComponent } from './component/add-category/add-category.component';
 import { RealTimePriceComponent } from './component/real-time-price/real-time-price.component';
+import { ChatRoomComponent } from './component/chat-room/chat-room.component';
 
 // Export this function
 export function playerFactory(): any {
@@ -69,6 +70,7 @@ export function playerFactory(): any {
     RegularTransactionsComponent,
     AddCategoryComponent,
     RealTimePriceComponent,
+    ChatRoomComponent,
   ],
   imports: [
     BrowserModule,

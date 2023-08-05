@@ -364,6 +364,11 @@ export class AppComponent implements OnInit {
           ],
         },
         {
+          label: 'Chat',
+          icon: 'pi pi-fw pi-comments',
+          routerLink: '/chatroom',
+        },
+        {
           label: 'Support',
           icon: 'pi pi-fw pi-paypal',
           routerLink: '/payment',
